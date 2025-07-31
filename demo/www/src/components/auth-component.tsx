@@ -79,7 +79,7 @@ export function AuthComponent() {
           {isLoading ? 'Signing...' : 'Sign-In with Ethereum'}
         </Button>
         <Button variant='ghost' size='icon' onClick={() => disconnect()}>
-          <Icons.Cross className='h-4 w-4' />
+          <Icons.Wallet className='h-4 w-4' />
         </Button>
       </div>
     )
@@ -89,10 +89,6 @@ export function AuthComponent() {
   if (isXAuthenticated && xSession) {
     return (
       <div className='flex items-center gap-2'>
-        <Avatar>
-          <AvatarImage src={xSession.pfpUrl} alt={xSession.username} />
-          <AvatarFallback>{xSession.username.charAt(0)}</AvatarFallback>
-        </Avatar>
         <Dialog open={isModalOpen} onOpenChange={setModalOpen}>
           <DialogTrigger asChild>
             <Button>Connect Wallet</Button>

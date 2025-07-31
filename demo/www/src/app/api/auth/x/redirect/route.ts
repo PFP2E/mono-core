@@ -2,7 +2,7 @@
 import { getIronSession } from 'iron-session'
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
-import { sessionOptions } from '@/lib/session'
+import { sessionOptions, SessionData } from '@/lib/session'
 import { randomBytes, createHash } from 'crypto'
 
 // Helper to generate a random string
@@ -15,13 +15,16 @@ const generatePKCE = (verifier: string): string => {
   return createHash('sha256').update(verifier).digest('base64url')
 }
 
-export async function GET(req: NextRequest) {
-  const cookiesStore = await cookies()
+export async function GET(_req: NextRequest) {
   const state = generateRandomString(16)
   const codeVerifier = generateRandomString(32)
   const codeChallenge = generatePKCE(codeVerifier)
 
-  const session = await getIronSession(cookiesStore, sessionOptions)
+  const cookiesStore = await cookies()
+  const session = await getIronSession<SessionData>(
+    cookiesStore,
+    sessionOptions
+  )
   session.xState = state
   session.xCodeVerifier = codeVerifier
   await session.save()

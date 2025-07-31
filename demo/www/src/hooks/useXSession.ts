@@ -11,10 +11,10 @@ export function useXSession() {
   const fetchSession = useCallback(async () => {
     try {
       setIsLoading(true)
-      const res = await fetch('/api/me')
+      const res = await fetch('/api/auth/me')
       const json = await res.json()
       setSession(json.x || null)
-    } catch (e) {
+    } catch {
       setSession(null)
     } finally {
       setIsLoading(false)
@@ -30,7 +30,7 @@ export function useXSession() {
   const signOutX = useCallback(async () => {
     setIsLoading(true)
     try {
-      await fetch('/api/logout?method=x')
+      await fetch('/api/auth/logout?method=x')
       setSession(null)
     } catch (e) {
       console.error(e)

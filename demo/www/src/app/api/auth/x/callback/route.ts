@@ -2,15 +2,18 @@
 import { getIronSession } from 'iron-session'
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
-import { sessionOptions } from '@/lib/session'
+import { sessionOptions, SessionData } from '@/lib/session'
 
 export async function GET(req: NextRequest) {
-  const cookiesStore = await cookies()
   const { searchParams } = new URL(req.url)
   const code = searchParams.get('code')
   const state = searchParams.get('state')
 
-  const session = await getIronSession(cookiesStore, sessionOptions)
+  const cookiesStore = await cookies()
+  const session = await getIronSession<SessionData>(
+    cookiesStore,
+    sessionOptions
+  )
 
   if (!code || !state || state !== session.xState) {
     return new NextResponse('Invalid state or code', { status: 400 })

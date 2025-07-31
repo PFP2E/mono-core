@@ -3,10 +3,14 @@ import { getIronSession } from 'iron-session'
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 import { SiweMessage } from 'siwe'
-import { sessionOptions } from '@/lib/session'
+import { sessionOptions, SessionData } from '@/lib/session'
 
 export async function POST(req: NextRequest) {
-  const session = await getIronSession(cookies(), sessionOptions)
+  const cookiesStore = await cookies()
+  const session = await getIronSession<SessionData>(
+    cookiesStore,
+    sessionOptions
+  )
   const { message, signature } = await req.json()
 
   try {

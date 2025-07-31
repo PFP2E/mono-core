@@ -1,11 +1,30 @@
 import type { NextConfig } from 'next'
+import bundleAnalyzer from '@next/bundle-analyzer'
 
-const remoteImgs = ['https://pbs.twimg.com/profile_images/**'].map(
-  url => new URL(url)
-)
+const withBundleAnalyzer = bundleAnalyzer({
+  enabled: process.env.ANALYZE === 'true'
+})
+
 const config: NextConfig = {
   reactStrictMode: true,
   pageExtensions: ['ts', 'tsx'],
-  images: { remotePatterns: remoteImgs }
+  transpilePackages: ['wagmi', 'viem', 'ethersjs'],
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'pbs.twimg.com',
+        pathname: '/profile_images/**'
+      },
+      {
+        protocol: 'https',
+        hostname: 'placehold.co'
+      }
+    ]
+  },
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production'
+  }
 }
-export default config
+
+export default withBundleAnalyzer(config)

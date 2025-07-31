@@ -18,10 +18,10 @@ export function useSIWE() {
   const fetchSession = useCallback(async () => {
     try {
       setIsLoading(true)
-      const res = await fetch('/api/me')
+      const res = await fetch('/api/auth/me')
       const json = await res.json()
       setSession(json.siwe || null)
-    } catch (e) {
+    } catch {
       setSession(null)
     } finally {
       setIsLoading(false)
@@ -66,8 +66,8 @@ export function useSIWE() {
 
       await fetchSession()
       return true
-    } catch (e: any) {
-      setError(e)
+    } catch (e: unknown) {
+      setError(e as Error)
       return false
     } finally {
       setIsLoading(false)
@@ -77,10 +77,10 @@ export function useSIWE() {
   const signOut = useCallback(async () => {
     setIsLoading(true)
     try {
-      await fetch('/api/logout')
+      await fetch('/api/auth/logout')
       setSession(null)
-    } catch (e: any) {
-      setError(e)
+    } catch (e: unknown) {
+      setError(e as Error)
     } finally {
       setIsLoading(false)
     }

@@ -10,10 +10,13 @@ export interface SessionData {
     pfpUrl: string
   }
   nonce?: string
+  xState?: string
+  xCodeVerifier?: string
 }
 
 // Extend the IronSessionData interface
 declare module 'iron-session' {
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   interface IronSessionData extends SessionData {}
 }
 

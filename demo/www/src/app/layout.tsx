@@ -7,7 +7,7 @@ import { headers } from 'next/headers'
 import { Header } from '@/components/header'
 import { Footer } from '@/components/footer'
 import { cn } from '@/lib/utils/cn'
-import { config } from '@/config/wagmi'
+import { config } from '@/config/wagmi-config'
 import { Providers } from '@/app/providers'
 
 import './globals.css'
