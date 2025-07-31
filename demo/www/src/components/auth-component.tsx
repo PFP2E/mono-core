@@ -43,11 +43,7 @@ export function AuthComponent() {
 
   // Automatically trigger SIWE after wallet connection
   useEffect(() => {
-    if (
-      account.status === 'connected' &&
-      !isAuthenticated &&
-      !isSiweLoading
-    ) {
+    if (account.status === 'connected' && !isAuthenticated && !isSiweLoading) {
       signIn()
     }
   }, [account.status, isAuthenticated, isSiweLoading, signIn])
@@ -90,9 +86,7 @@ export function AuthComponent() {
               {isXAuthenticated && xSession && (
                 <Avatar className='h-6 w-6'>
                   <AvatarImage src={xSession.pfpUrl} alt={xSession.username} />
-                  <AvatarFallback>
-                    {xSession.username.charAt(0)}
-                  </AvatarFallback>
+                  <AvatarFallback>{xSession.username.charAt(0)}</AvatarFallback>
                 </Avatar>
               )}
               {isWalletConnected && (
