@@ -1,0 +1,69 @@
+# Taskfile.yml
+# This is the root task file for the monorepo.
+# It delegates commands to the appropriate module's Taskfile.
+version: '3'
+
+tasks:
+  default:
+    desc: Show available tasks for this project
+    summary: |
+      This is the root Taskfile. It provides commands to orchestrate the modules.
+      Tasks are namespaced by module (e.g., `demo:<command>`).
+    cmds:
+      - task -l
+
+  # --- Demo Module Tasks ---
+
+  demo:dev:
+    desc: 'Start the demo development server (container)'
+    dir: demo
+    cmds:
+      - task dev
+
+  demo:dev:local:
+    desc: 'Start the demo development server (local)'
+    dir: demo
+    cmds:
+      - task dev:local
+
+  demo:prod:
+    desc: 'Build and start the demo production server (container)'
+    dir: demo
+    cmds:
+      - task prod
+
+  demo:prod:local:
+    desc: 'Build and start the demo production server (local)'
+    dir: demo
+    cmds:
+      - task prod:local
+
+  demo:test:
+    desc: 'Run the demo test suite (container)'
+    dir: demo
+    cmds:
+      - task test
+
+  demo:test:local:
+    desc: 'Run the demo test suite (local)'
+    dir: demo
+    cmds:
+      - task test:local
+
+  demo:stop:
+    desc: 'Stop all running demo services (container only)'
+    dir: demo
+    cmds:
+      - task stop
+
+  demo:logs:
+    desc: 'Follow demo container logs'
+    dir: demo
+    cmds:
+      - task logs
+
+  demo:clean:
+    desc: 'Remove all demo container assets'
+    dir: demo
+    cmds:
+      - task clean

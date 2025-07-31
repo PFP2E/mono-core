@@ -18,21 +18,41 @@ This project was built in a constrained, hackathon environment. We prioritized a
 
 ---
 
-### Local Development
-The project uses a containerized environment managed by **[Task](https://taskfile.dev/)** and **Docker**. This provides a consistent, reproducible workflow.
+### Development Environment
+This project provides two development setups, both managed by **[Task](https://taskfile.dev/)**. The root `Taskfile.yml` is the single entry point for all workflows.
 
 **Prerequisites:**
--   Docker
--   [Task](https://taskfile.dev/installation/) (`brew install go-task/tap/go-task`)
+-   [**Task**](https://taskfile.dev/installation/)
+-   [**Docker**](https://www.docker.com/get-started) (for container workflow)
+-   [**Bun**](https://bun.sh/) (for local workflow)
 
-To run a module, navigate to its directory (e.g., `cd demo`) and use the `task` commands:
+---
+
+#### Container Workflow (Recommended)
+This setup uses Docker to provide a consistent, reproducible environment. All commands are run from the project root.
 
 ```bash
-# Start the development server
-task dev
+# Start the demo development server
+task demo:dev
 
-# Run the test suite
-task test
+# Run the demo test suite
+task demo:test
+
+# Stop all demo services
+task demo:stop
+```
+
+---
+
+#### Local Workflow
+This setup runs services directly on your host machine. It requires `bun` to be installed.
+
+```bash
+# Start the demo development server locally
+task demo:dev:local
+
+# Run the demo test suite locally
+task demo:test:local
 ```
 
 ---

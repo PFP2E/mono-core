@@ -1,0 +1,3 @@
+[test]
+# Run tests only in the tests directory for this workspace.
+root = "./tests"
