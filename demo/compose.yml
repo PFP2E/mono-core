@@ -45,14 +45,15 @@ services:
       - "3000:3000"
     volumes:
       # Mount source code for hot-reloading
-      - .:/app
+      - ./www:/app/www
       # Persist node_modules to avoid reinstalling on every start
       - node_modules:/app/www/node_modules
     working_dir: /app/www
     stdin_open: true
     tty: true
-    # This command ensures dependencies are fresh, and starts the dev server.
-    command: sh -c "bun install && bun run dev"
+    # The command now just starts the dev server.
+    # Dependencies are managed by the image and volume.
+    command: sh -c "bun run dev"
     networks:
       - pfp2e-demo-net
 

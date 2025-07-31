@@ -18,8 +18,8 @@ const Home = () => {
       <Hero />
       {isAuthed && (
         <>
-          <Marketplace />
           <UserDashboard />
+          <Marketplace />
         </>
       )}
       <UseCases />

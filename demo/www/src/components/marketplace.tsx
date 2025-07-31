@@ -2,7 +2,6 @@ import React from 'react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { campaigns } from '@/lib/mock-data'
-import Image from 'next/image'
 
 const ApyIndicator = ({ color }: { color: 'green' | 'orange' }) => (
   <div className='flex h-3 w-3 items-center justify-center'>
@@ -45,12 +44,10 @@ export const Marketplace = () => {
                 className='border-border grid grid-cols-12 items-center gap-4 border-b px-4 py-4 last:border-b-0'
               >
                 <div className='col-span-4 flex items-center gap-4'>
-                  <Image
+                  <img
                     className='h-16 w-16 rounded-xl'
                     src={campaign.imageUrl}
                     alt={campaign.name.replace('<br/>', ' ')}
-                    width={64}
-                    height={64}
                   />
                   <div
                     className='text-card-foreground text-base leading-snug font-medium'
