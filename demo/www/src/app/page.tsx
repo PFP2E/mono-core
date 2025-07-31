@@ -10,7 +10,7 @@ const Home = () => {
   const { isConnected } = useAppContext()
 
   return (
-    <div className="container mx-auto px-4">
+    <div className='container mx-auto px-4'>
       {isConnected ? (
         <Marketplace />
       ) : (

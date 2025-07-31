@@ -6,7 +6,7 @@ import { createContext, useContext, useState, ReactNode } from 'react'
 const mockUser = {
   name: 'Hackathon Judge',
   handle: '@ethglobal',
-  avatarUrl: 'https://github.com/ethglobal.png',
+  avatarUrl: 'https://github.com/ethglobal.png'
 }
 
 interface AppContextType {

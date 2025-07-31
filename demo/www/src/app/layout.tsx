@@ -11,16 +11,16 @@ import './globals.css'
 
 const fontSans = Inter({
   subsets: ['latin'],
-  variable: '--font-sans',
+  variable: '--font-sans'
 })
 
 export const metadata: Metadata = {
   title: 'PFP2E Demo',
-  description: 'A demo application for the PFP2E Protocol.',
+  description: 'A demo application for the PFP2E Protocol.'
 }
 
 export default function RootLayout({
-  children,
+  children
 }: Readonly<{
   children: React.ReactNode
 }>) {
@@ -28,7 +28,7 @@ export default function RootLayout({
     <html lang='en' suppressHydrationWarning>
       <body
         className={cn(
-          'min-h-screen bg-background font-sans antialiased',
+          'bg-background min-h-screen font-sans antialiased',
           fontSans.variable
         )}
       >
@@ -39,10 +39,10 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <AppProvider>
-            <div className="relative flex min-h-screen flex-col">
-              <div className="absolute top-0 left-0 w-full h-[400px] bg-gradient-to-b from-primary/20 to-background -z-10" />
+            <div className='relative flex min-h-screen flex-col'>
+              <div className='from-primary/20 to-background absolute top-0 left-0 -z-10 h-[400px] w-full bg-gradient-to-b' />
               <Header />
-              <main className="flex-1">{children}</main>
+              <main className='flex-1'>{children}</main>
               <Footer />
             </div>
           </AppProvider>

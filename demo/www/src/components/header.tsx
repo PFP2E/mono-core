@@ -1,47 +1,51 @@
 'use client'
 
-import React from 'react';
-import Image from 'next/image';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { ThemeToggle } from '@/components/theme-toggle';
-import { Icons } from '@/components/icons';
-import { useAppContext } from '@/context/app-context';
+import React from 'react'
+import Image from 'next/image'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { ThemeToggle } from '@/components/theme-toggle'
+import { Icons } from '@/components/icons'
+import { useAppContext } from '@/context/app-context'
 
 export const Header = () => {
-  const { isConnected, connect, disconnect } = useAppContext();
+  const { isConnected, connect, disconnect } = useAppContext()
 
   return (
-    <header className="sticky top-0 left-0 z-10 w-full backdrop-blur-md">
-      <nav className="w-full px-4 sm:px-12 md:px-28 py-2.5 bg-background/50 border-b border-border flex flex-wrap justify-between items-center">
+    <header className='sticky top-0 left-0 z-10 w-full backdrop-blur-md'>
+      <nav className='bg-background/50 border-border flex w-full flex-wrap items-center justify-between border-b px-4 py-2.5 sm:px-12 md:px-28'>
         {/* Logo Section */}
-        <div className="flex items-center gap-2">
-          <Image src="/logo.png" alt="PFP2E Logo" width={32} height={32} />
-          <span className="text-primary text-2xl font-bold">PFP2e</span>
+        <div className='flex items-center gap-2'>
+          <Image src='/logo.png' alt='PFP2E Logo' width={32} height={32} />
+          <span className='text-primary text-2xl font-bold'>PFP2e</span>
         </div>
 
         {/* Search Bar Section */}
-        <div className="h-11 px-4 py-2.5 bg-card/80 rounded-full border border-border flex items-center gap-4 w-full max-w-sm my-2 sm:my-0 order-3 sm:order-2 flex-grow sm:flex-grow-0">
-          <Icons.Search className="w-5 h-5 text-muted-foreground" />
+        <div className='bg-card/80 border-border order-3 my-2 flex h-11 w-full max-w-sm flex-grow items-center gap-4 rounded-full border px-4 py-2.5 sm:order-2 sm:my-0 sm:flex-grow-0'>
+          <Icons.Search className='text-muted-foreground h-5 w-5' />
           <Input
-            type="text"
-            placeholder="Check address rewards"
-            className="bg-transparent p-0 text-foreground placeholder:text-muted-foreground text-base font-normal leading-tight focus:outline-none flex-grow border-0 ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+            type='text'
+            placeholder='Check address rewards'
+            className='text-foreground placeholder:text-muted-foreground flex-grow border-0 bg-transparent p-0 text-base leading-tight font-normal ring-offset-0 focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0'
           />
-          <div className="w-5 h-5 px-1.5 py-[3px] bg-muted rounded text-muted-foreground text-xs font-semibold flex items-center justify-center">/</div>
+          <div className='bg-muted text-muted-foreground flex h-5 w-5 items-center justify-center rounded px-1.5 py-[3px] text-xs font-semibold'>
+            /
+          </div>
         </div>
 
         {/* Action Buttons Section */}
-        <div className="flex items-center gap-2.5 order-2 sm:order-3">
+        <div className='order-2 flex items-center gap-2.5 sm:order-3'>
           {isConnected ? (
-            <Button variant="outline" onClick={disconnect}>Disconnect</Button>
+            <Button variant='outline' onClick={disconnect}>
+              Disconnect
+            </Button>
           ) : (
             <>
-              <Button variant="outline" onClick={connect}>
+              <Button variant='outline' onClick={connect}>
                 Connect Wallet
               </Button>
-              <Button variant="outline" onClick={connect}>
-                Sign in with <Icons.X className="ml-2 h-3.5 w-3.5" />
+              <Button variant='outline' onClick={connect}>
+                Sign in with <Icons.X className='ml-2 h-3.5 w-3.5' />
               </Button>
             </>
           )}
@@ -49,5 +53,5 @@ export const Header = () => {
         </div>
       </nav>
     </header>
-  );
-};
+  )
+}

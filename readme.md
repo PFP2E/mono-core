@@ -1,13 +1,21 @@
 <div align="center">
-
-# PFP2E Protocol
-### Verifiable Visual Identity · Programmable Rewards
-
+  <img src="docs/logo.png" alt="PFP2E Logo" width="128" />
+  <h1>PFP2E Protocol</h1>
+  <p>Verifiable Visual Identity · Programmable Rewards</p>
+  
+  <p>
+    <a href="https://nextjs.org/"><img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white" alt="Next.js"></a>
+    <a href="https://nodejs.org/"><img src="https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" alt="Node.js"></a>
+    <a href="https://soliditylang.org/"><img src="https://img.shields.io/badge/Solidity-363636?style=for-the-badge&logo=solidity&logoColor=white" alt="Solidity"></a>
+    <a href="https://ethereum.org/"><img src="https://img.shields.io/badge/Ethereum-3C3C3D?style=for-the-badge&logo=ethereum&logoColor=white" alt="Ethereum"></a>
+    <a href="https://www.docker.com/"><img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker"></a>
+    <a href="https://1inch.io/"><img src="https://img.shields.io/badge/1inch-1F2A4D?style=for-the-badge&logo=1inch&logoColor=white" alt="1inch"></a>
+  </p>
 </div>
 
 ---
 
-### PFP2E is a hybrid on-chain/off-chain protocol for verifying visual identity and linking it to a trustless reward system. This repository contains the reference implementation built for the ETHGlobal hackathon.
+PFP2E is a hybrid on-chain/off-chain protocol for verifying visual identity and linking it to a trustless reward system. This repository contains the reference implementation built for the ETHGlobal hackathon.
 
 ![PFP2E Components Diagram](docs/components.jpg)
 
@@ -66,15 +74,3 @@ This repository is a monorepo organized by domain.
 | **[`/loop`](./loop)** | The off-chain verification engine (`Node.js`, `SQLite`). |
 | **[`/demo`](./demo)** | Frontend proofs-of-concept (`Next.js`, `Task`). |
 | **[`/docs`](./docs)** | System architecture diagrams. |
-
----
-
-<div align="center">
-
-![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white)
-![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
-![Solidity](https://img.shields.io/badge/Solidity-363636?style=for-the-badge&logo=solidity&logoColor=white)
-![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
-![1inch](https://img.shields.io/badge/1inch-1F2A4D?style=for-the-badge&logo=1inch&logoColor=white)
-
-</div>
