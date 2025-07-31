@@ -3,17 +3,14 @@
 import React from 'react'
 import Image from 'next/image'
 import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { Icons } from '@/components/icons'
-import { useAppContext } from '@/context/app-context'
+import { AuthComponent } from '@/components/auth-component'
 
 export const Header = () => {
-  const { isConnected, connect, disconnect } = useAppContext()
-
   return (
     <header className='sticky top-0 left-0 z-10 w-full backdrop-blur-md'>
-      <nav className='bg-background/50 border-border flex w-full flex-wrap items-center justify-between border-b px-4 py-2.5 sm:px-12 md:px-28'>
+      <nav className='bg-background/50 border-border sm-px-12 flex w-full flex-wrap items-center justify-between border-b px-4 py-2.5 md:px-28'>
         {/* Logo Section */}
         <div className='flex items-center gap-2'>
           <Image src='/logo.png' alt='PFP2E Logo' width={32} height={32} />
@@ -35,20 +32,7 @@ export const Header = () => {
 
         {/* Action Buttons Section */}
         <div className='order-2 flex items-center gap-2.5 sm:order-3'>
-          {isConnected ? (
-            <Button variant='outline' onClick={disconnect}>
-              Disconnect
-            </Button>
-          ) : (
-            <>
-              <Button variant='outline' onClick={connect}>
-                Connect Wallet
-              </Button>
-              <Button variant='outline' onClick={connect}>
-                Sign in with <Icons.X className='ml-2 h-3.5 w-3.5' />
-              </Button>
-            </>
-          )}
+          <AuthComponent />
           <ThemeToggle />
         </div>
       </nav>

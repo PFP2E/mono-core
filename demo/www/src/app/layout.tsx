@@ -1,11 +1,14 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { ThemeProvider } from 'next-themes'
+import { cookieToInitialState } from 'wagmi'
+import { headers } from 'next/headers'
 
 import { Header } from '@/components/header'
 import { Footer } from '@/components/footer'
-import { AppProvider } from '@/context/app-context'
 import { cn } from '@/lib/utils/cn'
+import { config } from '@/config/wagmi'
+import { Providers } from '@/app/providers'
 
 import './globals.css'
 
@@ -19,11 +22,14 @@ export const metadata: Metadata = {
   description: 'A demo application for the PFP2E Protocol.'
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const headersStore = await headers()
+  const initialState = cookieToInitialState(config, headersStore.get('cookie'))
+
   return (
     <html lang='en' suppressHydrationWarning>
       <body
@@ -38,14 +44,14 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <AppProvider>
+          <Providers initialState={initialState}>
             <div className='relative flex min-h-screen flex-col'>
               <div className='from-primary/20 to-background absolute top-0 left-0 -z-10 h-[400px] w-full bg-gradient-to-b' />
               <Header />
               <main className='flex-1'>{children}</main>
               <Footer />
             </div>
-          </AppProvider>
+          </Providers>
         </ThemeProvider>
       </body>
     </html>

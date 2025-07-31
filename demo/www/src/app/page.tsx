@@ -3,22 +3,22 @@
 import { Hero } from '@/components/hero'
 import { Marketplace } from '@/components/marketplace'
 import { UseCases } from '@/components/use-cases'
-import { useAppContext } from '@/context/app-context'
+import { useSIWE } from '@/hooks/useSIWE'
+import { useXSession } from '@/hooks/useXSession'
+import { UserDashboard } from '@/components/dashboard'
 import * as React from 'react'
 
 const Home = () => {
-  const { isConnected } = useAppContext()
+  const { isAuthenticated } = useSIWE()
+  const { isXAuthenticated } = useXSession()
+  const isAuthed = isAuthenticated || isXAuthenticated
 
   return (
     <div className='container mx-auto px-4'>
-      {isConnected ? (
-        <Marketplace />
-      ) : (
-        <>
-          <Hero />
-          <UseCases />
-        </>
-      )}
+      <Hero />
+      <UseCases />
+      {isAuthed && <UserDashboard />}
+      <Marketplace />
     </div>
   )
 }
