@@ -1,0 +1,117 @@
+version: '3'
+
+vars:
+  PROJECT_NAME: pfp2e-demo
+  COMPOSE_CMD: docker compose -p {{.PROJECT_NAME}}
+
+tasks:
+  default:
+    desc: Show this help message
+    cmds:
+      - task -l
+
+  # --- High-Level Commands ---
+
+  dev:
+    desc: 'Start the development server (container)'
+    cmds:
+      - task: _container:dev
+
+  dev:local:
+    desc: 'Start the development server (local)'
+    cmds:
+      - task: _local:dev
+
+  prod:
+    desc: 'Build and start the production server (container)'
+    cmds:
+      - task: _container:prod
+
+  prod:local:
+    desc: 'Build and start the production server (local)'
+    cmds:
+      - task: _local:prod
+
+  test:
+    desc: 'Run the full test suite (container)'
+    cmds:
+      - task: _container:test
+
+  test:local:
+    desc: 'Run the full test suite (local)'
+    cmds:
+      - task: _local:test
+
+  stop:
+    desc: 'Stop all running services (container only)'
+    cmds:
+      - task: _container:stop
+
+  logs:
+    desc: 'Follow container logs (container only)'
+    cmds:
+      - task: _container:logs
+
+  clean:
+    desc: 'Remove all project container assets'
+    prompt: Are you sure you want to permanently delete all project container assets?
+    cmds:
+      - task: _container:clean
+
+  # --- Internal Tasks ---
+  # The following tasks are not shown in the default help message.
+
+  _local:dev:
+    internal: true
+    cmds:
+      - cmd: (cd www && bun install && bun run dev)
+
+  _local:prod:
+    internal: true
+    cmds:
+      - task: _local:build:www
+      - cmd: (cd www && bun start)
+
+  _local:test:
+    internal: true
+    cmds:
+      - echo "🧪 Running www tests..."
+      - cmd: (cd www && bun install && bun test ./tests/unit && bun run test:ui)
+
+  _local:build:www:
+    internal: true
+    cmds:
+      - cmd: (cd www && bun install && bun run format && bun run build)
+
+  _container:dev:
+    internal: true
+    cmds:
+      - '{{.COMPOSE_CMD}} up -d --build dev'
+
+  _container:prod:
+    internal: true
+    cmds:
+      - '{{.COMPOSE_CMD}} up -d --build prod'
+
+  _container:test:
+    internal: true
+    cmds:
+      - '{{.COMPOSE_CMD}} up --build --abort-on-container-exit --exit-code-from test prod test'
+    finally:
+      - '{{.COMPOSE_CMD}} down'
+
+  _container:stop:
+    internal: true
+    cmds:
+      - '{{.COMPOSE_CMD}} down --remove-orphans'
+
+  _container:logs:
+    internal: true
+    cmds:
+      - '{{.COMPOSE_CMD}} logs -f'
+
+  _container:clean:
+    internal: true
+    cmds:
+      - '{{.COMPOSE_CMD}} down --volumes --remove-orphans'
+      - 'docker image prune -a -f --filter "label=project={{.PROJECT_NAME}}"'

@@ -1,0 +1,37 @@
+node_modules
+
+# Next.js
+.next/
+out/
+
+# Log files
+bun-error.log*
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Test reports and coverage
+playwright-report/
+test-results/
+playwright/.cache/
+
+# Container / Podman
+# Ignore exported container images or other container-related artifacts
+*.tar
+*.tar.gz
+
+# ESLint cache
+.eslintcache
+
+# Aider
+.aider*
+.aider.*
+.aider/
+.aider.tags.cache.v4/
+
+.pki
+.DS_Store
+.cache
+tags

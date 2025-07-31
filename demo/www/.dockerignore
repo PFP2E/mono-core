@@ -1,0 +1,5 @@
+# Node modules and local build outputs.
+# These should be generated INSIDE the container, not copied from the host.
+**/node_modules
+**/.next
+**/.env.local

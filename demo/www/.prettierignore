@@ -1,0 +1,33 @@
+# Build artifacts
+.next/
+out/
+build/
+dist/
+
+# Node modules
+node_modules/
+
+# Cache files
+.eslintcache
+*.tsbuildinfo
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+bun-error.log*
+
+bun.lock
+
+# Test results / Coverage
+test-results/
+coverage/
+playwright-report/
+
+# Env files
+.env*
+!.env.example
+
+# Generated files (if any)
+# e.g., *.generated.ts

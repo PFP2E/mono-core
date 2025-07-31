@@ -1,0 +1,64 @@
+name: pfp2e-demo
+
+services:
+  # The production web server.
+  prod:
+    build:
+      context: .
+      dockerfile: www/Containerfile
+      target: prod-server
+    image: pfp2e-demo/app:latest
+    container_name: pfp2e-demo-prod
+    ports:
+      - "3000:3000"
+    networks:
+      - pfp2e-demo-net
+
+  # The test runner for UI/E2E tests.
+  # Run it with: docker compose run --rm test
+  test:
+    build:
+      context: .
+      dockerfile: www/Containerfile
+      target: test-runner
+    image: pfp2e-demo/app:test
+    container_name: pfp2e-demo-test-runner
+    depends_on:
+      - prod
+    environment:
+      - PLAYWRIGHT_TEST_BASE_URL=http://prod:3000
+    init: true
+    ipc: host
+    networks:
+      - pfp2e-demo-net
+
+  # The development server with hot-reloading.
+  dev:
+    build:
+      context: .
+      dockerfile: www/Containerfile
+      # Use a minimal base with just dependencies installed.
+      target: deps
+    image: pfp2e-demo/app:dev
+    container_name: pfp2e-demo-dev
+    ports:
+      - "3000:3000"
+    volumes:
+      # Mount source code for hot-reloading
+      - .:/app
+      # Persist node_modules to avoid reinstalling on every start
+      - node_modules:/app/www/node_modules
+    working_dir: /app/www
+    stdin_open: true
+    tty: true
+    # This command ensures dependencies are fresh, and starts the dev server.
+    command: sh -c "bun install && bun run dev"
+    networks:
+      - pfp2e-demo-net
+
+volumes:
+  node_modules:
+
+networks:
+  pfp2e-demo-net:
+    name: pfp2e-demo-net
