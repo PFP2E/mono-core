@@ -7,15 +7,24 @@ services:
       context: .
       dockerfile: www/Containerfile
       target: prod-server
-    image: pfp2e-demo/app:latest
+    image: pfp2e-demo/app:prod
     container_name: pfp2e-demo-prod
     ports:
       - "3000:3000"
     networks:
       - pfp2e-demo-net
+    profiles:
+      - prod
+      - test
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 2s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
 
   # The test runner for UI/E2E tests.
-  # Run it with: docker compose run --rm test
+  # Run it with: docker compose --profile test run --rm test
   test:
     build:
       context: .
@@ -24,13 +33,16 @@ services:
     image: pfp2e-demo/app:test
     container_name: pfp2e-demo-test-runner
     depends_on:
-      - prod
+      prod:
+        condition: service_healthy
     environment:
       - PLAYWRIGHT_TEST_BASE_URL=http://prod:3000
     init: true
     ipc: host
     networks:
       - pfp2e-demo-net
+    profiles:
+      - test
 
   # The development server with hot-reloading.
   dev:
@@ -41,6 +53,7 @@ services:
       target: deps
     image: pfp2e-demo/app:dev
     container_name: pfp2e-demo-dev
+    user: root
     ports:
       - "3000:3000"
     volumes:
@@ -56,6 +69,8 @@ services:
     command: sh -c "bun run dev"
     networks:
       - pfp2e-demo-net
+    profiles:
+      - dev
 
 volumes:
   node_modules:

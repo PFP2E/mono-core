@@ -34,6 +34,9 @@ This project provides two development setups, both managed by **[Task](https://t
 -   [**Docker**](https://www.docker.com/get-started) (for container workflow)
 -   [**Bun**](https://bun.sh/) (for local workflow)
 
+> [!IMPORTANT]
+> When changing dependencies in `demo/www/package.json`, you **must** run `bun install` in that directory. This updates `bun.lock`, which is essential for Docker builds to succeed.
+
 ---
 
 #### Container Workflow (Recommended)

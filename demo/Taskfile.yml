@@ -96,7 +96,7 @@ tasks:
   _container:test:
     internal: true
     cmds:
-      - '{{.COMPOSE_CMD}} up --build --abort-on-container-exit --exit-code-from test prod test'
+      - '{{.COMPOSE_CMD}} --profile test up --build --abort-on-container-exit --exit-code-from test'
     finally:
       - '{{.COMPOSE_CMD}} down'
 

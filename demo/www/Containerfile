@@ -19,7 +19,8 @@ USER bun
 FROM base AS deps
 LABEL project="pfp2e-demo" stage="deps"
 WORKDIR /app/www
-COPY www/package.json www/bun.lock ./
+COPY --chown=bun:bun www/package.json www/bun.lock ./
+COPY --chown=bun:bun www/tsconfig.json ./
 RUN bun install --frozen-lockfile
 
 # =================================================================
@@ -29,8 +30,9 @@ FROM deps AS build
 LABEL project="pfp2e-demo" stage="build"
 WORKDIR /app
 # Copy source code last to leverage caching
-COPY www ./www
+COPY --chown=bun:bun www ./www
 WORKDIR /app/www
+RUN bun run format
 RUN bun run build
 
 # =================================================================
@@ -40,10 +42,10 @@ FROM base AS prod-server
 LABEL project="pfp2e-demo" stage="prod-server"
 WORKDIR /app/www
 ENV NODE_ENV=production
-COPY --from=deps /app/www/node_modules ./node_modules
-COPY --from=build /app/www/.next ./.next
-COPY --from=build /app/www/public ./public
-COPY --from=build /app/www/package.json .
+COPY --chown=bun:bun --from=deps /app/www/node_modules ./node_modules
+COPY --chown=bun:bun --from=build /app/www/.next ./.next
+COPY --chown=bun:bun --from=build /app/www/public ./public
+COPY --chown=bun:bun --from=build /app/www/package.json .
 EXPOSE 3000
 HEALTHCHECK CMD curl -f http://localhost:3000/ || exit 1
 CMD ["bun", "run", "start"]
@@ -54,10 +56,13 @@ CMD ["bun", "run", "start"]
 FROM mcr.microsoft.com/playwright:v1.53.1-noble AS test-runner
 LABEL project="pfp2e-demo" stage="test-runner"
 WORKDIR /app/www
-COPY --from=deps /app/www/node_modules ./node_modules
+# Copy bun executable and node_modules from deps stage
 COPY --from=deps /usr/local/bin/bun /usr/local/bin/bun
+COPY --from=deps /app/www/node_modules ./node_modules
 # Copy only necessary files for testing
-COPY www/tests-ui ./tests-ui
-COPY www/playwright.config.ts .
+COPY --chown=bun:bun www/package.json www/bun.lock ./
+COPY --chown=bun:bun www/playwright.config.ts .
+COPY --chown=bun:bun www/tsconfig.json .
+COPY --chown=bun:bun www/tests-ui ./tests-ui
 # The test command is run from compose against the prod service.
 CMD ["bun", "run", "test:ui"]

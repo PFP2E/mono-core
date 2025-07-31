@@ -17,7 +17,6 @@ import { Dialog, DialogTrigger } from '@/components/ui/dialog'
 import { WalletConnectionDialog } from './wallet/wallet-connection-dialog'
 import { XSignInModal } from './x-signin-modal'
 import { Icons } from './icons'
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 
 export function AuthComponent() {
   const {
@@ -83,12 +82,6 @@ export function AuthComponent() {
               size='sm'
               className='flex items-center gap-2'
             >
-              {isXAuthenticated && xSession && (
-                <Avatar className='h-6 w-6'>
-                  <AvatarImage src={xSession.pfpUrl} alt={xSession.username} />
-                  <AvatarFallback>{xSession.username.charAt(0)}</AvatarFallback>
-                </Avatar>
-              )}
               {isWalletConnected && (
                 <span>
                   {isSIWEAuthenticated
@@ -101,6 +94,7 @@ export function AuthComponent() {
               {isXAuthenticated && !isWalletConnected && xSession && (
                 <span>{xSession.username}</span>
               )}
+              <Icons.ChevronDown className='h-4 w-4' />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align='end'>

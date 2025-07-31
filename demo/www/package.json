@@ -15,18 +15,10 @@
     "demo:format": "prettier --write ."
   },
   "dependencies": {
-    "@radix-ui/react-avatar": "^1.1.10",
-    "@radix-ui/react-checkbox": "^1.3.2",
-    "@radix-ui/react-collapsible": "^1.1.11",
     "@radix-ui/react-dialog": "^1.1.14",
     "@radix-ui/react-dropdown-menu": "^2.1.15",
     "@radix-ui/react-icons": "^1.3.2",
-    "@radix-ui/react-label": "^2.1.6",
-    "@radix-ui/react-navigation-menu": "^1.2.13",
-    "@radix-ui/react-progress": "^1.1.7",
-    "@radix-ui/react-separator": "^1.1.7",
     "@radix-ui/react-slot": "^1.2.3",
-    "@radix-ui/react-tooltip": "^1.2.7",
     "@tanstack/react-query": "^5.83.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -37,11 +29,10 @@
     "next-themes": "^0.4.6",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "react-medium-image-zoom": "^5.2.14",
     "siwe": "^3.0.0",
     "tailwind-merge": "^3.3.1",
     "tailwindcss-animate": "^1.0.7",
-    "wagmi": "^2.16.0"
+    "wagmi": "2.14.15"
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^14.2.3",
@@ -72,7 +63,6 @@
     "prettier": "^3.6.2",
     "prettier-plugin-tailwindcss": "^0.6.13",
     "tailwindcss": "^4.1.11",
-    "tw-animate-css": "^1.2.9",
     "typescript": "^5.8.3"
   }
 }

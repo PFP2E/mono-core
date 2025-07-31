@@ -1,4 +1,5 @@
 import {
+  ChevronDown,
   Github,
   Twitter,
   Wallet,
@@ -15,6 +16,7 @@ export const Icons = {
   Sun: (props: LucideProps) => <Sun {...props} />,
   Moon: (props: LucideProps) => <Moon {...props} />,
   Search: (props: LucideProps) => <Search {...props} />,
+  ChevronDown: (props: LucideProps) => <ChevronDown {...props} />,
   X: (props: LucideProps) => (
     <svg
       xmlns='http://www.w3.org/2000/svg'
