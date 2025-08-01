@@ -5,10 +5,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { sessionOptions, SessionData } from '@/lib/session'
 import logger from '@/lib/logger'
 
-async function parseErrorResponse(response: Response): Promise<object | string> {
+async function parseErrorResponse(
+  response: Response
+): Promise<object | string> {
   try {
     return await response.json()
-  } catch (e) {
+  } catch (error) {
+    logger.error('Failed to parse error response as JSON.', { error })
     return await response.text()
   }
 }
@@ -17,9 +20,8 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
   const code = searchParams.get('code')
   const state = searchParams.get('state')
-  const useMock = process.env.MOCK_X_AUTH === 'true'
 
-  logger.debug('X Auth Callback: Received request.', { code, state, useMock })
+  logger.debug('X Auth Callback: Received request.', { code, state })
 
   const cookiesStore = await cookies()
   const session = await getIronSession<SessionData>(
@@ -43,105 +45,90 @@ export async function GET(req: NextRequest) {
     )
   }
 
+  const body = new URLSearchParams({
+    grant_type: 'authorization_code',
+    code: code,
+    redirect_uri: `${process.env.APP_URL}/api/auth/x/callback`,
+    client_id: process.env.X_CLIENT_ID!,
+    code_verifier: session.xCodeVerifier!
+  })
+
   try {
-    let tokenData: {
-      access_token: string
-      refresh_token: string
-      expires_in: number
-    }
-
-    if (useMock) {
-      logger.warn('X Auth Callback: Using MOCK data for token exchange.')
-      tokenData = {
-        access_token: 'mock_access_token',
-        refresh_token: 'mock_refresh_token',
-        expires_in: 7200
+    logger.debug('X Auth Callback: Requesting access token.')
+    const tokenResponse = await fetch(
+      'https://api.twitter.com/2/oauth2/token',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          Authorization: `Basic ${Buffer.from(
+            `${process.env.X_CLIENT_ID}:${process.env.X_CLIENT_SECRET}`
+          ).toString('base64')}`
+        },
+        body: body.toString()
       }
-    } else {
-      const body = new URLSearchParams({
-        grant_type: 'authorization_code',
-        code: code,
-        redirect_uri: `${process.env.APP_URL}/api/auth/x/callback`,
-        client_id: process.env.X_CLIENT_ID!,
-        code_verifier: session.xCodeVerifier!
+    )
+
+    if (!tokenResponse.ok) {
+      const errorPayload = await parseErrorResponse(tokenResponse)
+      logger.error('X Auth Callback: Failed to fetch access token from X.', {
+        status: tokenResponse.status,
+        error: errorPayload
       })
-
-      logger.debug('X Auth Callback: Requesting access token.')
-      const tokenResponse = await fetch(
-        'https://api.twitter.com/2/oauth2/token',
+      return NextResponse.json(
         {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            Authorization: `Basic ${Buffer.from(
-              `${process.env.X_CLIENT_ID}:${process.env.X_CLIENT_SECRET}`
-            ).toString('base64')}`
-          },
-          body: body.toString()
-        }
+          error: 'Failed to fetch access token',
+          details: errorPayload
+        },
+        { status: tokenResponse.status }
       )
-
-      if (!tokenResponse.ok) {
-        const errorPayload = await parseErrorResponse(tokenResponse)
-        logger.error(
-          'X Auth Callback: Failed to fetch access token from X.',
-          { status: tokenResponse.status, error: errorPayload }
-        )
-        return NextResponse.json(
-          { error: 'Failed to fetch access token', details: errorPayload },
-          { status: tokenResponse.status }
-        )
-      }
-      tokenData = await tokenResponse.json()
     }
 
+    const tokenData = await tokenResponse.json()
     logger.debug('X Auth Callback: Successfully received token data.')
+
     const { access_token, refresh_token, expires_in } = tokenData
     const tokenExpiresAt = Date.now() + expires_in * 1000
 
     let username: string | undefined = 'X User'
     let pfpUrl: string | undefined = undefined
 
-    if (useMock) {
-      logger.warn('X Auth Callback: Using MOCK data for user profile.')
-      username = 'mock_x_user'
-      pfpUrl = 'https://placehold.co/400x400/1DA1F2/FFFFFF?text=X'
-    } else {
-      try {
-        logger.debug('X Auth Callback: Requesting user data.')
-        const userResponse = await fetch(
-          'https://api.twitter.com/2/users/me?user.fields=profile_image_url',
-          {
-            headers: {
-              Authorization: `Bearer ${access_token}`,
-              'User-Agent': 'pfp2e-app'
-            },
-            method: 'GET'
-          }
-        )
-
-        if (userResponse.ok) {
-          const { data: userData } = await userResponse.json()
-          logger.debug('X Auth Callback: Successfully received user data.', {
-            username: userData.username
-          })
-          username = userData.username
-          pfpUrl = userData.profile_image_url
-            ? userData.profile_image_url.replace('_normal', '_400x400')
-            : undefined
-        } else {
-          const errorPayload = await parseErrorResponse(userResponse)
-          logger.error('X Auth Callback: Failed to fetch user data from X.', {
-            status: userResponse.status,
-            error: errorPayload
-          })
+    try {
+      logger.debug('X Auth Callback: Requesting user data.')
+      const userResponse = await fetch(
+        'https://api.twitter.com/2/users/me?user.fields=profile_image_url',
+        {
+          headers: {
+            Authorization: `Bearer ${access_token}`,
+            'User-Agent': 'pfp2e-app'
+          },
+          method: 'GET'
         }
-      } catch (fetchError) {
-        logger.error(
-          'X Auth Callback: An exception occurred while fetching user data.',
-          { error: fetchError }
-        )
+      )
+
+      if (userResponse.ok) {
+        const { data: userData } = await userResponse.json()
+        logger.debug('X Auth Callback: Successfully received user data.', {
+          username: userData.username
+        })
+        username = userData.username
+        pfpUrl = userData.profile_image_url
+          ? userData.profile_image_url.replace('_normal', '_400x400')
+          : undefined
+      } else {
+        const errorPayload = await parseErrorResponse(userResponse)
+        logger.error('X Auth Callback: Failed to fetch user data from X.', {
+          status: userResponse.status,
+          error: errorPayload
+        })
       }
+    } catch (fetchError) {
+      logger.error(
+        'X Auth Callback: An exception occurred while fetching user data.',
+        {
+          error: fetchError
+        }
+      )
     }
 
     session.x = {

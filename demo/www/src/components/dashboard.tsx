@@ -4,17 +4,10 @@
 import { useSIWE } from '@/hooks/useSIWE'
 import { useXSession } from '@/hooks/useXSession'
 import { useWallet } from '@/hooks/use-wallet'
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardHeader,
-  CardTitle
-} from './ui/card'
+import { Card, CardAction, CardContent, CardHeader, CardTitle } from './ui/card'
 import Image from 'next/image'
 import { Button } from './ui/button'
 import Link from 'next/link'
-import { Icons } from './icons'
 import {
   Tooltip,
   TooltipContent,
@@ -24,7 +17,7 @@ import {
 import { AlertTriangle } from 'lucide-react'
 
 export function UserDashboard() {
-  const { isAuthenticated } = useSIWE()
+  const { isAuthenticated, ens } = useSIWE()
   const { isXAuthenticated, session: xSession } = useXSession()
   const { formattedAddress } = useWallet()
 
@@ -46,7 +39,7 @@ export function UserDashboard() {
             </Button>
           </CardAction>
         </CardHeader>
-        <CardContent className='flex items-center gap-4'>
+        <CardContent className='flex flex-wrap items-center gap-8'>
           {isXAuthenticated && xSession && (
             <div className='flex items-center gap-4'>
               {pfpUrl && (
@@ -77,11 +70,24 @@ export function UserDashboard() {
             </div>
           )}
           {isAuthenticated && (
-            <div className='flex flex-col items-start gap-1'>
-              <span className='text-muted-foreground text-sm'>
-                Wallet Connected
-              </span>
-              <span className='font-mono text-sm'>{formattedAddress}</span>
+            <div className='flex items-center gap-4'>
+              {ens?.avatar && (
+                <Image
+                  src={ens.avatar}
+                  alt={ens.name || 'ENS Avatar'}
+                  width={100}
+                  height={100}
+                  className='rounded-full'
+                />
+              )}
+              <div className='flex flex-col items-start gap-1'>
+                <span className='text-muted-foreground text-sm'>
+                  Wallet Connected
+                </span>
+                <span className='text-lg font-medium'>
+                  {ens?.name || formattedAddress}
+                </span>
+              </div>
             </div>
           )}
         </CardContent>

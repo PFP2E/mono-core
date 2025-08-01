@@ -1,7 +1,7 @@
 // src/components/auth-component.tsx
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,7 +31,8 @@ export function AuthComponent() {
     isAuthenticated,
     signIn,
     signOut: signOutSIWE,
-    isLoading: isSiweLoading
+    isLoading: isSiweLoading,
+    ens
   } = useSIWE()
   const {
     isXAuthenticated,
@@ -40,12 +41,30 @@ export function AuthComponent() {
     isLoading: isXLoading
   } = useXSession()
 
-  // Automatically trigger SIWE after wallet connection
+  // This state is now local to the component, preventing the global loop.
+  const [hasAttemptedSignIn, setHasAttemptedSignIn] = useState(false)
+
   useEffect(() => {
-    if (account.status === 'connected' && !isAuthenticated && !isSiweLoading) {
+    if (
+      account.status === 'connected' &&
+      !isAuthenticated &&
+      !isSiweLoading &&
+      !hasAttemptedSignIn
+    ) {
       signIn()
+      setHasAttemptedSignIn(true)
     }
-  }, [account.status, isAuthenticated, isSiweLoading, signIn])
+    // Reset attempt flag if wallet disconnects
+    if (account.status === 'disconnected') {
+      setHasAttemptedSignIn(false)
+    }
+  }, [
+    account.status,
+    isAuthenticated,
+    isSiweLoading,
+    signIn,
+    hasAttemptedSignIn
+  ])
 
   if (!isClient) {
     return (
@@ -58,12 +77,11 @@ export function AuthComponent() {
   const isLoading = isSiweLoading || isXLoading
   const isWalletConnected = account.status === 'connected'
   const isSIWEAuthenticated = isWalletConnected && isAuthenticated
+  const displayName = ens?.name || formattedAddress
 
-  // Render the user menu if authenticated with X or wallet is connected
   if (isXAuthenticated || isWalletConnected) {
     return (
       <div className='flex items-center gap-2'>
-        {/* Show X sign-in button if not authenticated with X, but wallet is connected */}
         {!isXAuthenticated && isWalletConnected && (
           <Dialog>
             <DialogTrigger asChild>
@@ -85,7 +103,7 @@ export function AuthComponent() {
               {isWalletConnected && (
                 <span>
                   {isSIWEAuthenticated
-                    ? formattedAddress
+                    ? displayName
                     : isLoading
                       ? 'Signing...'
                       : 'Sign In'}
@@ -132,7 +150,6 @@ export function AuthComponent() {
     )
   }
 
-  // Default state: Unauthenticated
   return (
     <div className='flex items-center gap-2'>
       <Dialog>
