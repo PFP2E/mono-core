@@ -14,7 +14,7 @@ export const Header = () => {
         {/* Logo Section */}
         <div className='flex items-center gap-2'>
           <Image src='/logo.png' alt='PFP2E Logo' width={32} height={32} />
-          <span className='text-primary text-2xl font-bold'>PFP2e</span>
+          <span className='text-primary text-2xl font-bold'>PFP2E</span>
         </div>
 
         {/* Search Bar Section */}

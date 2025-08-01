@@ -1,8 +1,10 @@
 import React from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { campaigns } from '@/lib/mock-data'
+import { DepositModal } from './deposit-modal'
 
 const ApyIndicator = ({ color }: { color: 'green' | 'orange' }) => (
   <div className='flex h-3 w-3 items-center justify-center'>
@@ -13,10 +15,23 @@ const ApyIndicator = ({ color }: { color: 'green' | 'orange' }) => (
 )
 
 export const Marketplace = () => {
+  const [isModalOpen, setIsModalOpen] = React.useState(false)
+  const [selectedCampaign, setSelectedCampaign] = React.useState<typeof campaigns[0] | null>(null)
+
+  const handleFundClick = (campaign: typeof campaigns[0]) => {
+    setSelectedCampaign(campaign)
+    setIsModalOpen(true)
+  }
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false)
+    setSelectedCampaign(null)
+  }
+
   return (
     <div className='py-16'>
       <h2 className='text-foreground mb-8 text-center text-3xl font-bold sm:text-4xl'>
-        Marketplace
+        PFP2E Reward Pools
       </h2>
       <div className='mx-auto w-full max-w-6xl overflow-x-auto'>
         <Card className='border-border bg-card/50 min-w-[1024px] overflow-hidden rounded-3xl'>
@@ -25,7 +40,7 @@ export const Marketplace = () => {
               Campaign
             </div>
             <div className='text-muted-foreground col-span-2 text-sm font-medium'>
-              Participants
+              Stakers
             </div>
             <div className='text-muted-foreground col-span-2 text-sm font-medium'>
               Reward Pool
@@ -52,19 +67,21 @@ export const Marketplace = () => {
                     width={64}
                     height={64}
                   />
-                  <div
-                    className='text-card-foreground text-base leading-snug font-medium'
-                    dangerouslySetInnerHTML={{ __html: campaign.name }}
-                  />
+                  <Link href={`/campaign/${campaign.slug}`} className="hover:underline">
+                    <div
+                      className='text-card-foreground text-base leading-snug font-medium cursor-pointer'
+                      dangerouslySetInnerHTML={{ __html: campaign.name }}
+                    />
+                  </Link>
                 </div>
                 <div className='text-card-foreground col-span-2 text-base leading-snug font-medium'>
-                  {campaign.participants.toLocaleString()}
+                  {campaign.stakers.toLocaleString()}
                 </div>
                 <div className='text-card-foreground col-span-2 text-base leading-snug font-medium'>
-                  {campaign.rewardPool}
+                  {campaign.rewardPool.replace('RWT', campaign.token)}
                 </div>
                 <div className='text-card-foreground col-span-2 text-base leading-snug font-medium'>
-                  {campaign.dailyReward}
+                  {campaign.dailyReward.replace('RWT', campaign.token)}
                 </div>
                 <div className='col-span-2 flex items-center justify-end gap-4'>
                   <div className='flex items-center gap-1'>
@@ -78,6 +95,7 @@ export const Marketplace = () => {
                       disabled={!campaign.fundable}
                       variant='secondary'
                       size='sm'
+                      onClick={() => handleFundClick(campaign)}
                     >
                       Fund
                     </Button>
@@ -91,6 +109,12 @@ export const Marketplace = () => {
           </CardContent>
         </Card>
       </div>
+
+      <DepositModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        campaign={selectedCampaign}
+      />
     </div>
   )
 }
