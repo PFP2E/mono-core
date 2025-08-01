@@ -3,7 +3,7 @@
 import * as React from 'react'
 import { useSIWE } from '@/hooks/useSIWE'
 import { useXSession } from '@/hooks/useXSession'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -14,86 +14,91 @@ const AiGeneratorPage = () => {
   const { isAuthenticated } = useSIWE()
   const { isXAuthenticated, session } = useXSession()
   const isAuthed = isAuthenticated || isXAuthenticated
+  const username = session?.username?.toLowerCase()
 
-  // State for overlay selection and image upload
-  const [selectedOverlay, setSelectedOverlay] = React.useState<string>('')
-  const [uploadedImage, setUploadedImage] = React.useState<File | null>(null)
-
+  // State for overlay selection
+  const [selectedOverlay, setSelectedOverlay] = React.useState('')
+  
   // Get profile picture URL if available
   const pfpUrl = session?.pfpUrl
 
+  // Simple overlay options
+  const overlayOptions = username ? [
+    { value: 'mogacc', label: 'MOGACC', path: `/images/Users/${username}/${username}_mogacc.jpg` },
+    { value: '1inch', label: '1INCH', path: `/images/Users/${username}/${username}_1inch.jpg` }
+  ] : []
+
+  console.log('Profile URL:', pfpUrl)
+  console.log('Username:', username)
+  console.log('Overlay options:', overlayOptions)
+
   if (!isAuthed) {
     return (
-      <div className='container mx-auto px-4 py-8 text-center'>
+      <div className="container mx-auto px-4 py-8 text-center">
         <p>Please sign in to use the AI Generator.</p>
       </div>
     )
   }
 
   return (
-    <div className='container mx-auto px-4'>
-      <Card>
-        <CardHeader>
-          <CardTitle>AI Generator</CardTitle>
-        </CardHeader>
-        <CardContent className='space-y-6'>
-          {/* Overlay Selection */}
-          <div className='space-y-2'>
-            <Label>Pick your overlay</Label>
-            <Select value={selectedOverlay} onValueChange={setSelectedOverlay}>
-              <SelectTrigger>
-                <SelectValue placeholder='Select an overlay type' />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value='1inch'>1 INCH</SelectItem>
-                <SelectItem value='mog-acc'>MOG/ACC</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+    <div className="container mx-auto px-4 py-8">
+      <div className="max-w-2xl mx-auto">
+        <h1 className="text-4xl font-bold text-center mb-8">AI Generator</h1>
+        
+        <Card className="shadow-lg">
+          <CardContent className="p-8 space-y-8">
+            {/* Overlay Selection */}
+            <div className="max-w-sm mx-auto">
+              <Label className="text-center block mb-2 text-lg">Pick your overlay</Label>
+              <Select value={selectedOverlay} onValueChange={setSelectedOverlay}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select your overlay" />
+                </SelectTrigger>
+                <SelectContent>
+                  {overlayOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-          {/* Image Display Area */}
-          <div className='mx-auto w-[400px] h-[400px] relative bg-zinc-100 dark:bg-zinc-900 rounded-lg overflow-hidden'>
-            {pfpUrl ? (
-              <Image
-                src={pfpUrl}
-                alt='Profile'
-                fill
-                className='object-cover'
-                priority
-              />
-            ) : uploadedImage ? (
-              <Image
-                src={URL.createObjectURL(uploadedImage)}
-                alt='Uploaded'
-                fill
-                className='object-cover'
-                priority
-              />
-            ) : (
-              <div className='flex items-center justify-center h-full'>
-                <p className='text-muted-foreground'>No image selected</p>
-              </div>
-            )}
-          </div>
-
-          {/* Upload Button */}
-          <div className='flex justify-center'>
-            <Button variant='outline' asChild>
-              <label htmlFor='image-upload' className='flex cursor-pointer items-center gap-2'>
-                <Upload className='h-4 w-4' />
-                <span>{uploadedImage ? uploadedImage.name : 'Upload Image'}</span>
-                <input
-                  id='image-upload'
-                  type='file'
-                  className='sr-only'
-                  accept='image/*'
-                  onChange={e => setUploadedImage(e.target.files?.[0] ?? null)}
+            {/* Image Display Area */}
+            <div className="mx-auto w-[400px] h-[400px] relative bg-muted rounded-xl overflow-hidden border-2 border-border shadow-sm">
+              {selectedOverlay ? (
+                // Show the selected pre-made image
+                <Image
+                  src={overlayOptions.find(opt => opt.value === selectedOverlay)?.path || ''}
+                  alt="Generated Image"
+                  fill
+                  sizes="400px"
+                  className="object-cover"
+                  priority
                 />
-              </label>
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+              ) : pfpUrl ? (
+                // Show profile picture if no overlay selected
+                <Image
+                  src={pfpUrl}
+                  alt="Profile"
+                  fill
+                  sizes="400px"
+                  className="object-cover"
+                  priority
+                />
+              ) : (
+                // Fallback if no image available
+                <div className="flex items-center justify-center h-full flex-col gap-4">
+                  <Upload className="h-12 w-12 text-muted-foreground opacity-50" />
+                  <p className="text-muted-foreground text-lg">Select an overlay</p>
+                </div>
+              )}
+            </div>
+
+
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }
