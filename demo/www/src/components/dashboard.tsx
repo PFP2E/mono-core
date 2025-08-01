@@ -109,15 +109,15 @@ export function UserDashboard() {
       {deposits.length > 0 && (
         <Card>
           <CardHeader>
-            <div className='flex items-center justify-between'>
+            <div className='flex items-center gap-2'>
               <CardTitle>Recent Activity</CardTitle>
               <Button
                 variant='outline'
                 size='sm'
                 onClick={clearHistory}
-                className='h-8 px-2'
+                className='h-6 px-2 text-xs'
               >
-                <Trash2 className='h-4 w-4 mr-1' />
+                <Trash2 className='h-3 w-3 mr-1' />
                 Reset
               </Button>
             </div>

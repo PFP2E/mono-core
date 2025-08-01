@@ -95,7 +95,7 @@ const campaignDetails: CampaignDetail[] = campaigns.map((campaign, index) => {
     creator: additionalData.creator,
     totalSupply: additionalData.totalSupply,
     stakers: campaign.stakers,
-    rewardPool: campaign.rewardPool.replace('RWT', campaign.token),
+    rewardPool: campaign.rewardPool,
     dailyReward: campaign.dailyReward,
     apy: campaign.apy,
     apyColor: campaign.apyColor,
@@ -115,8 +115,7 @@ export default function CampaignPage() {
   const [isModalOpen, setIsModalOpen] = React.useState(false)
   const [selectedCampaign, setSelectedCampaign] = React.useState<any>(null)
 
-  const campaign = campaignDetails.find(c => c.slug === slug)
-  const marketplaceCampaign = campaigns.find(c => c.name.includes(campaign?.name || ''))
+  const campaign = campaigns.find(c => c.campaignName === slug)
 
   const handleFundClick = () => {
     if (campaign) {
@@ -155,7 +154,7 @@ export default function CampaignPage() {
     <div className="container mx-auto px-4 py-8">
       <div className="mb-6">
         <Button variant="outline" asChild>
-          <Link href="/">← Back Home</Link>
+          <Link href="/">← Back to Marketplace</Link>
         </Button>
       </div>
 
@@ -168,16 +167,16 @@ export default function CampaignPage() {
               <div className="flex items-start gap-4">
                 <Image
                   src={campaign.imageUrl}
-                  alt={campaign.name}
+                  alt={campaign.campaignName}
                   width={80}
                   height={80}
                   className="rounded-lg"
                 />
                 <div className="flex-1">
-                  <h1 className="text-2xl font-bold mb-2">{campaign.name}</h1>
-                  <p className="text-muted-foreground mb-2">by {campaign.creator}</p>
+                  <h1 className="text-2xl font-bold mb-2">{campaign.campaignName}</h1>
+                  <p className="text-muted-foreground mb-2">{campaign.campaignType}</p>
                   <p className="text-sm text-muted-foreground">
-                    Total Supply: {campaign.totalSupply.toLocaleString()}
+                    Stakers: {campaign.stakers.toLocaleString()}
                   </p>
                 </div>
               </div>
@@ -191,7 +190,8 @@ export default function CampaignPage() {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground leading-relaxed">
-                {campaign.description}
+                This is a {campaign.campaignType} campaign for {campaign.campaignName}. 
+                Join the community and start earning rewards by participating in this campaign.
               </p>
             </CardContent>
           </Card>
@@ -229,19 +229,15 @@ export default function CampaignPage() {
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Reward Pool</span>
-                <span className="font-medium">{marketplaceCampaign?.rewardPool || campaign.rewardPool}</span>
+                <span className="font-medium">{campaign.rewardPool}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Daily Reward</span>
-                <span className="font-medium">{marketplaceCampaign?.dailyReward || campaign.dailyReward}</span>
+                <span className="font-medium">{campaign.dailyReward}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">NFT floor APY</span>
                 <span className="font-medium">{campaign.apy}%</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Reward Timer</span>
-                <span className="font-medium">{campaign.rewardTimer}</span>
               </div>
             </CardContent>
           </Card>
@@ -253,48 +249,32 @@ export default function CampaignPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {campaign.eligibilityCriteria.map((criteria) => (
-                  <div key={criteria.id} className="border rounded-lg p-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => toggleCriteria(criteria.id)}
-                          className="p-1 hover:bg-muted rounded"
-                        >
-                          {expandedCriteria.includes(criteria.id) ? (
-                            <ChevronUp className="h-4 w-4" />
-                          ) : (
-                            <ChevronDown className="h-4 w-4" />
-                          )}
-                        </button>
-                        <span className="text-sm">{criteria.text}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {criteria.completed ? (
-                          <Badge variant="secondary" className="bg-green-100 text-green-800">
-                            <CheckCircle className="h-3 w-3 mr-1" />
-                            Completed
-                          </Badge>
-                        ) : (
-                          <Badge variant="outline">
-                            <Clock className="h-3 w-3 mr-1" />
-                            Pending
-                          </Badge>
-                        )}
-                        {!criteria.verified && (
-                          <Button size="sm" variant="outline">
-                            Verify
-                          </Button>
-                        )}
-                      </div>
+                <div className="border rounded-lg p-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm">Hold {campaign.campaignName} tokens</span>
                     </div>
-                    {expandedCriteria.includes(criteria.id) && (
-                      <div className="mt-3 pl-6 text-sm text-muted-foreground">
-                        <p>Additional details about this criteria will be shown here when expanded.</p>
-                      </div>
-                    )}
+                    <div className="flex items-center gap-2">
+                      <Badge variant="secondary" className="bg-green-100 text-green-800">
+                        <CheckCircle className="h-3 w-3 mr-1" />
+                        Completed
+                      </Badge>
+                    </div>
                   </div>
-                ))}
+                </div>
+                <div className="border rounded-lg p-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm">Participate in community events</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline">
+                        <Clock className="h-3 w-3 mr-1" />
+                        Pending
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>

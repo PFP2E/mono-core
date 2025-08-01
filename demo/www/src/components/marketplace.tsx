@@ -67,21 +67,23 @@ export const Marketplace = () => {
                     width={64}
                     height={64}
                   />
-                  <Link href={`/campaign/${campaign.slug}`} className="hover:underline">
-                    <div
-                      className='text-card-foreground text-base leading-snug font-medium cursor-pointer'
-                      dangerouslySetInnerHTML={{ __html: campaign.name }}
-                    />
+                  <Link href={`/campaign/${campaign.campaignName}`} className="hover:underline">
+                    <div className='text-card-foreground text-base leading-snug font-medium cursor-pointer'>
+                      {campaign.campaignName}
+                    </div>
                   </Link>
+                  <div className='text-muted-foreground text-sm'>
+                    {campaign.campaignType}
+                  </div>
                 </div>
                 <div className='text-card-foreground col-span-2 text-base leading-snug font-medium'>
                   {campaign.stakers.toLocaleString()}
                 </div>
                 <div className='text-card-foreground col-span-2 text-base leading-snug font-medium'>
-                  {campaign.rewardPool.replace('RWT', campaign.token)}
+                  {campaign.rewardPool}
                 </div>
                 <div className='text-card-foreground col-span-2 text-base leading-snug font-medium'>
-                  {campaign.dailyReward.replace('RWT', campaign.token)}
+                  {campaign.dailyReward}
                 </div>
                 <div className='col-span-2 flex items-center justify-end gap-4'>
                   <div className='flex items-center gap-1'>
