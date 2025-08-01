@@ -6,8 +6,11 @@ import { SiweMessage } from 'siwe'
 export interface SessionData {
   siwe?: SiweMessage
   x?: {
-    username: string
-    pfpUrl: string
+    username?: string
+    pfpUrl?: string
+    accessToken?: string
+    refreshToken?: string
+    tokenExpiresAt?: number // Store as a Unix timestamp (milliseconds)
   }
   nonce?: string
   xState?: string

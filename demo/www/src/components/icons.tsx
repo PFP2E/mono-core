@@ -6,6 +6,7 @@ import {
   Sun,
   Moon,
   Search,
+  AlertTriangle,
   type LucideProps
 } from 'lucide-react'
 
@@ -17,6 +18,7 @@ export const Icons = {
   Moon: (props: LucideProps) => <Moon {...props} />,
   Search: (props: LucideProps) => <Search {...props} />,
   ChevronDown: (props: LucideProps) => <ChevronDown {...props} />,
+  AlertTriangle: (props: LucideProps) => <AlertTriangle {...props} />,
   X: (props: LucideProps) => (
     <svg
       xmlns='http://www.w3.org/2000/svg'
