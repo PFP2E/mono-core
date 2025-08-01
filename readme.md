@@ -7,6 +7,7 @@
     <a href="https://nextjs.org/"><img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white" alt="Next.js"></a>
     <a href="https://nodejs.org/"><img src="https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" alt="Node.js"></a>
     <a href="https://soliditylang.org/"><img src="https://img.shields.io/badge/Solidity-363636?style=for-the-badge&logo=solidity&logoColor=white" alt="Solidity"></a>
+    <a href="https://hardhat.org/"><img src="https://img.shields.io/badge/Hardhat-D8D8D8?style=for-the-badge&logo=hardhat&logoColor=black" alt="Hardhat"></a>
     <a href="https://ethereum.org/"><img src="https://img.shields.io/badge/Ethereum-3C3C3D?style=for-the-badge&logo=ethereum&logoColor=white" alt="Ethereum"></a>
     <a href="https://www.docker.com/"><img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker"></a>
     <a href="https://1inch.io/"><img src="https://img.shields.io/badge/1inch-1F2A4D?style=for-the-badge&logo=1inch&logoColor=white" alt="1inch"></a>

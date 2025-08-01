@@ -67,3 +67,9 @@ tasks:
     dir: demo
     cmds:
       - task clean
+
+  demo:install:
+    desc: 'Install/update demo dependencies after package.json changes'
+    dir: demo
+    cmds:
+      - task install

@@ -6,9 +6,9 @@ const withBundleAnalyzer = bundleAnalyzer({
 })
 
 const config: NextConfig = {
+  output: 'standalone',
   reactStrictMode: true,
   pageExtensions: ['ts', 'tsx'],
-  transpilePackages: ['wagmi', 'viem', 'ethersjs'],
   images: {
     remotePatterns: [
       {

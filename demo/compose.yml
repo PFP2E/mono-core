@@ -11,17 +11,13 @@ services:
     container_name: pfp2e-demo-prod
     ports:
       - "3000:3000"
+    env_file:
+      - www/.env
     networks:
       - pfp2e-demo-net
     profiles:
       - prod
       - test
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000"]
-      interval: 2s
-      timeout: 5s
-      retries: 10
-      start_period: 5s
 
   # The test runner for UI/E2E tests.
   # Run it with: docker compose --profile test run --rm test
@@ -56,6 +52,8 @@ services:
     user: root
     ports:
       - "3000:3000"
+    env_file:
+      - www/.env
     volumes:
       # Mount source code for hot-reloading
       - ./www:/app/www
