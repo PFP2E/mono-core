@@ -1,48 +1,36 @@
 // src/hooks/useXSession.ts
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import { SessionData } from '@/lib/session'
+import { useEffect } from 'react'
+import { useAuthStore } from '@/store/auth.store'
 
 export function useXSession() {
-  const [session, setSession] = useState<SessionData['x'] | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-
-  const fetchSession = useCallback(async () => {
-    try {
-      setIsLoading(true)
-      const res = await fetch('/api/auth/me')
-      const json = await res.json()
-      setSession(json.x || null)
-    } catch {
-      setSession(null)
-    } finally {
-      setIsLoading(false)
-    }
-  }, [])
-
-  useEffect(() => {
-    fetchSession()
-    window.addEventListener('focus', fetchSession)
-    return () => window.removeEventListener('focus', fetchSession)
-  }, [fetchSession])
-
-  const signOutX = useCallback(async () => {
-    setIsLoading(true)
-    try {
-      await fetch('/api/auth/logout?method=x')
-      setSession(null)
-    } catch (e) {
-      console.error(e)
-    } finally {
-      setIsLoading(false)
-    }
-  }, [])
-
-  return {
+  const {
     session,
     isLoading,
+    fetchSession,
+    signOutX: storeSignOutX
+  } = useAuthStore()
+
+  // The fetchSession is already called in useSIWE, but we can keep it here
+  // for hook independence. Zustand will prevent duplicate fetches if called closely.
+  useEffect(() => {
+    // Only fetch if the session hasn't been loaded yet.
+    if (isLoading) {
+      fetchSession()
+    }
+    window.addEventListener('focus', fetchSession)
+    return () => window.removeEventListener('focus', fetchSession)
+  }, [fetchSession, isLoading])
+
+  const signOutX = async () => {
+    return storeSignOutX()
+  }
+
+  return {
+    session: session?.x ?? null,
+    isLoading,
     signOutX,
-    isXAuthenticated: !!session
+    isXAuthenticated: !!session?.x?.accessToken
   }
 }
