@@ -41,14 +41,19 @@ FROM oven/bun:1-slim AS prod-server
 LABEL project="pfp2e-demo" stage="prod-server"
 WORKDIR /app
 ENV NODE_ENV=production
-# Copy healthcheck script from the 'www' subdir of the context
-COPY www/healthcheck.js .
+ENV HOSTNAME=0.0.0.0
+# Install curl for a reliable healthcheck
+USER root
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+USER bun
 # Copy the standalone output from the builder stage
-COPY --from=builder /app/www/.next/standalone .
+COPY --chown=bun:bun --from=builder /app/www/.next/standalone .
 # Copy the static public assets from the builder stage
-COPY --from=builder /app/www/public ./public
+COPY --chown=bun:bun --from=builder /app/www/public ./public
+# Copy the static assets from the builder stage
+COPY --chown=bun:bun --from=builder /app/www/.next/static ./.next/static
 EXPOSE 3000
-HEALTHCHECK --interval=5s --timeout=5s --start-period=5s --retries=3 CMD ["bun", "healthcheck.js"]
+HEALTHCHECK --interval=5s --timeout=5s --start-period=5s --retries=3 CMD curl -f http://localhost:3000/ || exit 1
 # The start command is run from the standalone server.js
 CMD ["node", "server.js"]
 
