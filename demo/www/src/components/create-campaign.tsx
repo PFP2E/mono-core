@@ -38,8 +38,16 @@ const mockCollections = [
     address: '0xb47e3cd837dDF8e4c57F05d70Ab865de6e193BBB'
   },
   {
+    name: 'Sproto Gremlins',
+    address: '0x1234567890123456789012345678901234567890'
+  },
+  {
     name: 'Pudgy Penguins',
     address: '0xBd3531dA5CF5857e7CfAA92426877b022e612cf8'
+  },
+  {
+    name: 'Milady Maker',
+    address: '0x5af0d9827e0c53e4799bb226655a1de152a425a5'
   }
 ]
 
@@ -47,7 +55,7 @@ type CampaignType = 'nft' | 'overlay'
 const steps = [
   'Basic Details',
   'Campaign Type',
-  'Configure Rules',
+  'Select NFT Collection',
   'Define Rewards',
   'Review & Launch'
 ]
@@ -142,6 +150,7 @@ export function CreateCampaign() {
                   value={campaignName}
                   onChange={e => setCampaignName(e.target.value)}
                   placeholder='e.g. BAYC Social Staking'
+                  autoComplete="off"
                 />
               </div>
               <div>
@@ -189,7 +198,7 @@ export function CreateCampaign() {
               {campaignType === 'nft' ? (
                 <>
                   <div>
-                    <Label>Choose Collection</Label>
+                    <Label>Choose NFT Collection</Label>
                     <Select
                       onValueChange={setNftCollection}
                       defaultValue={nftCollection}
@@ -208,7 +217,7 @@ export function CreateCampaign() {
                   </div>
                   <div>
                     <Label htmlFor='nftAddress'>
-                      Or Enter Contract Address
+                      Or Enter NFT Contract Address
                     </Label>
                     <Input
                       id='nftAddress'
@@ -217,18 +226,7 @@ export function CreateCampaign() {
                       placeholder='0x...'
                     />
                   </div>
-                  <div className='flex items-center space-x-2 pt-2'>
-                    <Checkbox
-                      id='requireOwnership'
-                      checked={requireOwnership}
-                      onCheckedChange={checked =>
-                        setRequireOwnership(Boolean(checked))
-                      }
-                    />
-                    <Label htmlFor='requireOwnership'>
-                      Require wallet to own the NFT
-                    </Label>
-                  </div>
+
                 </>
               ) : (
                 <>

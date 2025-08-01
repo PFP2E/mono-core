@@ -110,12 +110,15 @@ const campaignDetails: CampaignDetail[] = campaigns.map((campaign, index) => {
 
 export default function CampaignPage() {
   const params = useParams()
-  const slug = params.slug as string
+  const slug = decodeURIComponent(params.slug as string)
   const [expandedCriteria, setExpandedCriteria] = React.useState<string[]>([])
   const [isModalOpen, setIsModalOpen] = React.useState(false)
   const [selectedCampaign, setSelectedCampaign] = React.useState<any>(null)
 
-  const campaign = campaigns.find(c => c.campaignName === slug)
+  // Find campaign by name, handling spaces and case sensitivity
+  const campaign = campaigns.find(c => 
+    c.campaignName.toLowerCase() === slug.toLowerCase()
+  )
 
   const handleFundClick = () => {
     if (campaign) {
@@ -135,7 +138,7 @@ export default function CampaignPage() {
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">Campaign not found</h1>
           <Button asChild>
-            <Link href="/">Back to Marketplace</Link>
+            <Link href="/">Back Home</Link>
           </Button>
         </div>
       </div>
@@ -154,7 +157,7 @@ export default function CampaignPage() {
     <div className="container mx-auto px-4 py-8">
       <div className="mb-6">
         <Button variant="outline" asChild>
-          <Link href="/">← Back to Marketplace</Link>
+          <Link href="/">← Back Home</Link>
         </Button>
       </div>
 
@@ -190,8 +193,7 @@ export default function CampaignPage() {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground leading-relaxed">
-                This is a {campaign.campaignType} campaign for {campaign.campaignName}. 
-                Join the community and start earning rewards by participating in this campaign.
+                {campaignDetails.find(c => c.name === campaign.campaignName)?.description}
               </p>
             </CardContent>
           </Card>

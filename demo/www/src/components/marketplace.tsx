@@ -35,63 +35,71 @@ export const Marketplace = () => {
       </h2>
       <div className='mx-auto w-full max-w-6xl overflow-x-auto'>
         <Card className='border-border bg-card/50 min-w-[1024px] overflow-hidden rounded-3xl'>
-          <CardHeader className='bg-muted/50 border-border grid grid-cols-12 gap-4 border-b px-4 py-3'>
+          <CardHeader className='bg-muted/50 border-border grid grid-cols-12 gap-6 border-b px-6 py-4'>
             <div className='text-muted-foreground col-span-4 text-sm font-medium'>
               Campaign
             </div>
-            <div className='text-muted-foreground col-span-2 text-sm font-medium'>
+            <div className='text-muted-foreground col-span-2 text-sm font-medium text-center'>
               Stakers
             </div>
-            <div className='text-muted-foreground col-span-2 text-sm font-medium'>
+            <div className='text-muted-foreground col-span-2 text-sm font-medium text-center'>
               Reward Pool
             </div>
-            <div className='text-muted-foreground col-span-2 text-sm font-medium'>
+            <div className='text-muted-foreground col-span-2 text-sm font-medium text-center'>
               Daily Reward
             </div>
-            <div className='text-muted-foreground col-span-2 text-sm font-medium'>
+            <div className='text-muted-foreground col-span-2 text-sm font-medium text-center'>
               NFT floor APY
             </div>
           </CardHeader>
 
           <CardContent className='p-0'>
             {campaigns.map(campaign => (
-              <div
-                key={campaign.id}
-                className='border-border grid grid-cols-12 items-center gap-4 border-b px-4 py-4 last:border-b-0'
-              >
-                <div className='col-span-4 flex items-center gap-4'>
-                  <Image
-                    className='h-16 w-16 rounded-xl'
-                    src={campaign.imageUrl}
-                    alt={campaign.name.replace('<br/>', ' ')}
-                    width={64}
-                    height={64}
-                  />
-                  <Link href={`/campaign/${campaign.campaignName}`} className="hover:underline">
-                    <div className='text-card-foreground text-base leading-snug font-medium cursor-pointer'>
-                      {campaign.campaignName}
-                    </div>
-                  </Link>
-                  <div className='text-muted-foreground text-sm'>
-                    {campaign.campaignType}
-                  </div>
-                </div>
-                <div className='text-card-foreground col-span-2 text-base leading-snug font-medium'>
-                  {campaign.stakers.toLocaleString()}
-                </div>
-                <div className='text-card-foreground col-span-2 text-base leading-snug font-medium'>
-                  {campaign.rewardPool}
-                </div>
-                <div className='text-card-foreground col-span-2 text-base leading-snug font-medium'>
-                  {campaign.dailyReward}
-                </div>
-                <div className='col-span-2 flex items-center justify-end gap-4'>
-                  <div className='flex items-center gap-1'>
-                    <ApyIndicator color={campaign.apyColor} />
-                    <div className='text-card-foreground text-base leading-snug font-medium'>
-                      {campaign.apy}%
+                              <div
+                  key={campaign.id}
+                  className='border-border grid grid-cols-12 items-center gap-6 border-b px-6 py-5 last:border-b-0 hover:bg-muted/20 transition-colors'
+                >
+                  <div className='col-span-4 flex items-center gap-4'>
+                    <Image
+                      className='h-12 w-12 rounded-lg'
+                      src={campaign.imageUrl}
+                      alt={campaign.campaignName}
+                      width={48}
+                      height={48}
+                    />
+                    <div className='flex flex-col gap-1'>
+                      <Link href={`/campaign/${campaign.campaignName}`} className="hover:underline">
+                        <div className='text-card-foreground text-base font-medium cursor-pointer'>
+                          {campaign.campaignName}
+                        </div>
+                      </Link>
+                      <div className='text-muted-foreground text-sm'>
+                        {campaign.campaignType}
+                      </div>
                     </div>
                   </div>
+                  <div className='text-card-foreground col-span-2 text-base font-medium text-right'>
+                    {campaign.stakers.toLocaleString()}
+                  </div>
+                  <div className='text-card-foreground col-span-2 text-base font-medium text-right'>
+                    {campaign.rewardPool}
+                  </div>
+                  <div className='text-card-foreground col-span-2 text-base font-medium text-right'>
+                    {campaign.dailyReward}
+                  </div>
+                  <div className='col-span-2 flex items-center justify-end'>
+                    <div className='flex items-center gap-2'>
+                      <div className='flex items-center gap-1'>
+                        <div
+                          className={`h-2 w-2 rounded-full ${
+                            campaign.apyColor === 'green' ? 'bg-green-500' : 'bg-orange-500'
+                          }`}
+                        />
+                        <div className='text-card-foreground text-base font-medium'>
+                          {campaign.apy}%
+                        </div>
+                      </div>
+                    </div>
                   <div className='flex items-center gap-2'>
                     <Button
                       disabled={!campaign.fundable}

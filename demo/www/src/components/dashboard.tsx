@@ -15,14 +15,19 @@ import {
   TooltipTrigger
 } from './ui/tooltip'
 import { AlertTriangle } from 'lucide-react'
-import { useDepositStore } from '@/store/deposit.store'
+import { useActivityStore } from '@/store/activity.store'
 import { Trash2 } from 'lucide-react'
 
 export function UserDashboard() {
   const { isAuthenticated, ens } = useSIWE()
   const { isXAuthenticated, session: xSession } = useXSession()
   const { formattedAddress } = useWallet()
-  const { deposits, clearHistory } = useDepositStore()
+  // Access store directly through getState for consistency
+  const store = useActivityStore.getState()
+  const activities = store.activities
+  
+  // Debug log to see activities
+  console.log('Current activities:', activities)
 
   if (!isAuthenticated && !isXAuthenticated) {
     return null
@@ -106,7 +111,7 @@ export function UserDashboard() {
       </Card>
 
       {/* Deposit History */}
-      {deposits.length > 0 && (
+      {activities.length > 0 && (
         <Card>
           <CardHeader>
             <div className='flex items-center gap-2'>
@@ -114,7 +119,7 @@ export function UserDashboard() {
               <Button
                 variant='outline'
                 size='sm'
-                onClick={clearHistory}
+                onClick={store.clearHistory}
                 className='h-6 px-2 text-xs'
               >
                 <Trash2 className='h-3 w-3 mr-1' />
@@ -124,14 +129,22 @@ export function UserDashboard() {
           </CardHeader>
           <CardContent>
             <div className='space-y-3'>
-              {deposits.slice(0, 5).map((deposit) => (
-                <div key={deposit.id} className='flex items-center justify-between py-2 border-b border-border last:border-b-0'>
+              {activities.slice(0, 5).map((activity) => (
+                <div key={activity.id} className='flex items-center justify-between py-2 border-b border-border last:border-b-0'>
                   <div className='flex items-center justify-between w-full'>
                     <span className='text-sm font-medium'>
-                      {deposit.type === 'deposit' ? 'Deposit' : 'Claim'}: {deposit.tokenName} ({deposit.amount}) {deposit.tokenName} tokens into {deposit.campaignName}
+                      {activity.type === 'pfp_update' ? (
+                        <>
+                          @{activity.username} Staking {activity.campaignName} PFP to earn {activity.tokenName}
+                        </>
+                      ) : (
+                        <>
+                          {activity.type === 'deposit' ? 'Deposit' : 'Claim'}: {activity.tokenName} ({activity.amount}) {activity.tokenName} tokens into {activity.campaignName}
+                        </>
+                      )}
                     </span>
                     <span className='text-xs text-muted-foreground'>
-                      {formatTimestamp(deposit.timestamp)}
+                      {formatTimestamp(activity.timestamp)}
                     </span>
                   </div>
                 </div>

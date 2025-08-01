@@ -1,64 +1,82 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
-export interface DepositRecord {
+export type ActivityType = 'deposit' | 'claim' | 'pfp_update'
+
+export interface ActivityRecord {
   id: string
+  type: ActivityType
   campaignName: string
   tokenName: string
-  amount: number
+  amount?: number
   timestamp: number
-  type: 'deposit' | 'claim'
+  username?: string
 }
 
-interface DepositState {
-  deposits: DepositRecord[]
+interface ActivityState {
+  activities: ActivityRecord[]
   addDeposit: (campaignName: string, tokenName: string, amount: number) => void
   addClaim: (campaignName: string, tokenName: string, amount: number) => void
+  addPfpUpdate: (campaignName: string, tokenName: string, username: string) => void
   clearHistory: () => void
 }
 
-export const useDepositStore = create<DepositState>()(
+export const useActivityStore = create<ActivityState>()(
   persist(
     (set, get) => ({
-      deposits: [],
+      activities: [],
       
       addDeposit: (campaignName: string, tokenName: string, amount: number) => {
-        const newDeposit: DepositRecord = {
+        const newActivity: ActivityRecord = {
           id: `${Date.now()}-${Math.random()}`,
+          type: 'deposit',
           campaignName,
           tokenName,
           amount,
-          timestamp: Date.now(),
-          type: 'deposit'
+          timestamp: Date.now()
         }
         
         set((state) => ({
-          deposits: [newDeposit, ...state.deposits]
+          activities: [newActivity, ...state.activities]
         }))
       },
       
       addClaim: (campaignName: string, tokenName: string, amount: number) => {
-        const newClaim: DepositRecord = {
+        const newActivity: ActivityRecord = {
           id: `${Date.now()}-${Math.random()}`,
+          type: 'claim',
           campaignName,
           tokenName,
           amount,
-          timestamp: Date.now(),
-          type: 'claim'
+          timestamp: Date.now()
         }
         
         set((state) => ({
-          deposits: [newClaim, ...state.deposits]
+          activities: [newActivity, ...state.activities]
+        }))
+      },
+
+      addPfpUpdate: (campaignName: string, tokenName: string, username: string) => {
+        const newActivity: ActivityRecord = {
+          id: `${Date.now()}-${Math.random()}`,
+          type: 'pfp_update',
+          campaignName,
+          tokenName,
+          username,
+          timestamp: Date.now()
+        }
+        
+        set((state) => ({
+          activities: [newActivity, ...state.activities]
         }))
       },
       
       clearHistory: () => {
-        set({ deposits: [] })
+        set({ activities: [] })
       }
     }),
     {
-      name: 'deposit-history',
-      // Store in localStorage for persistence
+      name: 'deposit-history', // Using same name as old store for consistency
       storage: {
         getItem: (name) => {
           if (typeof window === 'undefined') return null
@@ -76,4 +94,4 @@ export const useDepositStore = create<DepositState>()(
       }
     }
   )
-) 
+)

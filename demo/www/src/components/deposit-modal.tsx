@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ChevronUp, ChevronDown } from 'lucide-react'
-import { useDepositStore } from '@/store/deposit.store'
+import { useActivityStore } from '@/store/activity.store'
 
 interface DepositModalProps {
   isOpen: boolean
@@ -37,8 +37,6 @@ export const DepositModal = ({ isOpen, onClose, campaign }: DepositModalProps) =
   const [balance] = React.useState(0) // Mock balance
   const [showSuccess, setShowSuccess] = React.useState(false)
   
-  const { addDeposit } = useDepositStore()
-
   const tokenName = campaign ? getTokenName(campaign.name) : 'TOKEN'
   const campaignName = campaign?.name.replace('<br/>', ' ') || 'Campaign'
 
@@ -47,8 +45,8 @@ export const DepositModal = ({ isOpen, onClose, campaign }: DepositModalProps) =
     
     const amount = parseFloat(depositAmount)
     
-    // Store the deposit in Zustand store
-    addDeposit(campaignName, tokenName, amount)
+    // Store the deposit in Zustand store using getState() for persistence
+    useActivityStore.getState().addDeposit(campaignName, tokenName, amount)
     
     // Show success message
     setShowSuccess(true)
