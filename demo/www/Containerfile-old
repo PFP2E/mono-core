@@ -1,0 +1,52 @@
+# /www/Containerfile
+# The definitive, simplified, workspace-aware Docker build file.
+# The build context MUST be the project root directory.
+
+# =================================================================
+# STAGE 1: Dependencies (Strict & Reproducible)
+# =================================================================
+FROM oven/bun:1-slim AS deps
+LABEL project="pfp2e-docs" stage="deps"
+WORKDIR /app/www
+COPY www/package.json www/bun.lock ./
+COPY www/tsconfig.json ./
+RUN bun install --frozen-lockfile
+
+# =================================================================
+# STAGE 2: Build the `www` Application
+# =================================================================
+FROM deps AS build
+LABEL project="pfp2e-docs" stage="build"
+WORKDIR /app
+COPY www ./www
+# The content-cache.json is expected to be in the root of the context
+COPY content-cache.json .
+WORKDIR /app/www
+RUN bun run build
+
+# =================================================================
+# STAGE 3: Final Production Image
+# =================================================================
+FROM oven/bun:1-slim AS prod-server
+LABEL project="pfp2e-docs" stage="prod-server"
+WORKDIR /app
+USER root
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+USER bun
+COPY --from=build /app/www/out ./out
+EXPOSE 3000
+HEALTHCHECK CMD curl -f http://localhost:3000/nda || exit 1
+CMD ["bunx", "serve", "out", "-p", "3000"]
+
+# =================================================================
+# STAGE 4: Final Test Runner Image
+# =================================================================
+FROM mcr.microsoft.com/playwright:v1.53.1-noble AS test-runner
+LABEL project="pfp2e-docs" stage="test-runner"
+WORKDIR /app
+COPY --from=deps /app/node_modules ./www/node_modules
+COPY --from=deps /usr/local/bin/bun /usr/local/bin/bun
+COPY www ./www
+# The test command is run from compose against the prod service.
+# This container just needs the test files and playwright.
+CMD ["bun", "run", "test:ui"]

@@ -1,54 +1,61 @@
 # /www/Containerfile
-# The definitive, simplified, workspace-aware Docker build file.
-# The build context MUST be the project root directory.
+# The build context is the 'demo' directory.
 
 # =================================================================
-# STAGE 1: Base with OS dependencies
+# STAGE 1: Base Image
 # =================================================================
 FROM oven/bun:1-slim AS base
 LABEL project="pfp2e-demo" stage="base"
-WORKDIR /app
-# Install curl for healthcheck
-USER root
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
-USER bun
+# Set a consistent workdir that matches the old, working file's logic.
+WORKDIR /app/www
 
 # =================================================================
-# STAGE 2: Dependencies (Strict & Reproducible)
+# STAGE 2: Dependencies
+# This stage installs all dependencies needed for building.
 # =================================================================
 FROM base AS deps
 LABEL project="pfp2e-demo" stage="deps"
-WORKDIR /app/www
-COPY --chown=bun:bun www/package.json www/bun.lock ./
-COPY --chown=bun:bun www/tsconfig.json ./
+# Copy manifests and config from the 'www' subdir of the context.
+# The WORKDIR is /app/www, so they are copied into there.
+COPY www/package.json www/bun.lock www/bunfig.toml ./
+# Install all dependencies
 RUN bun install --frozen-lockfile
 
 # =================================================================
-# STAGE 3: Build the `www` Application
+# STAGE 3: Builder
+# This stage builds the application. It uses the deps stage as a base,
+# so it already has node_modules installed in the correct place.
 # =================================================================
-FROM deps AS build
-LABEL project="pfp2e-demo" stage="build"
-WORKDIR /app
-# Copy source code last to leverage caching
-COPY --chown=bun:bun www ./www
-WORKDIR /app/www
-RUN bun run format
+FROM deps AS builder
+LABEL project="pfp2e-demo" stage="builder"
+# Copy the rest of the source code, overwriting the manifests
+# but leaving node_modules intact.
+COPY www ./
+# Run the build
 RUN bun run build
 
 # =================================================================
-# STAGE 4: Final Production Image
+# STAGE 4: Final Production Image (Standalone)
 # =================================================================
-FROM base AS prod-server
+FROM oven/bun:1-slim AS prod-server
 LABEL project="pfp2e-demo" stage="prod-server"
-WORKDIR /app/www
+WORKDIR /app
 ENV NODE_ENV=production
-COPY --chown=bun:bun --from=deps /app/www/node_modules ./node_modules
-COPY --chown=bun:bun --from=build /app/www/.next ./.next
-COPY --chown=bun:bun --from=build /app/www/public ./public
-COPY --chown=bun:bun --from=build /app/www/package.json .
+ENV HOSTNAME=0.0.0.0
+# Install curl for a reliable healthcheck
+USER root
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+USER bun
+# Copy the standalone output from the builder stage
+COPY --chown=bun:bun --from=builder /app/www/.next/standalone .
+# Copy the static public assets from the builder stage
+COPY --chown=bun:bun --from=builder /app/www/public ./public
+# Copy the static assets from the builder stage
+COPY --chown=bun:bun --from=builder /app/www/.next/static ./.next/static
 EXPOSE 3000
-HEALTHCHECK CMD curl -f http://localhost:3000/ || exit 1
-CMD ["bun", "run", "start"]
+HEALTHCHECK --interval=5s --timeout=5s --start-period=5s --retries=3 CMD curl -f http://localhost:3000/ || exit 1
+# The start command is run from the standalone server.js
+CMD ["node", "server.js"]
 
 # =================================================================
 # STAGE 5: Final Test Runner Image
@@ -56,13 +63,14 @@ CMD ["bun", "run", "start"]
 FROM mcr.microsoft.com/playwright:v1.53.1-noble AS test-runner
 LABEL project="pfp2e-demo" stage="test-runner"
 WORKDIR /app/www
-# Copy bun executable and node_modules from deps stage
-COPY --from=deps /usr/local/bin/bun /usr/local/bin/bun
+# Copy bun executable from the base stage
+COPY --from=base /usr/local/bin/bun /usr/local/bin/bun
+# Copy dependencies from our deps stage
 COPY --from=deps /app/www/node_modules ./node_modules
-# Copy only necessary files for testing
-COPY --chown=bun:bun www/package.json www/bun.lock ./
-COPY --chown=bun:bun www/playwright.config.ts .
-COPY --chown=bun:bun www/tsconfig.json .
-COPY --chown=bun:bun www/tests-ui ./tests-ui
+# Copy test-related files from the 'www' subdir of the context
+COPY www/package.json www/bun.lock ./
+COPY www/playwright.config.ts .
+COPY www/tsconfig.json .
+COPY www/tests-ui ./tests-ui
 # The test command is run from compose against the prod service.
 CMD ["bun", "run", "test:ui"]

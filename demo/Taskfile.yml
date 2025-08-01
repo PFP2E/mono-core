@@ -58,6 +58,12 @@ tasks:
     cmds:
       - task: _container:clean
 
+  install:
+    desc: 'Install/update dependencies after package.json changes'
+    dir: www
+    cmds:
+      - bun install
+
   # --- Internal Tasks ---
   # The following tasks are not shown in the default help message.
 

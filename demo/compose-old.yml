@@ -1,0 +1,82 @@
+name: pfp2e-docs
+
+services:
+  # This service is a utility to build the content cache.
+  # Run it with: docker compose run --rm loader
+  loader:
+    build:
+      context: .
+      dockerfile: loader/Containerfile
+    image: pfp2e/docs/loader
+    container_name: pfp2e-docs-loader-util # To avoid name clashes
+    volumes:
+      - .:/app # Mount project root to output content-cache.json
+    environment:
+      - DATA_DIR=/app/data
+      - OUTPUT_FILE=/app/content-cache.json
+
+  # The production web server.
+  prod:
+    build:
+      context: .
+      dockerfile: www/Containerfile
+      target: prod-server
+    image: pfp2e/docs/app:latest
+    container_name: pfp2e-docs-prod
+    ports:
+      - "3000:3000"
+    networks:
+      - pfp2e-docs-net
+
+  # The test runner for UI/E2E tests.
+  # Run it with: docker compose run --rm test
+  test:
+    build:
+      context: .
+      dockerfile: www/Containerfile
+      target: test-runner
+    image: pfp2e/docs/app:test
+    container_name: pfp2e-docs-test-runner
+    depends_on:
+      - prod
+    environment:
+      - PLAYWRIGHT_TEST_BASE_URL=http://prod:3000
+    init: true
+    ipc: host
+    networks:
+      - pfp2e-docs-net
+
+  # The development server with hot-reloading.
+  dev:
+    build:
+      context: .
+      dockerfile: www/Containerfile
+      # Use a minimal base with just dependencies installed.
+      target: deps
+    image: pfp2e/docs/app:dev
+    container_name: pfp2e-docs-dev
+    environment:
+      - DATA_DIR=/app/data
+      - OUTPUT_FILE=/app/content-cache.json
+    ports:
+      - "3000:3000"
+    volumes:
+      # Mount source code for hot-reloading
+      - .:/app
+      # Persist node_modules to avoid reinstalling on every start
+      - node_modules:/app/www/node_modules
+    working_dir: /app/www
+    stdin_open: true
+    tty: true
+    # This command ensures dependencies are fresh, regenerates content,
+    # and starts the dev server.
+    command: sh -c "bun install && (cd ../loader && bun install && bun run build) && bun run dev"
+    networks:
+      - pfp2e-docs-net
+
+volumes:
+  node_modules:
+
+networks:
+  pfp2e-docs-net:
+    name: pfp2e-docs-net
