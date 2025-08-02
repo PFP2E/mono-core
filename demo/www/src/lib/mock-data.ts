@@ -92,7 +92,7 @@ export const campaigns: Campaign[] = [
   },
   {
     id: 6,
-    name: 'MOGACC<br/>Derivative',
+    name: 'MOG/ACC<br/>Derivative',
     campaignName: 'MOG',
     campaignType: 'Derivative',
     imageUrl: '/images/MOG.jpg',

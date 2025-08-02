@@ -1,410 +1,301 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import React, { useState, useEffect } from 'react'
+import Image from 'next/image'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { useRewardsStore } from '@/store/rewards.store'
+import { Trash2 } from 'lucide-react'
 import { useXSession } from '@/hooks/useXSession'
-import { useSIWE } from '@/hooks/useSIWE'
-import { processPFPAndFindMatches } from '@/lib/utils/pfp-hash'
-import { isValidSuiAddress } from '@/lib/utils'
-import { 
-  Wallet, 
-  Coins, 
-  ArrowRight, 
-  CheckCircle,
-  Trash2, 
-  RefreshCw,
-  Zap,
-  AlertCircle
-} from 'lucide-react'
-import Image from 'next/image'
 
-// Utility function for formatting amounts
-const formatAmount = (amount: number) => {
-  return amount.toFixed(2)
+// Token conversion rates for testing
+const CONVERSION_RATES = {
+  APE_USD: 4.00,      // 1 APE = $4.00
+  ETH_USD: 3500.00,   // 1 ETH = $3,500
+  SUI_USD: 3.50       // 1 SUI = $3.50
 }
 
-// Helper function to get token symbol
-const getTokenSymbol = (poolName: string): string => {
-  switch (poolName) {
-    case 'BAYC': return 'APE'
-    case 'ETHGLOBAL': return 'ETHG'
-    case 'MOGACC': return 'MOG'
-    case 'PUNKS': return 'PUNK'
-    case 'SPROTO': return 'BITCOIN'
-    case '1INCH': return '1INCH'
-    default: return 'TOKEN'
+// Conversion calculation functions
+const parseApeAmount = (apeString: string): number => {
+  return parseFloat(apeString.replace(' APE', ''))
+}
+
+const calculateSwaps = (apeAmount: number) => {
+  const usdValue = apeAmount * CONVERSION_RATES.APE_USD
+  return {
+    usdt: usdValue.toFixed(2),                                    // 1 USDT = $1
+    eth: (usdValue / CONVERSION_RATES.ETH_USD).toFixed(8),       // Convert USD to ETH
+    sui: (usdValue / CONVERSION_RATES.SUI_USD).toFixed(2)        // Convert USD to SUI
   }
 }
 
-export function Rewards() {
-  const { session: xSession, isXAuthenticated } = useXSession()
-  const { isAuthenticated } = useSIWE()
-  const {
-    stakedPFPs,
-    stakePFP,
-    removeStake,
-    addReward,
-    claimReward,
-    simulateEarnings,
-    getTotalEarned,
-    getTotalClaimed,
-    getPendingRewards,
-    resetPoolRewards
-  } = useRewardsStore()
+// Initial stake data
+const mockStake = {
+  id: '1',
+  name: 'BAYC',
+  tokenId: 'Token #1234',
+  stakedDate: '8/3/2025',
+  totalEarned: '0.00 APE',
+  unclaimed: '0.00 APE',
+  claimedOrReady: '0.00 APE',
+  matchPercent: '95.0% match'
+}
 
-  const [isProcessing, setIsProcessing] = useState(false)
-  const [showSwapModal, setShowSwapModal] = useState(false)
+// Main Rewards Component
+export const Rewards = () => {
   const [selectedStake, setSelectedStake] = useState<any>(null)
-
-  // Simulate earnings every 30 seconds for demo
-  useEffect(() => {
-    if (stakedPFPs.length > 0) {
-      const interval = setInterval(() => {
-        simulateEarnings()
-      }, 30000) // 30 seconds
-
-      return () => clearInterval(interval)
-    }
-  }, [stakedPFPs.length, simulateEarnings])
-
-  // Auto-stake PFP when user connects Twitter
-  useEffect(() => {
-    if (isXAuthenticated && xSession?.pfpUrl && stakedPFPs.length === 0) {
-      handleAutoStake()
-    }
-  }, [isXAuthenticated, xSession?.pfpUrl])
-
-  const handleAutoStake = async () => {
-    if (!xSession?.pfpUrl) return
-
-    setIsProcessing(true)
-    try {
-      const { matches } = await processPFPAndFindMatches(
-        xSession.pfpUrl,
-        {} // Mock dataset
-      )
-
-      // Stake in all matching pools with >85% similarity
-      for (const match of matches) {
-        if (match.similarity > 0.85) {
-          stakePFP({
-            poolName: match.poolName,
-            tokenId: match.tokenId,
-            pfpUrl: xSession.pfpUrl,
-            aHash: 'mock-hash',
-            colorHist: { r: [], g: [], b: [] },
-            similarity: match.similarity,
-            isSpecial: match.isSpecial
-          })
-        }
-      }
-    } catch (error) {
-      console.error('Failed to stake PFP:', error)
-    } finally {
-      setIsProcessing(false)
-    }
-  }
-
-  const handleClaimReward = (stake: any) => {
-    const pendingRewards = getPendingRewards(stake.poolName)
-    pendingRewards.forEach(reward => {
-      claimReward(reward.id)
-    })
-  }
-
-  const handleSwapTokens = (stake: any) => {
-    setSelectedStake(stake)
-    setShowSwapModal(true)
-  }
-
-  if (!isXAuthenticated && !isAuthenticated) {
-    return (
-      <div className="py-16 text-center">
-        <Card className="mx-auto max-w-md">
-          <CardContent className="p-6">
-            <Wallet className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Connect to View Rewards</h3>
-            <p className="text-muted-foreground text-sm">
-              Connect your Twitter account to start earning rewards for your PFP.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
-
-  return (
-    <div className="py-16 space-y-8">
-      {/* Header */}
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">PFP Rewards</h1>
-        <p className="text-muted-foreground max-w-2xl mx-auto">
-          Earn tokens by staking your PFP. Your profile picture is automatically verified 
-          and staked when you connect your Twitter account.
-        </p>
-      </div>
-
-      {/* Active Staking Campaigns */}
-      {stakedPFPs.length > 0 && (
-        <div className="space-y-6">
-          <h2 className="text-2xl font-semibold">Active Staking Campaigns</h2>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {stakedPFPs.map((stake) => {
-              const pendingAmount = getPendingRewards(stake.poolName)
-                .reduce((sum, reward) => sum + reward.amount, 0)
-              const claimedAmount = getTotalClaimed(stake.poolName)
-              const hasUnclaimedRewards = pendingAmount > 0
-              const hasClaimedTokens = claimedAmount > 0
-
-              return (
-                <Card key={stake.id} className="relative overflow-hidden">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center gap-3">
-                      <Image
-                        src={stake.pfpUrl}
-                        alt="Staked PFP"
-                        width={48}
-                        height={48}
-                        className="rounded-lg"
-                      />
-                      <div className="flex-1">
-                        <CardTitle className="text-lg">{stake.poolName}</CardTitle>
-                        <p className="text-sm text-muted-foreground">
-                          Token #{stake.tokenId}
-                        </p>
-                      </div>
-                      <div className="flex flex-col items-end gap-2">
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={() => resetPoolRewards(stake.poolName)}
-                          className="h-6 text-xs flex items-center gap-1 text-muted-foreground hover:text-foreground"
-                        >
-                          <Trash2 className="h-3 w-3" />
-                          Reset
-                        </Button>
-                        <Badge variant="secondary">
-                          {(stake.similarity * 100).toFixed(1)}% match
-                        </Badge>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {/* Stats */}
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">Staked Date</span>
-                          <span>{new Date(stake.stakedAt).toLocaleDateString()}</span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">Total Earned</span>
-                          <span className="font-medium">
-                            {formatAmount(getTotalEarned(stake.poolName))} {getTokenSymbol(stake.poolName)}
-                          </span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">Unclaimed</span>
-                          <span className={`font-medium ${hasUnclaimedRewards ? 'text-green-500' : ''}`}>
-                            {formatAmount(pendingAmount)} {getTokenSymbol(stake.poolName)}
-                          </span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">Claimed / Ready to Swap</span>
-                          <span className="font-medium">
-                            {formatAmount(claimedAmount)} {getTokenSymbol(stake.poolName)}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Action Buttons */}
-                      <div className="flex gap-2 pt-2">
-                        <Button 
-                          className="flex-1"
-                          onClick={() => handleClaimReward(stake)}
-                          disabled={!hasUnclaimedRewards}
-                        >
-                          <CheckCircle className="h-4 w-4 mr-2" />
-                          Claim
-                        </Button>
-                        <Button 
-                          variant="outline"
-                          className="flex-1"
-                          onClick={() => handleSwapTokens(stake)}
-                          disabled={!hasClaimedTokens}
-                        >
-                          <Zap className="h-4 w-4 mr-2" />
-                          Swap
-                        </Button>
-                      </div>
-
-                      {stake.isSpecial && (
-                        <Badge variant="destructive" className="w-full justify-center">
-                          Manual Verification Required
-                        </Badge>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              )
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Processing State */}
-      {isProcessing && (
-        <Card className="mx-auto max-w-md">
-          <CardContent className="p-6 text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-sm text-muted-foreground">
-              Processing your PFP and finding matches...
-            </p>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Swap Modal */}
-      {showSwapModal && selectedStake && (
-        <SwapModal
-          stake={selectedStake}
-          onClose={() => {
-            setShowSwapModal(false)
-            setSelectedStake(null)
-          }}
-        />
-      )}
-    </div>
-  )
-}
-
-// Swap Modal Component
-const SwapModal = ({ stake, onClose }: { stake: any; onClose: () => void }) => {
-  const [swapType, setSwapType] = useState<'normal' | 'cross-chain'>('normal')
-  const [destinationAddress, setDestinationAddress] = useState('')
+  const [selectedOption, setSelectedOption] = useState<'ape' | 'usdt' | 'eth' | 'sui' | null>(null)
+  const [suiAddress, setSuiAddress] = useState('')
   const [addressError, setAddressError] = useState('')
-  const [isProcessing, setIsProcessing] = useState(false)
-  const { getTotalClaimed } = useRewardsStore()
+  const [rewardUpdate, setRewardUpdate] = useState(0) // Force re-renders
+  const [epochTime, setEpochTime] = useState(30) // Countdown from 30 seconds
+  const { session } = useXSession()
+  const pfpUrl = session?.pfpUrl || '/images/BAYCNFT/0.png' // Fallback if no PFP
 
-  const claimedAmount = getTotalClaimed(stake.poolName)
-  const tokenSymbol = getTokenSymbol(stake.poolName)
+  // Simple countdown and reward timer
+  useEffect(() => {
+    if (!session) return
 
-  const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const timer = setInterval(() => {
+      if (epochTime === 0) {
+        // At zero: add reward and reset timer
+        const currentUnclaimed = parseApeAmount(mockStake.unclaimed)
+        const currentTotal = parseApeAmount(mockStake.totalEarned)
+        mockStake.unclaimed = `${(currentUnclaimed + 5).toFixed(2)} APE`
+        mockStake.totalEarned = `${(currentTotal + 5).toFixed(2)} APE`
+        setEpochTime(30)
+      } else {
+        // Not zero: count down
+        setEpochTime(epochTime - 1)
+      }
+    }, 1000)
+
+    return () => clearInterval(timer)
+  }, [session, epochTime])
+
+  const handleSuiAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const address = e.target.value
-    setDestinationAddress(address)
+    setSuiAddress(address)
     
-    if (address && !isValidSuiAddress(address)) {
-      setAddressError('Please enter a valid 32-byte Sui address (e.g., 0x906b5fc264539be8b1a5faa84441cf65e13e99ee555c0025d282770797cf99d1)')
+    // Validate Sui address format (32 bytes / 64 characters hex string starting with 0x)
+    const suiAddressRegex = /^0x[a-fA-F0-9]{64}$/
+    if (address && !suiAddressRegex.test(address)) {
+      setAddressError('Please enter a valid 32-byte Sui address')
     } else {
       setAddressError('')
     }
   }
 
-  const handleSwap = async () => {
-    if (swapType === 'cross-chain' && !isValidSuiAddress(destinationAddress)) {
-      setAddressError('Please enter a valid Sui address')
-      return
+  const handleClaim = () => {
+    // TODO: Replace with actual MetaMask/wallet integration
+    console.log('Claiming:', selectedOption, selectedStake?.unclaimed)
+    
+    // Simulate claim process
+    alert(`Claiming ${selectedStake?.unclaimed} in ${selectedOption?.toUpperCase()}...\n\nThis will open MetaMask for transaction confirmation.\n\nFor testing: Transaction would be processed here.`)
+    
+    // Only zero out unclaimed tokens after successful claim (total earned stays the same)
+    if (mockStake) {
+      mockStake.unclaimed = '0.00 APE'
     }
+    
+    // Close modal after "claim"
+    setSelectedStake(null)
+    setSelectedOption(null)
+    setSuiAddress('')
+    setAddressError('')
+  }
 
-    setIsProcessing(true)
-    // Simulate swap processing
-    setTimeout(() => {
-      setIsProcessing(false)
-      onClose()
-    }, 2000)
+  const handleTrashClick = () => {
+    // Special test function to reset the entire card for testing
+    if (mockStake) {
+      mockStake.unclaimed = '0.00 APE'
+      mockStake.totalEarned = '0.00 APE'
+    }
+    // Force re-render to show changes
+    setSelectedStake(null)
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <Card className="w-full max-w-md mx-4">
-        <CardHeader>
-          <CardTitle>Swap {tokenSymbol}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Swap Type</label>
-            <div className="flex gap-2">
-              <Button
-                variant={swapType === 'normal' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => {
-                  setSwapType('normal')
-                  setDestinationAddress('')
-                  setAddressError('')
-                }}
-              >
-                Normal Swap
-              </Button>
-              <Button
-                variant={swapType === 'cross-chain' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setSwapType('cross-chain')}
-              >
-                Cross-Chain (Sui)
-              </Button>
-            </div>
+    <div className="space-y-6">
+      <h2 className="text-2xl font-bold text-white">Active Staking Campaigns</h2>
+      
+      <Card className="bg-[#1a1a1a] border-[#333] w-[400px]">
+        <CardContent className="p-4">
+          {/* Reset Button */}
+          <div className="flex items-center gap-1 cursor-pointer hover:text-white transition-colors text-[#888] mb-4" onClick={handleTrashClick}>
+            <Trash2 className="h-4 w-4" />
+            <span className="text-sm">Reset</span>
           </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Available to Swap</label>
-            <div className="text-lg font-semibold">
-              {formatAmount(claimedAmount)} {tokenSymbol}
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium">To Token</label>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm">USDT</Button>
-              <Button variant="outline" size="sm">ETH</Button>
-              {swapType === 'cross-chain' && (
-                <Button variant="outline" size="sm">SUI</Button>
-              )}
-            </div>
-          </div>
-
-          {swapType === 'cross-chain' && (
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Sui Address</label>
-              <input
-                type="text"
-                placeholder="0x906b5fc264539be8b1a5faa84441cf65e13e99ee555c0025d282770797cf99d1"
-                value={destinationAddress}
-                onChange={handleAddressChange}
-                className={`w-full p-2 border rounded ${addressError ? 'border-red-500' : ''}`}
+          {/* Header with PFP and Token Info */}
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <Image
+                src={pfpUrl}
+                alt={mockStake.name}
+                width={48}
+                height={48}
+                className="rounded-lg"
+                unoptimized // Required for Twitter image URLs
               />
-              {addressError && (
-                <div className="flex items-center gap-1 text-xs text-red-500">
-                  <AlertCircle className="h-3 w-3" />
-                  {addressError}
-                </div>
-              )}
-              <p className="text-xs text-muted-foreground">
-                Enter a valid 32-byte Sui address starting with 0x
-              </p>
+              <div>
+                <div className="text-white text-xl font-semibold">{mockStake.name}</div>
+                <div className="text-[#888]">{mockStake.tokenId}</div>
+              </div>
             </div>
-          )}
+            <div className="flex flex-col items-end gap-2">
+              <div className="text-[#888] text-sm">Next Reward: {epochTime}s</div>
+              <Badge className="bg-[#333] text-white hover:bg-[#444]">{mockStake.matchPercent}</Badge>
+            </div>
+          </div>
 
-          <div className="flex gap-2 pt-4">
-            <Button variant="outline" onClick={onClose} className="flex-1">
-              Cancel
-            </Button>
+          {/* Stats */}
+          <div className="space-y-2">
+            <div className="flex justify-between">
+              <span className="text-[#888]">Staked Date</span>
+              <span className="text-[#ccc]">{mockStake.stakedDate}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-[#888]">Total Earned</span>
+              <span className="text-[#ccc]">{mockStake.totalEarned}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-[#888]">Unclaimed</span>
+              <span className="text-green-400">{mockStake.unclaimed}</span>
+            </div>
+          </div>
+
+          {/* Single Claim Button */}
+          <div className="mt-4">
             <Button 
-              onClick={handleSwap}
-              disabled={
-                isProcessing || 
-                (swapType === 'cross-chain' && (!destinationAddress || !isValidSuiAddress(destinationAddress)))
-              }
-              className="flex-1"
+              className="w-full bg-green-500 hover:bg-green-600 text-white" 
+              onClick={() => setSelectedStake(mockStake)}
             >
-              {isProcessing ? 'Processing...' : 'Swap'}
+              <span className="flex items-center gap-2">
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Claim
+              </span>
             </Button>
           </div>
         </CardContent>
       </Card>
+
+      {/* Modal */}
+      {selectedStake && (
+        <div 
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+          onClick={() => {
+            setSelectedStake(null)
+            setSelectedOption(null)
+            setSuiAddress('')
+            setAddressError('')
+          }}
+        >
+          <Card 
+            className="w-full max-w-md mx-4"
+            onClick={e => e.stopPropagation()} // Prevent clicks inside card from closing modal
+          >
+            <CardContent className="p-6 pb-0">
+              <h3 className="text-xl font-bold mb-4">Claim {selectedStake.unclaimed}</h3>
+              
+              {/* Claim Options */}
+              <div className="space-y-3 mb-4">
+                <button 
+                  className={`w-full p-3 text-left border rounded bg-transparent text-white hover:bg-gray-800 transition-colors ${selectedOption === 'ape' ? 'border-green-400' : 'border-gray-600'}`}
+                  onClick={() => setSelectedOption('ape')}
+                >
+                  <div className="flex justify-between items-center">
+                    <span>Claim in APE</span>
+                    <span className="text-gray-400">{selectedStake.unclaimed}</span>
+                  </div>
+                </button>
+                
+                <button 
+                  className={`w-full p-3 text-left border rounded bg-transparent text-white hover:bg-gray-800 transition-colors ${selectedOption === 'usdt' ? 'border-green-400' : 'border-gray-600'}`}
+                  onClick={() => setSelectedOption('usdt')}
+                >
+                  <div className="flex justify-between items-center">
+                    <span>Claim & Swap to USDT</span>
+                    <span className="text-gray-400">≈ {calculateSwaps(parseApeAmount(selectedStake.unclaimed)).usdt} USDT</span>
+                  </div>
+                </button>
+                
+                <button 
+                  className={`w-full p-3 text-left border rounded bg-transparent text-white hover:bg-gray-800 transition-colors ${selectedOption === 'eth' ? 'border-green-400' : 'border-gray-600'}`}
+                  onClick={() => setSelectedOption('eth')}
+                >
+                  <div className="flex justify-between items-center">
+                    <span>Claim & Swap to ETH</span>
+                    <span className="text-gray-400">≈ {calculateSwaps(parseApeAmount(selectedStake.unclaimed)).eth} ETH</span>
+                  </div>
+                </button>
+                
+                <button 
+                  className={`w-full p-3 text-left border rounded bg-transparent text-white hover:bg-gray-800 transition-colors ${selectedOption === 'sui' ? 'border-green-400' : 'border-gray-600'}`}
+                  onClick={() => setSelectedOption('sui')}
+                >
+                  <div className="flex justify-between items-center">
+                    <span>Claim & Fusion+ Swap to SUI</span>
+                    <span className="text-gray-400">≈ {calculateSwaps(parseApeAmount(selectedStake.unclaimed)).sui} SUI</span>
+                  </div>
+                </button>
+              </div>
+
+              {/* SUI Address Input */}
+              {selectedOption === 'sui' && (
+                <div className="space-y-2 mb-4">
+                  <label className="text-sm font-medium">Sui Wallet Address</label>
+                  <input
+                    type="text"
+                    placeholder="0x906b5fc264539be8b1a5faa84441cf65e13e99ee555c0025d282770797cf99d1"
+                    value={suiAddress}
+                    onChange={handleSuiAddressChange}
+                    className={`w-full p-2 border rounded ${addressError ? 'border-red-500' : suiAddress && !addressError ? 'border-green-400' : ''}`}
+                  />
+                  {addressError && (
+                    <div className="text-xs text-red-500">{addressError}</div>
+                  )}
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex gap-2 mb-4">
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    setSelectedStake(null)
+                    setSelectedOption(null)
+                    setSuiAddress('')
+                    setAddressError('')
+                  }}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  className="flex-1 bg-green-500 hover:bg-green-600"
+                  disabled={!selectedOption || (selectedOption === 'sui' && (!suiAddress || !!addressError))}
+                  onClick={handleClaim}
+                >
+                  Claim
+                </Button>
+              </div>
+
+              {/* Powered by 1inch */}
+              <div className="w-full flex justify-center">
+                <Image
+                  src="/images/poweredby1inch.png"
+                  alt="Powered by 1inch"
+                  width={245}
+                  height={36}
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   )
 }
