@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Trash2 } from 'lucide-react'
 import { useXSession } from '@/hooks/useXSession'
+import { useAuthStore } from '@/store/auth.store'
 
 // Token conversion rates for testing
 const CONVERSION_RATES = {
@@ -29,8 +30,8 @@ const calculateSwaps = (apeAmount: number) => {
   }
 }
 
-// Initial stake data
-const mockStake = {
+// Initial stake data template
+const initialStake = {
   id: '1',
   name: 'BAYC',
   tokenId: 'Token #1234',
@@ -43,6 +44,14 @@ const mockStake = {
 
 // Main Rewards Component
 export const Rewards = () => {
+  const [stakeData, setStakeData] = useState(() => {
+    // Load saved data on component mount
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('stakeData')
+      if (saved) return JSON.parse(saved)
+    }
+    return initialStake
+  })
   const [selectedStake, setSelectedStake] = useState<any>(null)
   const [selectedOption, setSelectedOption] = useState<'ape' | 'usdt' | 'eth' | 'sui' | null>(null)
   const [suiAddress, setSuiAddress] = useState('')
@@ -50,19 +59,30 @@ export const Rewards = () => {
   const [rewardUpdate, setRewardUpdate] = useState(0) // Force re-renders
   const [epochTime, setEpochTime] = useState(30) // Countdown from 30 seconds
   const { session } = useXSession()
+  const { session: siweSession } = useAuthStore()
   const pfpUrl = session?.pfpUrl || '/images/BAYCNFT/0.png' // Fallback if no PFP
+
+  // Save stake data helper
+  const saveStakeData = (data: typeof initialStake) => {
+    setStakeData(data)
+    localStorage.setItem('stakeData', JSON.stringify(data))
+  }
 
   // Simple countdown and reward timer
   useEffect(() => {
     if (!session) return
 
-    const timer = setInterval(() => {
+        const timer = setInterval(() => {
       if (epochTime === 0) {
         // At zero: add reward and reset timer
-        const currentUnclaimed = parseApeAmount(mockStake.unclaimed)
-        const currentTotal = parseApeAmount(mockStake.totalEarned)
-        mockStake.unclaimed = `${(currentUnclaimed + 5).toFixed(2)} APE`
-        mockStake.totalEarned = `${(currentTotal + 5).toFixed(2)} APE`
+        const currentUnclaimed = parseApeAmount(stakeData.unclaimed)
+        const currentTotal = parseApeAmount(stakeData.totalEarned)
+        const newData = {
+          ...stakeData,
+          unclaimed: `${(currentUnclaimed + 5).toFixed(2)} APE`,
+          totalEarned: `${(currentTotal + 5).toFixed(2)} APE`
+        }
+        saveStakeData(newData)
         setEpochTime(30)
       } else {
         // Not zero: count down
@@ -94,9 +114,10 @@ export const Rewards = () => {
     alert(`Claiming ${selectedStake?.unclaimed} in ${selectedOption?.toUpperCase()}...\n\nThis will open MetaMask for transaction confirmation.\n\nFor testing: Transaction would be processed here.`)
     
     // Only zero out unclaimed tokens after successful claim (total earned stays the same)
-    if (mockStake) {
-      mockStake.unclaimed = '0.00 APE'
-    }
+    saveStakeData({
+      ...stakeData,
+      unclaimed: '0.00 APE'
+    })
     
     // Close modal after "claim"
     setSelectedStake(null)
@@ -107,10 +128,9 @@ export const Rewards = () => {
 
   const handleTrashClick = () => {
     // Special test function to reset the entire card for testing
-    if (mockStake) {
-      mockStake.unclaimed = '0.00 APE'
-      mockStake.totalEarned = '0.00 APE'
-    }
+    saveStakeData({
+      ...initialStake
+    })
     // Force re-render to show changes
     setSelectedStake(null)
   }
@@ -132,20 +152,20 @@ export const Rewards = () => {
             <div className="flex items-center gap-3">
               <Image
                 src={pfpUrl}
-                alt={mockStake.name}
+                alt={stakeData.name}
                 width={48}
                 height={48}
                 className="rounded-lg"
                 unoptimized // Required for Twitter image URLs
               />
               <div>
-                <div className="text-white text-xl font-semibold">{mockStake.name}</div>
-                <div className="text-[#888]">{mockStake.tokenId}</div>
+                <div className="text-white text-xl font-semibold">{stakeData.name}</div>
+                <div className="text-[#888]">{stakeData.tokenId}</div>
               </div>
             </div>
             <div className="flex flex-col items-end gap-2">
               <div className="text-[#888] text-sm">Next Reward: {epochTime}s</div>
-              <Badge className="bg-[#333] text-white hover:bg-[#444]">{mockStake.matchPercent}</Badge>
+              <Badge className="bg-[#333] text-white hover:bg-[#444]">{stakeData.matchPercent}</Badge>
             </div>
           </div>
 
@@ -153,23 +173,23 @@ export const Rewards = () => {
           <div className="space-y-2">
             <div className="flex justify-between">
               <span className="text-[#888]">Staked Date</span>
-              <span className="text-[#ccc]">{mockStake.stakedDate}</span>
+              <span className="text-[#ccc]">{stakeData.stakedDate}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-[#888]">Total Earned</span>
-              <span className="text-[#ccc]">{mockStake.totalEarned}</span>
+              <span className="text-[#ccc]">{stakeData.totalEarned}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-[#888]">Unclaimed</span>
-              <span className="text-green-400">{mockStake.unclaimed}</span>
+              <span className="text-green-400">{stakeData.unclaimed}</span>
             </div>
           </div>
 
           {/* Single Claim Button */}
-          <div className="mt-4">
+          <div className="mt-4 space-y-4">
             <Button 
               className="w-full bg-green-500 hover:bg-green-600 text-white" 
-              onClick={() => setSelectedStake(mockStake)}
+              onClick={() => setSelectedStake(stakeData)}
             >
               <span className="flex items-center gap-2">
                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -178,6 +198,16 @@ export const Rewards = () => {
                 Claim
               </span>
             </Button>
+
+            {/* 1inch logo */}
+            <div className="w-full flex justify-center">
+              <Image
+                src="/images/poweredby1inch.png"
+                alt="Powered by 1inch"
+                width={196}
+                height={29}
+              />
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -198,7 +228,13 @@ export const Rewards = () => {
             onClick={e => e.stopPropagation()} // Prevent clicks inside card from closing modal
           >
             <CardContent className="p-6 pb-0">
-              <h3 className="text-xl font-bold mb-4">Claim {selectedStake.unclaimed}</h3>
+              <h3 className="text-xl font-bold mb-1">Claim {selectedStake.unclaimed}</h3>
+              <p className="text-[#888] text-sm mb-4">
+                {selectedOption === 'sui' 
+                  ? 'to SUI wallet' 
+                  : `to wallet ${siweSession?.siwe?.address?.slice(0, 6)}...${siweSession?.siwe?.address?.slice(-4)}`
+                }
+              </p>
               
               {/* Claim Options */}
               <div className="space-y-3 mb-4">
@@ -246,7 +282,7 @@ export const Rewards = () => {
               {/* SUI Address Input */}
               {selectedOption === 'sui' && (
                 <div className="space-y-2 mb-4">
-                  <label className="text-sm font-medium">Sui Wallet Address</label>
+                  <label className="text-sm text-[#888]">Enter SUI wallet address to receive funds</label>
                   <input
                     type="text"
                     placeholder="0x906b5fc264539be8b1a5faa84441cf65e13e99ee555c0025d282770797cf99d1"
