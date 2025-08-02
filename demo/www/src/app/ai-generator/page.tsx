@@ -24,7 +24,7 @@ const AiGeneratorPage = () => {
   const { isXAuthenticated, session } = useXSession()
   const isAuthed = isAuthenticated || isXAuthenticated
   const username = session?.username?.toLowerCase()
-
+  
   // State for overlay selection
   const [selectedOverlay, setSelectedOverlay] = React.useState('')
   

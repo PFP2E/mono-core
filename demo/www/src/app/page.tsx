@@ -19,9 +19,10 @@ const Home = () => {
       {isAuthed && (
         <>
           <UserDashboard />
-          <Marketplace />
+          
         </>
       )}
+      <Marketplace />
       <UseCases />
     </div>
   )

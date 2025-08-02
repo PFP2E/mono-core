@@ -7,7 +7,7 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
-import { Upload, CheckCircle } from 'lucide-react'
+import { Upload, CheckCircle, Settings } from 'lucide-react'
 import Image from 'next/image'
 import { useActivityStore } from '@/store/activity.store'
 import {
@@ -23,7 +23,13 @@ const AiGeneratorPage = () => {
   const { isAuthenticated } = useSIWE()
   const { isXAuthenticated, session } = useXSession()
   const isAuthed = isAuthenticated || isXAuthenticated
-  const username = session?.username?.toLowerCase()
+  
+  // For testing: allow manual username input
+  const [testUsername, setTestUsername] = React.useState('')
+  const [useTestUsername, setUseTestUsername] = React.useState(false)
+  
+  // Use test username if enabled, otherwise use session username
+  const username = useTestUsername ? testUsername.toLowerCase() : session?.username?.toLowerCase()
 
   // State for overlay selection
   const [selectedOverlay, setSelectedOverlay] = React.useState('')
@@ -87,9 +93,43 @@ const AiGeneratorPage = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-2xl mx-auto">
-        <h1 className="text-4xl font-bold text-center mb-8">AI Generator</h1>
-        
-        <Card className="shadow-lg">
+                 <h1 className="text-4xl font-bold text-center mb-8">AI Generator</h1>
+         
+         {/* Testing Interface */}
+         <Card className="mb-4 shadow-lg">
+           <CardContent className="p-4">
+             <div className="flex items-center gap-2 mb-3">
+               <Settings className="h-4 w-4" />
+               <Label className="font-medium">Testing Mode</Label>
+             </div>
+             <div className="flex items-center gap-3">
+               <input
+                 type="checkbox"
+                 id="use-test-username"
+                 checked={useTestUsername}
+                 onChange={(e) => setUseTestUsername(e.target.checked)}
+                 className="rounded"
+               />
+               <Label htmlFor="use-test-username" className="text-sm">Use test username</Label>
+               {useTestUsername && (
+                 <input
+                   type="text"
+                   placeholder="Enter X username (e.g., 0xQuintus)"
+                   value={testUsername}
+                   onChange={(e) => setTestUsername(e.target.value)}
+                   className="flex-1 px-3 py-1 text-sm border rounded bg-background"
+                 />
+               )}
+             </div>
+             {username && (
+               <p className="text-xs text-muted-foreground mt-2">
+                 Current username: <span className="font-mono">{username}</span>
+               </p>
+             )}
+           </CardContent>
+         </Card>
+         
+         <Card className="shadow-lg">
           <CardContent className="p-4 space-y-4">
             {/* Overlay Selection */}
             <div className="max-w-sm mx-auto">
