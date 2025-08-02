@@ -22,9 +22,8 @@ export function UserDashboard() {
   const { isAuthenticated, ens } = useSIWE()
   const { isXAuthenticated, session: xSession } = useXSession()
   const { formattedAddress } = useWallet()
-  // Access store directly through getState for consistency
-  const store = useActivityStore.getState()
-  const activities = store.activities
+  // Use the hook to get reactive updates
+  const { activities, clearHistory } = useActivityStore()
   
   // Debug log to see activities
   console.log('Current activities:', activities)
@@ -48,65 +47,52 @@ export function UserDashboard() {
   return (
     <div className='my-8 space-y-6'>
       <Card>
-        <CardHeader>
+        <CardHeader className='flex flex-col md:flex-row md:items-center md:justify-between'>
           <CardTitle>Welcome Back</CardTitle>
-          <CardAction>
+          {/* Desktop Button */}
+          <div className='hidden md:block'>
             <Button asChild>
               <Link href='/create-campaign'>Create Campaign</Link>
             </Button>
-          </CardAction>
+          </div>
         </CardHeader>
-        <CardContent className='flex flex-wrap items-center gap-8'>
-          {isXAuthenticated && xSession && (
-            <div className='flex items-center gap-4'>
-              {pfpUrl && (
-                <Image src={pfpUrl} alt={'pfp'} width={100} height={100} />
-              )}
-              <div>
-                <div className='flex items-center gap-2'>
+        <CardContent className='space-y-6'>
+          {/* Profile Section */}
+          <div className='flex items-center gap-4'>
+            {isXAuthenticated && xSession && pfpUrl && (
+              <Image src={pfpUrl} alt={'pfp'} width={80} height={80} className='rounded-full' />
+            )}
+            {isAuthenticated && ens?.avatar && (
+              <Image
+                src={ens.avatar}
+                alt={ens.name || 'ENS Avatar'}
+                width={80}
+                height={80}
+                className='rounded-full'
+              />
+            )}
+            <div className='flex flex-col gap-1'>
+              {isXAuthenticated && xSession && (
+                <div>
                   <p className='text-muted-foreground text-sm'>Signed in as</p>
-                  {!hasProfileData && (
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <AlertTriangle className='h-4 w-4 text-amber-500' />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>
-                            Could not load profile details from X.
-                            <br />
-                            This may be due to rate limits.
-                          </p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  )}
+                  <p className='text-lg font-medium'>{xSession.username}</p>
                 </div>
-                <p className='text-lg font-medium'>{xSession.username}</p>
-              </div>
-            </div>
-          )}
-          {isAuthenticated && (
-            <div className='flex items-center gap-4'>
-              {ens?.avatar && (
-                <Image
-                  src={ens.avatar}
-                  alt={ens.name || 'ENS Avatar'}
-                  width={100}
-                  height={100}
-                  className='rounded-full'
-                />
               )}
-              <div className='flex flex-col items-start gap-1'>
-                <span className='text-muted-foreground text-sm'>
-                  Wallet Connected
-                </span>
-                <span className='text-lg font-medium'>
-                  {ens?.name || formattedAddress}
-                </span>
-              </div>
+              {isAuthenticated && (
+                <div>
+                  <p className='text-muted-foreground text-sm'>Wallet Connected</p>
+                  <p className='text-lg font-medium'>{ens?.name || formattedAddress}</p>
+                </div>
+              )}
             </div>
-          )}
+          </div>
+          
+          {/* Mobile Button */}
+          <div className='flex justify-center md:hidden'>
+            <Button asChild size='lg'>
+              <Link href='/create-campaign'>Create Campaign</Link>
+            </Button>
+          </div>
         </CardContent>
       </Card>
 
@@ -119,7 +105,7 @@ export function UserDashboard() {
               <Button
                 variant='outline'
                 size='sm'
-                onClick={store.clearHistory}
+                onClick={clearHistory}
                 className='h-6 px-2 text-xs'
               >
                 <Trash2 className='h-3 w-3 mr-1' />
