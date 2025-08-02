@@ -664,105 +664,82 @@ export function CreateCampaign() {
                               accept='image/*'
                               onChange={handleOverlayFileChange}
                             />
-                            <Button
-                              variant='outline'
-                              size='sm'
-                              className='absolute top-2 right-2'
-                              onClick={() => {
-                                setOverlayFile(null)
-                                setOverlayImageUrl('')
-                              }}
-                            >
-                              Remove
-                            </Button>
-                          </div>
-                        ) : (
-                          <div className='flex h-32 w-full items-center justify-center rounded-md border-2 border-dashed'>
-                            <Button variant='outline' asChild>
-                              <label
-                                htmlFor='overlay-upload'
-                                className='flex cursor-pointer items-center gap-2'
-                              >
-                                <Upload className='h-4 w-4' />
-                                <span>Upload Image</span>
-                                <input
-                                  id='overlay-upload'
-                                  type='file'
-                                  className='sr-only'
-                                  accept='image/*'
-                                  onChange={handleOverlayFileChange}
-                                />
-                              </label>
-                            </Button>
-                          </div>
-                        )}
+                          </label>
+                        </Button>
                       </div>
-                    </div>
+                    )}
+                  </div>
 
-                    {/* LoRA File Upload Section */}
-                    <div>
-                      <Label>Upload SafeTensor LoRA File</Label>
-                      <p className='text-xs text-muted-foreground mb-2'>
-                        Upload a .safetensors LoRA file for Stable Diffusion derivatives
-                      </p>
-                      <div className='space-y-3'>
-                        {loraFile ? (
-                          <div className='flex items-center justify-between p-3 border rounded-lg bg-muted/50'>
-                            <div className='flex items-center gap-2'>
-                              <div className='w-8 h-8 bg-blue-500 rounded flex items-center justify-center'>
-                                <span className='text-white text-xs font-bold'>.safetensors</span>
-                              </div>
-                              <div>
-                                <p className='text-sm font-medium'>{loraFile.name}</p>
-                                <p className='text-xs text-muted-foreground'>
-                                  {(loraFile.size / 1024 / 1024).toFixed(2)} MB
-                                </p>
-                              </div>
+                  {/* LoRA File Upload Section */}
+                  <div>
+                    <Label>Upload SafeTensor LoRA File</Label>
+                    <p className='text-muted-foreground mb-2 text-xs'>
+                      Upload a .safetensors LoRA file for Stable Diffusion
+                      derivatives
+                    </p>
+                    <div className='space-y-3'>
+                      {loraFile ? (
+                        <div className='bg-muted/50 flex items-center justify-between rounded-lg border p-3'>
+                          <div className='flex items-center gap-2'>
+                            <div className='flex h-8 w-8 items-center justify-center rounded bg-blue-500'>
+                              <span className='text-xs font-bold text-white'>
+                                .safetensors
+                              </span>
                             </div>
-                            <Button
-                              variant='outline'
-                              size='sm'
-                              onClick={() => setLoraFile(null)}
+                            <div>
+                              <p className='text-sm font-medium'>
+                                {loraFile.name}
+                              </p>
+                              <p className='text-muted-foreground text-xs'>
+                                {(loraFile.size / 1024 / 1024).toFixed(2)} MB
+                              </p>
+                            </div>
+                          </div>
+                          <Button
+                            variant='outline'
+                            size='sm'
+                            onClick={() => setLoraFile(null)}
+                          >
+                            Remove
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className='flex h-24 w-full items-center justify-center rounded-md border-2 border-dashed'>
+                          <Button variant='outline' asChild>
+                            <label
+                              htmlFor='lora-upload'
+                              className='flex cursor-pointer items-center gap-2'
                             >
-                              Remove
-                            </Button>
-                          </div>
-                        ) : (
-                          <div className='flex h-24 w-full items-center justify-center rounded-md border-2 border-dashed'>
-                            <Button variant='outline' asChild>
-                              <label
-                                htmlFor='lora-upload'
-                                className='flex cursor-pointer items-center gap-2'
-                              >
-                                <Upload className='h-4 w-4' />
-                                <span>Upload .safetensors File</span>
-                                <input
-                                  id='lora-upload'
-                                  type='file'
-                                  className='sr-only'
-                                  accept='.safetensors'
-                                  onChange={handleLoraFileChange}
-                                />
-                              </label>
-                            </Button>
-                          </div>
-                        )}
-                      </div>
+                              <Upload className='h-4 w-4' />
+                              <span>Upload .safetensors File</span>
+                              <input
+                                id='lora-upload'
+                                type='file'
+                                className='sr-only'
+                                accept='.safetensors'
+                                onChange={handleLoraFileChange}
+                              />
+                            </label>
+                          </Button>
+                        </div>
+                      )}
                     </div>
+                  </div>
 
-                    {/* AI Prompt Section */}
-                    <div>
-                      <Label>AI Generation Prompt</Label>
-                      <p className='text-xs text-muted-foreground mb-2'>
-                        Describe what you want the AI to generate (e.g., "1INCH branded hoodie", "Coke can overlay")
-                      </p>
-                      <textarea
-                        value={aiPrompt}
-                        onChange={(e) => setAiPrompt(e.target.value)}
-                        placeholder="Enter your AI generation prompt here..."
-                        className='w-full h-24 p-3 text-sm border rounded-md bg-background resize-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent'
-                      />
-                    </div>
+                  {/* AI Prompt Section */}
+                  <div>
+                    <Label>AI Generation Prompt</Label>
+                    <p className='text-muted-foreground mb-2 text-xs'>
+                      Describe what you want the AI to generate (e.g.,
+                      &quot;1INCH branded hoodie&quot;, &quot;Coke can
+                      overlay&quot;)
+                    </p>
+                    <textarea
+                      value={aiPrompt}
+                      onChange={e => setAiPrompt(e.target.value)}
+                      placeholder='Enter your AI generation prompt here...'
+                      className='bg-background focus:ring-primary h-24 w-full resize-none rounded-md border p-3 text-sm focus:border-transparent focus:ring-2 focus:outline-none'
+                    />
                   </div>
                 </>
               )}

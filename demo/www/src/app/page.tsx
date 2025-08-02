@@ -19,7 +19,6 @@ const Home = () => {
       {isAuthed && (
         <>
           <UserDashboard />
-          
         </>
       )}
       <Marketplace />
