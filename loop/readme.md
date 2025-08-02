@@ -1,17 +1,14 @@
 # /loop
 
-> The off-chain verification engine, built with Node.js.
+> The off-chain verification engine, built with Bun and TypeScript.
 
 ### Design Philosophy
-The backend follows a service-oriented data pipeline model. Each service has a single, clear responsibility, making the system easy to understand, test, and maintain.
+The backend follows a service-oriented data pipeline model. Each service is a distinct package within the Bun workspace, ensuring clear separation of concerns.
 
-### Development Workflow
-This module follows the same containerized, `Task`-based workflow as `/demo`.
-
-### Service Pipeline
--   **[`/indexer`](./indexer/readme.md)**: Pre-processes NFT collections into a searchable format.
--   **[`/records`](./records/readme.md)**: Manages the verification lifecycle and writes on-chain receipts.
--   **[`/rewards`](./rewards/readme.md)**: Calculates rewards and constructs the Merkle tree for settlement.
--   **[`/sdk`](./sdk/readme.md)**: Shared utilities and clients for all backend services.
+### Packages
+-   **[`@pfp2e/sdk`](./sdk)**: A shared library containing the database client, shared types, and utilities.
+-   **[`@pfp2e/records`](./records)**: The core API service that manages the verification lifecycle.
+-   **[`@pfp2e/rewards`](./rewards)**: A service that consumes verification data to calculate and prepare rewards for on-chain settlement.
+-   **[`@pfp2e/indexer`](./indexer)**: (Future service) Pre-processes NFT collections for fast similarity search.
 
 [↰ Back to root](../readme.md)

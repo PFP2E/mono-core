@@ -1,39 +1,109 @@
 # Taskfile.yml
-# This is the root task file for the monorepo.
-# It delegates commands to the appropriate module's Taskfile.
+# Root task file for the monorepo.
+# Orchestrates all services with a clear, grouped command structure.
 version: '3'
 
 tasks:
   default:
-    desc: Show available tasks for this project
-    summary: |
-      This is the root Taskfile. It provides commands to orchestrate the modules.
-      Tasks are namespaced by module (e.g., `demo:<command>`).
+    desc: 'Show available tasks for this project'
     cmds:
       - task -l
 
-  # --- Demo Module Tasks ---
+  # --- Primary Development Workflow ---
+
+  start:
+    desc: 'Start the entire application in development mode (backend + frontend)'
+    cmds:
+      - task: loop:start
+      - task: demo:dev:local
+
+  stop:
+    desc: 'Stop all development services'
+    cmds:
+      - task: loop:stop
+      - task: demo:stop # Note: This only works for containerized demo
+
+  # --- Project Lifecycle ---
+
+  project:install:
+    desc: 'Install all dependencies for all workspaces'
+    summary: 'This is the first step to bootstrap the project. It installs all npm dependencies.'
+    cmds:
+      - bun install
+
+  project:build:
+    desc: 'Build all packages in the monorepo'
+    deps:
+      - sdk:build
+    cmds:
+      # Once the SDK is built, build the other packages in parallel
+      - task: records:build
+      - task: demo:build
+
+  project:clean:
+    desc: 'Remove all build artifacts and node_modules from all packages'
+    cmds:
+      - rm -rf node_modules bun.lockb
+      - task: sdk:clean
+      - task: records:clean
+      - task: rewards:clean
+      - task: demo:clean
+
+  # --- CI / Validation ---
+
+  ci:test:
+    desc: 'Run tests for all services in parallel'
+    cmds:
+      - task: loop:test
+      - task: demo:test:local
+
+  ci:typecheck:
+    desc: 'Type-check all packages in parallel'
+    cmds:
+      - task: sdk:typecheck
+      - task: records:typecheck
+      - task: rewards:typecheck
+      - task: demo:typecheck
+
+  # --- Backend Services (Loop) ---
+
+  loop:start:
+    desc: 'Start the loop backend services'
+    cmds:
+      - task: records:start
+
+  loop:stop:
+    desc: 'Stop the loop backend services'
+    cmds:
+      - task: records:stop
+
+  loop:test:
+    desc: 'Run tests for the loop backend services'
+    cmds:
+      - task: records:test
+
+  # --- Frontend Service (Demo) ---
 
   demo:dev:
-    desc: 'Start the demo development server (container)'
+    desc: 'Start the demo frontend (container)'
     dir: demo
     cmds:
       - task dev
 
   demo:dev:local:
-    desc: 'Start the demo development server (local)'
+    desc: 'Start the demo frontend (local)'
     dir: demo
     cmds:
       - task dev:local
 
   demo:prod:
-    desc: 'Build and start the demo production server (container)'
+    desc: 'Build and start the demo frontend (container)'
     dir: demo
     cmds:
       - task prod
 
   demo:prod:local:
-    desc: 'Build and start the demo production server (local)'
+    desc: 'Build and start the demo frontend (local)'
     dir: demo
     cmds:
       - task prod:local
@@ -68,8 +138,30 @@ tasks:
     cmds:
       - task clean
 
-  demo:install:
-    desc: 'Install/update demo dependencies after package.json changes'
-    dir: demo
+  # --- Administrative Tasks ---
+
+  records:setup:
+    desc: 'One-time setup for the records database (init + seed)'
+    dir: loop/records
     cmds:
-      - task install
+      - task setup
+
+  # --- Internal Helper Tasks (for orchestration) ---
+
+  sdk:build: { internal: true, dir: loop/sdk, cmds: ['task build'] }
+  sdk:clean: { internal: true, dir: loop/sdk, cmds: ['task clean'] }
+  sdk:typecheck: { internal: true, dir: loop/sdk, cmds: ['tsc --noEmit'] }
+
+  records:build: { internal: true, dir: loop/records, cmds: ['task build'] }
+  records:clean: { internal: true, dir: loop/records, cmds: ['rm -rf dist *.db *.db-journal'] }
+  records:start: { internal: true, dir: loop/records, cmds: ['task start'] }
+  records:stop: { internal: true, dir: loop/records, cmds: ['task stop'] }
+  records:test: { internal: true, dir: loop/records, cmds: ['task test'] }
+  records:typecheck: { internal: true, dir: loop/records, cmds: ['task typecheck'] }
+
+  rewards:clean: { internal: true, dir: loop/rewards, cmds: ['rm -rf dist'] }
+  rewards:typecheck: { internal: true, dir: loop/rewards, cmds: ['task typecheck'] }
+
+  demo:build: { internal: true, dir: demo, cmds: ['task build'] }
+  demo:clean: { internal: true, dir: demo, cmds: ['rm -rf www/.next www/.dist'] }
+  demo:typecheck: { internal: true, dir: demo, cmds: ['task typecheck'] }

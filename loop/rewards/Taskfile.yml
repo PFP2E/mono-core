@@ -1,0 +1,17 @@
+version: '3'
+
+tasks:
+  default:
+    desc: "Show available tasks for the rewards service"
+    cmds:
+      - task -l
+
+  start:
+    desc: "Run the rewards oracle script"
+    cmds:
+      - bun run src/index.ts
+
+  typecheck:
+    desc: "Type-check the project without emitting files"
+    cmds:
+      - tsc --noEmit

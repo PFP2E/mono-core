@@ -1,0 +1,4 @@
+[test]
+# Set the root directory for test discovery to `src`.
+# This prevents the runner from looking in `dist`.
+root = "src/"
