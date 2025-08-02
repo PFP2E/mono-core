@@ -139,7 +139,7 @@ export const Rewards = () => {
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-white">Active Staking Campaigns</h2>
       
-      <Card className="bg-[#1a1a1a] border-[#333] w-[400px]">
+      <Card className="bg-[#1a1a1a] border-[#333] w-full max-w-[400px] min-w-[280px]">
         <CardContent className="p-4">
           {/* Reset Button */}
           <div className="flex items-center gap-1 cursor-pointer hover:text-white transition-colors text-[#888] mb-4" onClick={handleTrashClick}>
@@ -224,7 +224,7 @@ export const Rewards = () => {
           }}
         >
           <Card 
-            className="w-full max-w-md mx-4"
+            className="w-[calc(100%-2rem)] max-w-md min-w-[280px] mx-4"
             onClick={e => e.stopPropagation()} // Prevent clicks inside card from closing modal
           >
             <CardContent className="p-6 pb-0">
@@ -253,7 +253,10 @@ export const Rewards = () => {
                   onClick={() => setSelectedOption('usdt')}
                 >
                   <div className="flex justify-between items-center">
-                    <span>Claim & Swap to USDT</span>
+                    <div className="flex flex-col sm:flex-row sm:items-center">
+                      <span>Claim & Swap</span>
+                      <span className="sm:ml-1">to USDT</span>
+                    </div>
                     <span className="text-gray-400">≈ {calculateSwaps(parseApeAmount(selectedStake.unclaimed)).usdt} USDT</span>
                   </div>
                 </button>
@@ -263,7 +266,10 @@ export const Rewards = () => {
                   onClick={() => setSelectedOption('eth')}
                 >
                   <div className="flex justify-between items-center">
-                    <span>Claim & Swap to ETH</span>
+                    <div className="flex flex-col sm:flex-row sm:items-center">
+                      <span>Claim & Swap</span>
+                      <span className="sm:ml-1">to ETH</span>
+                    </div>
                     <span className="text-gray-400">≈ {calculateSwaps(parseApeAmount(selectedStake.unclaimed)).eth} ETH</span>
                   </div>
                 </button>
@@ -273,7 +279,10 @@ export const Rewards = () => {
                   onClick={() => setSelectedOption('sui')}
                 >
                   <div className="flex justify-between items-center">
-                    <span>Claim & Fusion+ Swap to SUI</span>
+                    <div className="flex flex-col sm:flex-row sm:items-center">
+                      <span>Claim & Swap</span>
+                      <span className="sm:ml-1">to SUI</span>
+                    </div>
                     <span className="text-gray-400">≈ {calculateSwaps(parseApeAmount(selectedStake.unclaimed)).sui} SUI</span>
                   </div>
                 </button>
