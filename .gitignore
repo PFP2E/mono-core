@@ -1,0 +1,48 @@
+# Operating System Files
+.DS_Store
+
+# Dependency Directories
+node_modules/
+
+# Lockfiles from other package managers
+package-lock.json
+yarn.lock
+
+# Bun
+bun.lockb
+
+# Build Artifacts
+dist/
+.next/
+out/
+
+# Local Environment & Secrets
+.env
+.env.*
+!.env.example
+
+# Local Databases
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+
+# Large Compressed Files
+*.tar
+*.zip
+*.gz
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Test & Coverage Output
+test-results/
+coverage/
+
+# IDE / Editor
+.vscode/
+.idea/
