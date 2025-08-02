@@ -7,7 +7,7 @@ export type Campaign = {
   stakers: number
   rewardPool: string
   dailyReward: string
-  apy: number
+  apy: number | 'N/A'
   apyColor: 'green' | 'orange'
   fundable: boolean
   claimable: boolean
@@ -23,7 +23,7 @@ export const campaigns: Campaign[] = [
     imageUrl: '/images/BAYC.jpg',
     stakers: 1234,
     rewardPool: '1.2M APE',
-    dailyReward: '10k APE',
+    dailyReward: '9.72 APE',
     apy: 12.5,
     apyColor: 'green',
     fundable: true,
@@ -36,9 +36,9 @@ export const campaigns: Campaign[] = [
     campaignName: 'ETHGLOBAL',
     campaignType: 'PFP Staking',
     imageUrl: '/images/ETHGLOBAL.jpg',
-    stakers: 856,
+    stakers: 16,
     rewardPool: '950k EGLOBAL',
-    dailyReward: '8k EBLOBAL',
+    dailyReward: '593 EBLOBAL',
     apy: 15.2,
     apyColor: 'green',
     fundable: true,
@@ -53,8 +53,8 @@ export const campaigns: Campaign[] = [
     imageUrl: '/images/1INCH.jpg',
     stakers: 2341,
     rewardPool: '2.1M 1INCH',
-    dailyReward: '15k 1INCH',
-    apy: 18.7,
+    dailyReward: '8.7 1INCH',
+    apy: 'N/A',
     apyColor: 'green',
     fundable: true,
     claimable: true,
@@ -67,8 +67,8 @@ export const campaigns: Campaign[] = [
     campaignType: 'PFP Staking',
     imageUrl: '/images/CRYPTOPUNKS.jpg',
     stakers: 567,
-    rewardPool: '800k ETH',
-    dailyReward: '5k ETH',
+    rewardPool: '1800 ETH',
+    dailyReward: '0.317 ETH',
     apy: 8.2,
     apyColor: 'green',
     fundable: true,
@@ -82,8 +82,8 @@ export const campaigns: Campaign[] = [
     campaignType: 'PFP Staking',
     imageUrl: '/images/SPROTO.jpg',
     stakers: 890,
-    rewardPool: '500k BITCOIN',
-    dailyReward: '2.5k BITCOIN',
+    rewardPool: '800k BITCOIN',
+    dailyReward: '8.98 BITCOIN',
     apy: 22.1,
     apyColor: 'orange',
     fundable: false,
@@ -92,14 +92,14 @@ export const campaigns: Campaign[] = [
   },
   {
     id: 6,
-    name: 'MOG/AAC<br/>Derivative',
-    campaignName: 'MOG',
+    name: 'MOGACC<br/>Derivative',
+    campaignName: 'MOGACC',
     campaignType: 'Derivative',
     imageUrl: '/images/MOG.jpg',
-    stakers: 1456,
-    rewardPool: '1.8M MOG',
-    dailyReward: '12k MOG',
-    apy: 14.3,
+    stakers: 2456,
+    rewardPool: '118M MOG',
+    dailyReward: '480 MOG',
+    apy: 'N/A',
     apyColor: 'green',
     fundable: true,
     claimable: true,

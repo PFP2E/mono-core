@@ -28,7 +28,7 @@ interface CampaignDetail {
   stakers: number
   rewardPool: string
   dailyReward: string
-  apy: number
+  apy: number | 'N/A'
   apyColor: 'green' | 'orange'
   description: string
   eligibilityCriteria: EligibilityCriteria[]
@@ -161,10 +161,12 @@ const campaignDetails: CampaignDetail[] = campaigns.map((campaign, index) => {
         }
       ],
       [
-        { id: '1', 
+        {
+          id: '1',
           text: 'Wear MOG/ACC stylyed image on X',
           completed: true,
-          verified: true },
+          verified: true
+        },
         {
           id: '2',
           text: 'Hold 1B MOG tokens',
@@ -290,12 +292,12 @@ export default function CampaignPage() {
               <CardTitle>About Campaign</CardTitle>
             </CardHeader>
             <CardContent>
-                              <p className='text-muted-foreground leading-relaxed'>
-                  {
-                    campaignDetails.find(c => c.slug === campaign.campaignName)
-                      ?.description
-                  }
-                </p>
+              <p className='text-muted-foreground leading-relaxed'>
+                {
+                  campaignDetails.find(c => c.slug === campaign.campaignName)
+                    ?.description
+                }
+              </p>
             </CardContent>
           </Card>
         </div>
@@ -342,7 +344,11 @@ export default function CampaignPage() {
               </div>
               <div className='flex justify-between'>
                 <span className='text-muted-foreground'>NFT floor APY</span>
-                <span className='font-medium'>{campaign.apy}%</span>
+                <span className='font-medium'>
+                  {typeof campaign.apy === 'number'
+                    ? `${campaign.apy}%`
+                    : campaign.apy}
+                </span>
               </div>
             </CardContent>
           </Card>
@@ -354,32 +360,36 @@ export default function CampaignPage() {
             </CardHeader>
             <CardContent>
               <div className='space-y-3'>
-                {campaignDetails.find(c => c.slug === campaign.campaignName)?.eligibilityCriteria.map((criteria: EligibilityCriteria) => (
-                  <div key={criteria.id} className='rounded-lg border p-3'>
-                    <div className='flex items-center justify-between'>
-                      <div className='flex items-center gap-2'>
-                        <span className='text-sm'>{criteria.text}</span>
-                      </div>
-                      <div className='flex items-center gap-2'>
-                        <Badge
-                          variant={criteria.completed ? 'secondary' : 'outline'}
-                          className={
-                            criteria.completed
-                              ? 'bg-green-100 text-green-800'
-                              : ''
-                          }
-                        >
-                          {criteria.completed ? (
-                            <CheckCircle className='mr-1 h-3 w-3' />
-                          ) : (
-                            <Clock className='mr-1 h-3 w-3' />
-                          )}
-                          {criteria.completed ? 'Completed' : 'Pending'}
-                        </Badge>
+                {campaignDetails
+                  .find(c => c.slug === campaign.campaignName)
+                  ?.eligibilityCriteria.map((criteria: EligibilityCriteria) => (
+                    <div key={criteria.id} className='rounded-lg border p-3'>
+                      <div className='flex items-center justify-between'>
+                        <div className='flex items-center gap-2'>
+                          <span className='text-sm'>{criteria.text}</span>
+                        </div>
+                        <div className='flex items-center gap-2'>
+                          <Badge
+                            variant={
+                              criteria.completed ? 'secondary' : 'outline'
+                            }
+                            className={
+                              criteria.completed
+                                ? 'bg-green-100 text-green-800'
+                                : ''
+                            }
+                          >
+                            {criteria.completed ? (
+                              <CheckCircle className='mr-1 h-3 w-3' />
+                            ) : (
+                              <Clock className='mr-1 h-3 w-3' />
+                            )}
+                            {criteria.completed ? 'Completed' : 'Pending'}
+                          </Badge>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
               </div>
             </CardContent>
           </Card>

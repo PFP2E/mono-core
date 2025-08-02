@@ -95,7 +95,9 @@ export const Marketplace = () => {
                         }`}
                       />
                       <div className='text-card-foreground text-base font-medium'>
-                        {campaign.apy}%
+                        {typeof campaign.apy === 'number'
+                          ? `${campaign.apy}%`
+                          : campaign.apy}
                       </div>
                     </div>
                   </div>

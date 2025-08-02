@@ -39,16 +39,10 @@ export function UserDashboard() {
   return (
     <div className='my-8 space-y-6'>
       <Card className='mx-auto max-w-2xl'>
-        <CardHeader className='flex flex-col md:flex-row md:items-center md:justify-between'>
+        <CardHeader className='flex flex-row items-center justify-between'>
           <CardTitle>Welcome Back</CardTitle>
-          {/* Desktop Button */}
-          <div className='hidden md:block'>
-            <Button asChild>
-              <Link href='/create-campaign'>Create Campaign</Link>
-            </Button>
-          </div>
         </CardHeader>
-        <CardContent className='space-y-6'>
+        <CardContent className='flex items-center justify-between'>
           {/* Profile Section */}
           <div className='flex items-center gap-4'>
             {isXAuthenticated && xSession && pfpUrl && (
@@ -89,8 +83,27 @@ export function UserDashboard() {
             </div>
           </div>
 
-          {/* Mobile Button */}
-          <div className='flex justify-center md:hidden'>
+          {/* Desktop Buttons */}
+          <div className='hidden flex-col gap-2 md:flex'>
+            <Button
+              asChild
+              className='bg-blue-600 text-white hover:bg-blue-700'
+            >
+              <Link href='/mogacc-generator'>MOG/ACC Generator</Link>
+            </Button>
+            <Button
+              asChild
+              className='bg-green-600 text-white hover:bg-green-700'
+            >
+              <Link href='/create-campaign'>Create Campaign</Link>
+            </Button>
+          </div>
+
+          {/* Mobile Buttons */}
+          <div className='flex flex-col gap-2 md:hidden'>
+            <Button asChild variant='outline' size='lg'>
+              <Link href='/mogacc-generator'>MOG/ACC Generator</Link>
+            </Button>
             <Button asChild size='lg'>
               <Link href='/create-campaign'>Create Campaign</Link>
             </Button>
