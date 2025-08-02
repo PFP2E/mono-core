@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -136,7 +137,12 @@ export const Rewards = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pt-8">
+      <div className="mb-6">
+        <Button variant='outline' asChild>
+          <Link href='/'>← Back Home</Link>
+        </Button>
+      </div>
       <h2 className="text-2xl font-bold text-white">Active Staking Campaigns</h2>
       
       <Card className="bg-[#1a1a1a] border-[#333] w-full max-w-[400px] min-w-[280px]">

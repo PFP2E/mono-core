@@ -100,6 +100,8 @@ const campaignTypeInfo = {
   }
 }
 
+import Link from 'next/link'
+
 export function CreateCampaign() {
   const [step, setStep] = React.useState(1)
   const [campaignName, setCampaignName] = React.useState('')
@@ -1405,7 +1407,12 @@ export function CreateCampaign() {
   }
 
   return (
-    <div className='my-8 space-y-8'>
+    <div className='my-8 space-y-6'>
+      <div className="mb-6">
+        <Button variant='outline' asChild>
+          <Link href='/'>← Back Home</Link>
+        </Button>
+      </div>
       <Toaster />
       <Stepper steps={steps} currentStep={step} />
       <Card>

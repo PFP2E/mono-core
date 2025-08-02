@@ -87,15 +87,21 @@ export function UserDashboard() {
           <div className='hidden flex-col gap-2 md:flex'>
             <Button
               asChild
+              className='bg-green-600 text-white hover:bg-green-700'
+            >
+              <Link href='/rewards'>Rewards</Link>
+            </Button>
+            <Button
+              asChild
               className='bg-blue-600 text-white hover:bg-blue-700'
             >
               <Link href='/mogacc-generator'>MOG/ACC Generator</Link>
             </Button>
             <Button
               asChild
-              className='bg-green-600 text-white hover:bg-green-700'
+              className='bg-orange-700 text-white hover:bg-orange-800'
             >
-              <Link href='/create-campaign'>Create Campaign</Link>
+              <Link href='/create-campaign'>Campaign Constructor</Link>
             </Button>
           </div>
 
@@ -104,8 +110,8 @@ export function UserDashboard() {
             <Button asChild variant='outline' size='lg'>
               <Link href='/mogacc-generator'>MOG/ACC Generator</Link>
             </Button>
-            <Button asChild size='lg'>
-              <Link href='/create-campaign'>Create Campaign</Link>
+            <Button asChild size='lg' className='bg-orange-700 hover:bg-orange-800'>
+              <Link href='/create-campaign'>Campaign Constructor</Link>
             </Button>
           </div>
         </CardContent>
