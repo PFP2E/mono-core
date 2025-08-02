@@ -42,7 +42,7 @@ export function UserDashboard() {
         <CardHeader className='flex flex-row items-center justify-between'>
           <CardTitle>Welcome Back</CardTitle>
         </CardHeader>
-        <CardContent className='flex items-center justify-between'>
+        <CardContent className='space-y-4'>
           {/* Profile Section */}
           <div className='flex items-center gap-4'>
             {isXAuthenticated && xSession && pfpUrl && (
@@ -106,8 +106,11 @@ export function UserDashboard() {
           </div>
 
           {/* Mobile Buttons */}
-          <div className='flex flex-col gap-2 md:hidden'>
-            <Button asChild variant='outline' size='lg'>
+          <div className='flex flex-col gap-3 md:hidden'>
+            <Button asChild size='lg' className='bg-green-600 hover:bg-green-700'>
+              <Link href='/rewards'>Rewards</Link>
+            </Button>
+            <Button asChild size='lg' className='bg-blue-600 hover:bg-blue-700'>
               <Link href='/mogacc-generator'>MOG/ACC Generator</Link>
             </Button>
             <Button asChild size='lg' className='bg-orange-700 hover:bg-orange-800'>
