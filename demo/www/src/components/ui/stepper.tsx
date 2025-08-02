@@ -15,7 +15,7 @@ export function Stepper({ steps, currentStep }: StepperProps) {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768)
     }
-    
+
     checkMobile()
     window.addEventListener('resize', checkMobile)
     return () => window.removeEventListener('resize', checkMobile)
@@ -28,7 +28,10 @@ export function Stepper({ steps, currentStep }: StepperProps) {
       return steps.map((step, index) => ({ step, index }))
     } else {
       // Mobile: show sliding window of 3 steps
-      const startIndex = Math.max(0, Math.min(currentStep - 1, steps.length - 3))
+      const startIndex = Math.max(
+        0,
+        Math.min(currentStep - 1, steps.length - 3)
+      )
       const endIndex = Math.min(startIndex + 3, steps.length)
       return steps.slice(startIndex, endIndex).map((step, relativeIndex) => ({
         step,
@@ -41,7 +44,7 @@ export function Stepper({ steps, currentStep }: StepperProps) {
 
   return (
     <nav aria-label='Progress'>
-      <ol className='flex space-x-4 md:space-x-8 transition-all duration-300'>
+      <ol className='flex space-x-4 transition-all duration-300 md:space-x-8'>
         {visibleSteps.map(({ step, index }) => {
           const stepIndex = index + 1
           const isCompleted = currentStep > stepIndex

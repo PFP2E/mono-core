@@ -11,6 +11,7 @@ export type Campaign = {
   apyColor: 'green' | 'orange'
   fundable: boolean
   claimable: boolean
+  token: string
 }
 
 export const campaigns: Campaign[] = [
@@ -26,7 +27,8 @@ export const campaigns: Campaign[] = [
     apy: 12.5,
     apyColor: 'green',
     fundable: true,
-    claimable: true
+    claimable: true,
+    token: 'BAYC'
   },
   {
     id: 2,
@@ -40,7 +42,8 @@ export const campaigns: Campaign[] = [
     apy: 15.2,
     apyColor: 'green',
     fundable: true,
-    claimable: false
+    claimable: false,
+    token: 'ETHG'
   },
   {
     id: 3,
@@ -54,7 +57,8 @@ export const campaigns: Campaign[] = [
     apy: 18.7,
     apyColor: 'green',
     fundable: true,
-    claimable: true
+    claimable: true,
+    token: '1INCH'
   },
   {
     id: 4,
@@ -68,7 +72,8 @@ export const campaigns: Campaign[] = [
     apy: 8.2,
     apyColor: 'green',
     fundable: true,
-    claimable: false
+    claimable: false,
+    token: 'PUNK'
   },
   {
     id: 5,
@@ -82,7 +87,8 @@ export const campaigns: Campaign[] = [
     apy: 22.1,
     apyColor: 'orange',
     fundable: false,
-    claimable: true
+    claimable: true,
+    token: 'SPROTO'
   },
   {
     id: 6,
@@ -96,6 +102,7 @@ export const campaigns: Campaign[] = [
     apy: 14.3,
     apyColor: 'green',
     fundable: true,
-    claimable: true
+    claimable: true,
+    token: 'MOG'
   }
 ]

@@ -4,19 +4,12 @@
 import { useSIWE } from '@/hooks/useSIWE'
 import { useXSession } from '@/hooks/useXSession'
 import { useWallet } from '@/hooks/use-wallet'
-import { Card, CardAction, CardContent, CardHeader, CardTitle } from './ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card'
 import Image from 'next/image'
 import { Button } from './ui/button'
 import Link from 'next/link'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger
-} from './ui/tooltip'
-import { AlertTriangle } from 'lucide-react'
-import { useActivityStore } from '@/store/activity.store'
 import { Trash2 } from 'lucide-react'
+import { useActivityStore } from '@/store/activity.store'
 
 export function UserDashboard() {
   const { isAuthenticated, ens } = useSIWE()
@@ -24,7 +17,7 @@ export function UserDashboard() {
   const { formattedAddress } = useWallet()
   // Use the hook to get reactive updates
   const { activities, clearHistory } = useActivityStore()
-  
+
   // Debug log to see activities
   console.log('Current activities:', activities)
 
@@ -33,7 +26,6 @@ export function UserDashboard() {
   }
 
   const pfpUrl = xSession?.pfpUrl
-  const hasProfileData = pfpUrl && xSession?.username !== 'X User'
 
   const formatTimestamp = (timestamp: number) => {
     return new Date(timestamp).toLocaleDateString('en-US', {
@@ -60,7 +52,13 @@ export function UserDashboard() {
           {/* Profile Section */}
           <div className='flex items-center gap-4'>
             {isXAuthenticated && xSession && pfpUrl && (
-              <Image src={pfpUrl} alt={'pfp'} width={80} height={80} className='rounded-full' />
+              <Image
+                src={pfpUrl}
+                alt={'pfp'}
+                width={80}
+                height={80}
+                className='rounded-full'
+              />
             )}
             {isAuthenticated && ens?.avatar && (
               <Image
@@ -80,13 +78,17 @@ export function UserDashboard() {
               )}
               {isAuthenticated && (
                 <div>
-                  <p className='text-muted-foreground text-sm'>Wallet Connected</p>
-                  <p className='text-lg font-medium'>{ens?.name || formattedAddress}</p>
+                  <p className='text-muted-foreground text-sm'>
+                    Wallet Connected
+                  </p>
+                  <p className='text-lg font-medium'>
+                    {ens?.name || formattedAddress}
+                  </p>
                 </div>
               )}
             </div>
           </div>
-          
+
           {/* Mobile Button */}
           <div className='flex justify-center md:hidden'>
             <Button asChild size='lg'>
@@ -108,28 +110,35 @@ export function UserDashboard() {
                 onClick={clearHistory}
                 className='h-6 px-2 text-xs'
               >
-                <Trash2 className='h-3 w-3 mr-1' />
+                <Trash2 className='mr-1 h-3 w-3' />
                 Reset
               </Button>
             </div>
           </CardHeader>
           <CardContent>
             <div className='space-y-3'>
-              {activities.slice(0, 5).map((activity) => (
-                <div key={activity.id} className='flex items-center justify-between py-2 border-b border-border last:border-b-0'>
-                  <div className='flex items-center justify-between w-full'>
+              {activities.slice(0, 5).map(activity => (
+                <div
+                  key={activity.id}
+                  className='border-border flex items-center justify-between border-b py-2 last:border-b-0'
+                >
+                  <div className='flex w-full items-center justify-between'>
                     <span className='text-sm font-medium'>
                       {activity.type === 'pfp_update' ? (
                         <>
-                          @{activity.username} Staking {activity.campaignName} PFP to earn {activity.tokenName}
+                          @{activity.username} Staking {activity.campaignName}{' '}
+                          PFP to earn {activity.tokenName}
                         </>
                       ) : (
                         <>
-                          {activity.type === 'deposit' ? 'Deposit' : 'Claim'}: {activity.tokenName} ({activity.amount}) {activity.tokenName} tokens into {activity.campaignName}
+                          {activity.type === 'deposit' ? 'Deposit' : 'Claim'}:{' '}
+                          {activity.tokenName} ({activity.amount}){' '}
+                          {activity.tokenName} tokens into{' '}
+                          {activity.campaignName}
                         </>
                       )}
                     </span>
-                    <span className='text-xs text-muted-foreground'>
+                    <span className='text-muted-foreground text-xs'>
                       {formatTimestamp(activity.timestamp)}
                     </span>
                   </div>
