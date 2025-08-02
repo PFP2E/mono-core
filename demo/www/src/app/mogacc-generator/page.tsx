@@ -11,7 +11,7 @@ import { Icons } from '@/components/icons'
 import { useXSession } from '@/hooks/useXSession'
 import { useSIWE } from '@/hooks/useSIWE'
 import { Upload, CheckCircle, Loader2 } from 'lucide-react'
-import { campaigns } from '@/lib/mock-data'
+import { campaigns, type Campaign } from '@/lib/mock-data'
 import {
   DialogContent,
   DialogHeader,
@@ -32,6 +32,14 @@ export default function AIGeneratorPage() {
   
   // Loading state for MOG/ACC image
   const [isLoadingMogacc, setIsLoadingMogacc] = React.useState(true)
+
+  // Get MOG campaign data from mock data with fallback values
+  const mogCampaign = campaigns.find((c: Campaign) => c.campaignName === 'MOG') || {
+    stakers: 2456,
+    rewardPool: '118M MOG',
+    dailyReward: '480 MOG',
+    apy: 'N/A'
+  }
 
   // Simulate loading for 4 seconds
   React.useEffect(() => {
@@ -83,16 +91,8 @@ export default function AIGeneratorPage() {
   // Construct image paths
   const xpfpImagePath = `/images/Users/${username}/${username}_xpfp.jpg`
   const mogaccImagePath = `/images/Users/${username}/${username}_mogacc.jpg`
-  
-  // Get MOG campaign data from mock data
-  const mogCampaign = campaigns.find(c => c.campaignName === 'MOG')
-  
-  // Debug logging
-  console.log('Username:', username)
-  console.log('X PFP Path:', xpfpImagePath)
-  console.log('MOGACC Path:', mogaccImagePath)
 
-    return (
+  return (
     <div className='container mx-auto px-4 py-4'>
       <div className='mx-auto max-w-4xl'>
         <div className='mb-6'>
@@ -101,115 +101,98 @@ export default function AIGeneratorPage() {
           </Button>
         </div>
         
-                 <div className='mb-3 text-center'>
-           <h1 className='mb-1 text-4xl font-bold'>MOG/ACC AI Generator</h1>
-           <p className='text-lg text-muted-foreground'>
-             Use this MOG/ACC filter on your PFP to earn rewards
-           </p>
-         </div>
+        <div className='mb-3 text-center'>
+          <h1 className='mb-1 text-4xl font-bold'>MOG/ACC AI Generator</h1>
+          <p className='text-lg text-muted-foreground'>
+            Use this MOG/ACC filter on your PFP to earn rewards
+          </p>
+        </div>
 
-                                                                                                                                                                       <div className='grid grid-cols-1 gap-2 lg:grid-cols-3 lg:grid-flow-col'>
-              {/* Left Column - User Images (spans 2 columns) */}
-              <div className='lg:col-span-2 h-full'>
-                <Card className='h-full flex flex-col'>
-                  <CardHeader className='pb-1'>
-                    <CardTitle>Your Images</CardTitle>
-                  </CardHeader>
-                  <CardContent className='p-2 flex-1'>
-                    <div className='flex flex-row gap-2 h-full'>
-                      {/* X PFP */}
-                      <div className='flex-1'>
-                        <div className='text-center mb-0.5'>
-                          <div className='text-sm font-medium text-muted-foreground'>X PFP</div>
-                        </div>
-                        <div className='relative w-full overflow-hidden rounded-lg border' style={{ aspectRatio: '1/1' }}>
-                          <Image
-                            src={xpfpImagePath}
-                            alt={`${username} X PFP`}
-                            fill
-                            className='object-contain'
-                          />
-                        </div>
-                      </div>
-                      
-                      {/* MOGACC */}
-                      <div className='flex-1'>
-                        <div className='text-center mb-0.5'>
-                          <div className='text-sm font-medium text-muted-foreground'>MOG/ACC</div>
-                        </div>
-                        <div className='relative w-full overflow-hidden rounded-lg border' style={{ aspectRatio: '1/1' }}>
-                          {isLoadingMogacc ? (
-                            <div className='flex h-full w-full items-center justify-center bg-muted/20'>
-                              <div className='flex flex-col items-center gap-2'>
-                                <Loader2 className='h-8 w-8 animate-spin text-muted-foreground' />
-                                <p className='text-sm text-muted-foreground'>Processing...</p>
-                              </div>
-                            </div>
-                          ) : (
-                            <Image
-                              src={mogaccImagePath}
-                              alt={`${username} MOGACC`}
-                              fill
-                              className='object-contain'
-                            />
-                          )}
-                        </div>
-                      </div>
+        <div className='grid grid-cols-1 gap-2 lg:grid-cols-3 lg:grid-flow-col'>
+          {/* Left Column - User Images (spans 2 columns) */}
+          <div className='lg:col-span-2 h-full'>
+            <Card className='h-full flex flex-col'>
+              <CardHeader className='pb-1'>
+                <CardTitle>Your Images</CardTitle>
+              </CardHeader>
+              <CardContent className='p-2 flex-1'>
+                <div className='flex flex-row gap-2 h-full'>
+                  {/* X PFP */}
+                  <div className='flex-1'>
+                    <div className='text-center mb-0.5'>
+                      <div className='text-sm font-medium text-muted-foreground'>X PFP</div>
                     </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Right Column - Stats and Button */}
-              <div className='flex flex-col gap-2 h-full'>
-                {/* Stats Card */}
-                <Card className='flex-1'>
-                  <CardHeader className='pb-1'>
-                    <CardTitle>MOGACC Campaign</CardTitle>
-                  </CardHeader>
-                  <CardContent className='p-2'>
-                    <div className='space-y-3'>
-                      <div className='flex justify-between'>
-                        <span className='text-muted-foreground'>Participants</span>
-                        <span className='font-medium'>{mogCampaign?.stakers.toLocaleString() || '1,456'}</span>
-                      </div>
-                      <div className='flex justify-between'>
-                        <span className='text-muted-foreground'>Reward Pool</span>
-                        <span className='font-medium'>{mogCampaign?.rewardPool || '1.8M MOG'}</span>
-                      </div>
-                      <div className='flex justify-between'>
-                        <span className='text-muted-foreground'>Daily Reward</span>
-                        <span className='font-medium'>{mogCampaign?.dailyReward || '12k MOG'}</span>
-                      </div>
-                      <div className='flex justify-between'>
-                        <span className='text-muted-foreground'>NFT floor APY</span>
-                        <span className='font-medium'>{typeof mogCampaign?.apy === 'number' ? `${mogCampaign.apy}%` : mogCampaign?.apy || 'N/A'}</span>
-                      </div>
+                    <div className='relative w-full overflow-hidden rounded-lg border' style={{ aspectRatio: '1/1' }}>
+                      <Image
+                        src={xpfpImagePath}
+                        alt={`${username} X PFP`}
+                        fill
+                        className='object-contain'
+                      />
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                  
+                  {/* MOGACC */}
+                  <div className='flex-1'>
+                    <div className='text-center mb-0.5'>
+                      <div className='text-sm font-medium text-muted-foreground'>MOG/ACC</div>
+                    </div>
+                    <div className='relative w-full overflow-hidden rounded-lg border' style={{ aspectRatio: '1/1' }}>
+                      {isLoadingMogacc ? (
+                        <div className='flex h-full w-full items-center justify-center bg-muted/20'>
+                          <div className='flex flex-col items-center gap-2'>
+                            <Loader2 className='h-8 w-8 animate-spin text-muted-foreground' />
+                            <p className='text-sm text-muted-foreground'>Processing...</p>
+                          </div>
+                        </div>
+                      ) : (
+                        <Image
+                          src={mogaccImagePath}
+                          alt={`${username} MOGACC`}
+                          fill
+                          className='object-contain'
+                        />
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
-                {/* Button Card - Desktop Only */}
-                <Card className='hidden lg:block'>
-                  <CardContent className='p-2 text-center'>
-                    <h3 className='mb-1 text-base font-semibold'>Make Your X PFP</h3>
-                    <p className='mb-2 text-sm text-muted-foreground'>
-                      Apply the MOGACC overlay to your X profile picture and start earning rewards
-                    </p>
-                    <Button 
-                      size='lg' 
-                      className='w-full'
-                      onClick={() => setShowConfirmDialog(true)}
-                    >
-                      Make MOG/ACC my X PFP
-                    </Button>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
+          {/* Right Column - Stats and Button */}
+          <div className='flex flex-col gap-2 h-full'>
+            {/* Stats Card */}
+            <Card className='flex-1'>
+              <CardHeader className='pb-1'>
+                <CardTitle>MOGACC Campaign</CardTitle>
+              </CardHeader>
+              <CardContent className='p-2'>
+                <div className='space-y-3'>
+                  <div className='flex justify-between'>
+                    <span className='text-muted-foreground'>Participants</span>
+                    <span className='font-medium'>{mogCampaign.stakers.toLocaleString()}</span>
+                  </div>
+                  <div className='flex justify-between'>
+                    <span className='text-muted-foreground'>Reward Pool</span>
+                    <span className='font-medium'>{mogCampaign.rewardPool}</span>
+                  </div>
+                  <div className='flex justify-between'>
+                    <span className='text-muted-foreground'>Daily Reward</span>
+                    <span className='font-medium'>{mogCampaign.dailyReward}</span>
+                  </div>
+                  <div className='flex justify-between'>
+                    <span className='text-muted-foreground'>NFT floor APY</span>
+                    <span className='font-medium'>
+                      {typeof mogCampaign.apy === 'number' ? `${mogCampaign.apy}%` : mogCampaign.apy}
+                    </span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-            {/* Button Card - Mobile Only */}
-            <Card className='mt-2 lg:hidden'>
+            {/* Button Card - Desktop Only */}
+            <Card className='hidden lg:block'>
               <CardContent className='p-2 text-center'>
                 <h3 className='mb-1 text-base font-semibold'>Make Your X PFP</h3>
                 <p className='mb-2 text-sm text-muted-foreground'>
@@ -224,7 +207,26 @@ export default function AIGeneratorPage() {
                 </Button>
               </CardContent>
             </Card>
-       </div>
+          </div>
+        </div>
+
+        {/* Button Card - Mobile Only */}
+        <Card className='mt-2 lg:hidden'>
+          <CardContent className='p-2 text-center'>
+            <h3 className='mb-1 text-base font-semibold'>Make Your X PFP</h3>
+            <p className='mb-2 text-sm text-muted-foreground'>
+              Apply the MOGACC overlay to your X profile picture and start earning rewards
+            </p>
+            <Button 
+              size='lg' 
+              className='w-full'
+              onClick={() => setShowConfirmDialog(true)}
+            >
+              Make MOG/ACC my X PFP
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* X PFP Confirmation Dialog */}
       <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
@@ -251,26 +253,26 @@ export default function AIGeneratorPage() {
                 </DialogDescription>
               </DialogHeader>
 
-                             {/* User Info */}
-               <div className='flex items-center gap-3 py-2'>
-                 <div className='flex items-center gap-3'>
-                   <Image
-                     src={mogaccImagePath}
-                     alt='MOG/ACC Preview'
-                     width={40}
-                     height={40}
-                     className='rounded-full'
-                   />
-                   <div>
-                     <p className='text-[15px] font-bold'>
-                       @{session?.username}
-                     </p>
-                     <p className='text-xs text-gray-400'>
-                       MOG/ACC PFP Preview
-                     </p>
-                   </div>
-                 </div>
-               </div>
+              {/* User Info */}
+              <div className='flex items-center gap-3 py-2'>
+                <div className='flex items-center gap-3'>
+                  <Image
+                    src={mogaccImagePath}
+                    alt='MOG/ACC Preview'
+                    width={40}
+                    height={40}
+                    className='rounded-full'
+                  />
+                  <div>
+                    <p className='text-[15px] font-bold'>
+                      @{session?.username}
+                    </p>
+                    <p className='text-xs text-gray-400'>
+                      MOG/ACC PFP Preview
+                    </p>
+                  </div>
+                </div>
+              </div>
 
               <div className='flex gap-3 pt-4'>
                 <Button
@@ -315,6 +317,6 @@ export default function AIGeneratorPage() {
           )}
         </DialogContent>
       </Dialog>
-     </div>
+    </div>
   )
 }

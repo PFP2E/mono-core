@@ -48,7 +48,7 @@ export const campaigns: Campaign[] = [
   {
     id: 3,
     name: '1 INCH<br/>Derivative',
-    campaignName: '1 INCH',
+    campaignName: '1INCH',
     campaignType: 'Derivative',
     imageUrl: '/images/1INCH.jpg',
     stakers: 2341,
@@ -93,7 +93,7 @@ export const campaigns: Campaign[] = [
   {
     id: 6,
     name: 'MOGACC<br/>Derivative',
-    campaignName: 'MOGACC',
+    campaignName: 'MOG',
     campaignType: 'Derivative',
     imageUrl: '/images/MOG.jpg',
     stakers: 2456,
@@ -106,3 +106,19 @@ export const campaigns: Campaign[] = [
     token: 'MOG'
   }
 ]
+
+// Mock matches for testing
+export const mockMatches = {
+  BAYC: {
+    poolName: 'BAYC',
+    tokenId: '1234',
+    similarity: 0.95,
+    isSpecial: false
+  },
+  ETHGLOBAL: {
+    poolName: 'ETHGLOBAL',
+    tokenId: '5678',
+    similarity: 0.92,
+    isSpecial: false
+  }
+}
