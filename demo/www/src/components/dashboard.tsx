@@ -38,7 +38,7 @@ export function UserDashboard() {
 
   return (
     <div className='my-8 space-y-6'>
-      <Card>
+      <Card className='mx-auto max-w-2xl'>
         <CardHeader className='flex flex-col md:flex-row md:items-center md:justify-between'>
           <CardTitle>Welcome Back</CardTitle>
           {/* Desktop Button */}
@@ -100,7 +100,7 @@ export function UserDashboard() {
 
       {/* Deposit History */}
       {activities.length > 0 && (
-        <Card>
+        <Card className='mx-auto max-w-2xl'>
           <CardHeader>
             <div className='flex items-center gap-2'>
               <CardTitle>Recent Activity</CardTitle>

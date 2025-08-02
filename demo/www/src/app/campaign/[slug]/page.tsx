@@ -57,27 +57,27 @@ const campaignDetails: CampaignDetail[] = campaigns.map((campaign, index) => {
       '1INCH is a decentralized exchange aggregator that sources liquidity from various DEXs to provide users with the best trading rates and lowest fees.',
       'CryptoPunks is one of the first NFT projects on Ethereum, featuring 10,000 unique collectible characters with proof of ownership stored on the Ethereum blockchain.',
       "Sproto Gremlins are 3,333 exclusive unique manifestations of harrypotterobamasonic10inu's egregore. Imbued with high speed presidential wizardry and lifelong loyalty, Sproto Gremlins are vibrant, mischievous, quirky NFTs with chaotic energy. Blending humor and creativity, it appeals to collectors who love playful, haywire aesthetics.",
-      'MOG is a community-driven meme token that has evolved into a comprehensive DeFi ecosystem, offering staking, farming, and governance opportunities.'
+      '$MOG is the internets first culture coin. A community-driven meme token that has evolved into a comprehensive DeFi ecosystem, offering staking, farming, and governance opportunities.'
     ][index],
     eligibilityCriteria: [
       [
         {
           id: '1',
-          text: 'Hold BAYC NFT for more than 5 days',
-          completed: true,
-          verified: true
-        },
-        {
-          id: '2',
           text: 'Set BAYC as profile picture',
           completed: true,
           verified: true
         },
         {
-          id: '3',
-          text: 'Participate in community events',
+          id: '2',
+          text: 'Hold BAYC NFT for more than 30 days',
           completed: false,
           verified: false
+        },
+        {
+          id: '3',
+          text: 'Attend ETHGlobal hackathon',
+          completed: true,
+          verified: true
         }
       ],
       [
@@ -109,9 +109,9 @@ const campaignDetails: CampaignDetail[] = campaigns.map((campaign, index) => {
         },
         {
           id: '2',
-          text: 'Stake for minimum 30 days',
-          completed: true,
-          verified: true
+          text: 'Use for 30 days consecurtive days',
+          completed: false,
+          verified: false
         },
         {
           id: '3',
@@ -123,7 +123,7 @@ const campaignDetails: CampaignDetail[] = campaigns.map((campaign, index) => {
       [
         {
           id: '1',
-          text: 'Own a CryptoPunk NFT',
+          text: 'Set CryptoPunk as profile picture',
           completed: true,
           verified: true
         },
@@ -143,13 +143,13 @@ const campaignDetails: CampaignDetail[] = campaigns.map((campaign, index) => {
       [
         {
           id: '1',
-          text: 'Stake SPROTO tokens',
+          text: 'Set Sproto Gremlin as profile picture',
           completed: true,
           verified: true
         },
         {
           id: '2',
-          text: 'Provide liquidity to pools',
+          text: 'Provide liquidity to BITCOIN LP',
           completed: false,
           verified: false
         },
@@ -161,10 +161,13 @@ const campaignDetails: CampaignDetail[] = campaigns.map((campaign, index) => {
         }
       ],
       [
-        { id: '1', text: 'Hold MOG tokens', completed: true, verified: true },
+        { id: '1', 
+          text: 'Wear MOG/ACC stylyed image on X',
+          completed: true,
+          verified: true },
         {
           id: '2',
-          text: 'Stake for minimum 7 days',
+          text: 'Hold 1B MOG tokens',
           completed: true,
           verified: true
         },
@@ -287,12 +290,12 @@ export default function CampaignPage() {
               <CardTitle>About Campaign</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className='text-muted-foreground leading-relaxed'>
-                {
-                  campaignDetails.find(c => c.name === campaign.campaignName)
-                    ?.description
-                }
-              </p>
+                              <p className='text-muted-foreground leading-relaxed'>
+                  {
+                    campaignDetails.find(c => c.slug === campaign.campaignName)
+                      ?.description
+                  }
+                </p>
             </CardContent>
           </Card>
         </div>
@@ -351,39 +354,32 @@ export default function CampaignPage() {
             </CardHeader>
             <CardContent>
               <div className='space-y-3'>
-                <div className='rounded-lg border p-3'>
-                  <div className='flex items-center justify-between'>
-                    <div className='flex items-center gap-2'>
-                      <span className='text-sm'>
-                        Hold {campaign.campaignName} tokens
-                      </span>
-                    </div>
-                    <div className='flex items-center gap-2'>
-                      <Badge
-                        variant='secondary'
-                        className='bg-green-100 text-green-800'
-                      >
-                        <CheckCircle className='mr-1 h-3 w-3' />
-                        Completed
-                      </Badge>
-                    </div>
-                  </div>
-                </div>
-                <div className='rounded-lg border p-3'>
-                  <div className='flex items-center justify-between'>
-                    <div className='flex items-center gap-2'>
-                      <span className='text-sm'>
-                        Participate in community events
-                      </span>
-                    </div>
-                    <div className='flex items-center gap-2'>
-                      <Badge variant='outline'>
-                        <Clock className='mr-1 h-3 w-3' />
-                        Pending
-                      </Badge>
+                {campaignDetails.find(c => c.slug === campaign.campaignName)?.eligibilityCriteria.map((criteria: EligibilityCriteria) => (
+                  <div key={criteria.id} className='rounded-lg border p-3'>
+                    <div className='flex items-center justify-between'>
+                      <div className='flex items-center gap-2'>
+                        <span className='text-sm'>{criteria.text}</span>
+                      </div>
+                      <div className='flex items-center gap-2'>
+                        <Badge
+                          variant={criteria.completed ? 'secondary' : 'outline'}
+                          className={
+                            criteria.completed
+                              ? 'bg-green-100 text-green-800'
+                              : ''
+                          }
+                        >
+                          {criteria.completed ? (
+                            <CheckCircle className='mr-1 h-3 w-3' />
+                          ) : (
+                            <Clock className='mr-1 h-3 w-3' />
+                          )}
+                          {criteria.completed ? 'Completed' : 'Pending'}
+                        </Badge>
+                      </div>
                     </div>
                   </div>
-                </div>
+                ))}
               </div>
             </CardContent>
           </Card>
