@@ -1,0 +1,11 @@
+{
+  "name": "@pfp2e/rewards",
+  "version": "1.0.0",
+  "dependencies": {
+    "@pfp2e/sdk": "1.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.2",
+    "bun-types": "latest"
+  }
+}

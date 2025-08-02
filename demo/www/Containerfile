@@ -4,7 +4,7 @@
 # =================================================================
 # STAGE 1: Base Image
 # =================================================================
-FROM oven/bun:1-slim AS base
+FROM oven/bun:1.2.19-slim AS base
 LABEL project="pfp2e-demo" stage="base"
 # Set a consistent workdir that matches the old, working file's logic.
 WORKDIR /app/www
@@ -37,7 +37,7 @@ RUN bun run build
 # =================================================================
 # STAGE 4: Final Production Image (Standalone)
 # =================================================================
-FROM oven/bun:1-slim AS prod-server
+FROM oven/bun:1.2.19-slim AS prod-server
 LABEL project="pfp2e-demo" stage="prod-server"
 WORKDIR /app
 ENV NODE_ENV=production

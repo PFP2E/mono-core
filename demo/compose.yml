@@ -9,6 +9,8 @@ services:
       target: prod-server
     image: pfp2e-demo/app:prod
     container_name: pfp2e-demo-prod
+    # Explicitly set the correct command to run the standalone server.
+    command: node server.js
     ports:
       - "3000:3000"
     env_file:

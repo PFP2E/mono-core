@@ -1,0 +1,10 @@
+{
+  "name": "pfp2e-mono-core",
+  "private": true,
+  "workspaces": [
+    "loop/sdk",
+    "loop/records",
+    "loop/rewards",
+    "demo/www"
+  ]
+}
