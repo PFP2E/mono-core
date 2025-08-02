@@ -27,7 +27,9 @@ export const Marketplace = () => {
       <h2 className='text-foreground mb-8 text-center text-3xl font-bold sm:text-4xl'>
         PFP2E Reward Pools
       </h2>
-      <div className='mx-auto w-full max-w-6xl overflow-x-auto'>
+      
+      {/* Desktop Layout - Keep exactly as is */}
+      <div className='mx-auto w-full max-w-6xl overflow-x-auto hidden md:block'>
         <Card className='border-border bg-card/50 min-w-[1024px] overflow-hidden rounded-3xl'>
           <CardHeader className='bg-muted/50 border-border grid grid-cols-12 gap-6 border-b px-6 py-4'>
             <div className='text-muted-foreground col-span-4 text-sm font-medium'>
@@ -119,6 +121,87 @@ export const Marketplace = () => {
             ))}
           </CardContent>
         </Card>
+      </div>
+
+      {/* Mobile Layout - New card-based design */}
+      <div className='space-y-4 px-4 md:hidden'>
+        {campaigns.map(campaign => (
+          <Card key={campaign.id} className='w-full'>
+            <CardContent className='p-4'>
+              {/* Header with logo and title */}
+              <div className='flex items-center gap-3 mb-4'>
+                <Image
+                  className='h-12 w-12 rounded-lg'
+                  src={campaign.imageUrl}
+                  alt={campaign.campaignName}
+                  width={48}
+                  height={48}
+                />
+                <div className='flex flex-col'>
+                  <Link
+                    href={`/campaign/${campaign.campaignName}`}
+                    className='hover:underline'
+                  >
+                    <div className='text-card-foreground cursor-pointer text-lg font-medium'>
+                      {campaign.campaignName}
+                    </div>
+                  </Link>
+                  <div className='text-muted-foreground text-sm'>
+                    {campaign.campaignType}
+                  </div>
+                </div>
+              </div>
+
+                             {/* Stats as line items - same format as campaign page */}
+               <div className='space-y-2 mb-4'>
+                 <div className='flex justify-between'>
+                   <span className='text-muted-foreground text-sm'>Stakers</span>
+                   <span className='text-card-foreground font-medium'>{campaign.stakers.toLocaleString()}</span>
+                 </div>
+                 <div className='flex justify-between'>
+                   <span className='text-muted-foreground text-sm'>Reward Pool</span>
+                   <span className='text-card-foreground font-medium'>{campaign.rewardPool}</span>
+                 </div>
+                 <div className='flex justify-between'>
+                   <span className='text-muted-foreground text-sm'>Daily Reward</span>
+                   <span className='text-card-foreground font-medium'>{campaign.dailyReward}</span>
+                 </div>
+                 <div className='flex justify-between'>
+                   <span className='text-muted-foreground text-sm'>NFT floor APY</span>
+                   <div className='flex items-center gap-1'>
+                     <div
+                       className={`h-2 w-2 rounded-full ${
+                         campaign.apyColor === 'green'
+                           ? 'bg-green-500'
+                           : 'bg-orange-500'
+                       }`}
+                     />
+                     <span className='text-card-foreground font-medium'>
+                       {typeof campaign.apy === 'number'
+                         ? `${campaign.apy}%`
+                         : campaign.apy}
+                     </span>
+                   </div>
+                 </div>
+               </div>
+
+              {/* Action buttons */}
+              <div className='flex gap-2'>
+                <Button
+                  disabled={!campaign.fundable}
+                  variant='secondary'
+                  className='flex-1'
+                  onClick={() => handleFundClick(campaign)}
+                >
+                  Fund
+                </Button>
+                <Button disabled={!campaign.claimable} className='flex-1'>
+                  Claim
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
       <DepositModal
