@@ -9,159 +9,142 @@ tasks:
     cmds:
       - task -l
 
-  # --- Primary Development Workflow ---
+  # ==============================================================================
+  # LOOP (Backend Services)
+  # ==============================================================================
 
-  start:
-    desc: 'Start the entire application in development mode (backend + frontend)'
+  loop:install:
+    desc: 'Install dependencies for all loop services'
     cmds:
-      - task: loop:start
-      - task: demo:dev:local
-
-  stop:
-    desc: 'Stop all development services'
-    cmds:
-      - task: loop:stop
-      - task: demo:stop # Note: This only works for containerized demo
-
-  # --- Project Lifecycle ---
-
-  project:install:
-    desc: 'Install all dependencies for all workspaces'
-    summary: 'This is the first step to bootstrap the project. It installs all npm dependencies.'
-    cmds:
+      - echo "--- Installing Loop dependencies... ---"
       - bun install
 
-  project:build:
-    desc: 'Build all packages in the monorepo'
-    deps:
-      - sdk:build
+  loop:build:
+    desc: 'Build all loop packages (sdk, records, rewards)'
     cmds:
-      # Once the SDK is built, build the other packages in parallel
+      - echo "--- Building Loop packages... ---"
+      - task: sdk:build
       - task: records:build
-      - task: demo:build
 
-  project:clean:
-    desc: 'Remove all build artifacts and node_modules from all packages'
+  loop:dev:
+    desc: 'Start the loop backend in development mode (hot-reloading)'
     cmds:
-      - rm -rf node_modules bun.lockb
-      - task: sdk:clean
-      - task: records:clean
-      - task: rewards:clean
-      - task: demo:clean
+      - echo "--- Starting Loop dev server (hot-reloading)... ---"
+      - task: records:dev
 
-  # --- CI / Validation ---
-
-  ci:test:
-    desc: 'Run tests for all services in parallel'
+  loop:prod:
+    desc: 'Start the loop backend in production mode (from dist)'
+    deps: [loop:build]
     cmds:
-      - task: loop:test
-      - task: demo:test:local
-
-  ci:typecheck:
-    desc: 'Type-check all packages in parallel'
-    cmds:
-      - task: sdk:typecheck
-      - task: records:typecheck
-      - task: rewards:typecheck
-      - task: demo:typecheck
-
-  # --- Backend Services (Loop) ---
-
-  loop:start:
-    desc: 'Start the loop backend services'
-    cmds:
+      - echo "--- Starting Loop prod server... ---"
       - task: records:start
-
-  loop:stop:
-    desc: 'Stop the loop backend services'
-    cmds:
-      - task: records:stop
 
   loop:test:
     desc: 'Run tests for the loop backend services'
     cmds:
+      - echo "--- Running Loop tests... ---"
       - task: records:test
 
-  # --- Frontend Service (Demo) ---
+  loop:stop:
+    desc: 'Stop the loop backend services'
+    cmds:
+      - echo "--- Stopping Loop services... ---"
+      - task: records:stop
+
+  loop:clean:
+    desc: 'Clean all loop packages'
+    cmds:
+      - echo "--- Cleaning Loop packages... ---"
+      - task: sdk:clean
+      - task: records:clean
+      - task: rewards:clean
+
+  # ==============================================================================
+  # DEMO (Frontend Service)
+  # ==============================================================================
+
+  demo:install:
+    desc: 'Install dependencies for the demo frontend'
+    cmds:
+      - echo "--- Installing Demo dependencies... ---"
+      - bun install
+
+  demo:build:
+    desc: 'Build the demo frontend for production'
+    cmds:
+      - echo "--- Building Demo... ---"
+      - task: demo:build:internal
 
   demo:dev:
     desc: 'Start the demo frontend (container)'
-    dir: demo
     cmds:
-      - task dev
+      - echo "--- Starting Demo dev container... ---"
+      - task: demo:dev:internal
 
   demo:dev:local:
     desc: 'Start the demo frontend (local)'
-    dir: demo
     cmds:
-      - task dev:local
+      - echo "--- Starting Demo dev server (local)... ---"
+      - task: demo:dev:local:internal
 
   demo:prod:
     desc: 'Build and start the demo frontend (container)'
-    dir: demo
     cmds:
-      - task prod
+      - echo "--- Starting Demo prod container... ---"
+      - task: demo:prod:internal
 
   demo:prod:local:
     desc: 'Build and start the demo frontend (local)'
-    dir: demo
     cmds:
-      - task prod:local
+      - echo "--- Starting Demo prod server (local)... ---"
+      - task: demo:prod:local:internal
 
   demo:test:
     desc: 'Run the demo test suite (container)'
-    dir: demo
     cmds:
-      - task test
+      - echo "--- Running Demo tests (container)... ---"
+      - task: demo:test:internal
 
   demo:test:local:
     desc: 'Run the demo test suite (local)'
-    dir: demo
     cmds:
-      - task test:local
+      - echo "--- Running Demo tests (local)... ---"
+      - task: demo:test:local:internal
 
   demo:stop:
     desc: 'Stop all running demo services (container only)'
-    dir: demo
     cmds:
-      - task stop
-
-  demo:logs:
-    desc: 'Follow demo container logs'
-    dir: demo
-    cmds:
-      - task logs
+      - echo "--- Stopping Demo containers... ---"
+      - task: demo:stop:internal
 
   demo:clean:
-    desc: 'Remove all demo container assets'
-    dir: demo
+    desc: 'Remove all demo project assets (build artifacts and containers)'
     cmds:
-      - task clean
+      - echo "--- Cleaning Demo assets... ---"
+      - task: demo:clean:internal
 
-  # --- Administrative Tasks ---
-
-  records:setup:
-    desc: 'One-time setup for the records database (init + seed)'
-    dir: loop/records
-    cmds:
-      - task setup
-
-  # --- Internal Helper Tasks (for orchestration) ---
+  # ==============================================================================
+  # Internal Helper Tasks (for orchestration)
+  # ==============================================================================
 
   sdk:build: { internal: true, dir: loop/sdk, cmds: ['task build'] }
   sdk:clean: { internal: true, dir: loop/sdk, cmds: ['task clean'] }
-  sdk:typecheck: { internal: true, dir: loop/sdk, cmds: ['tsc --noEmit'] }
 
   records:build: { internal: true, dir: loop/records, cmds: ['task build'] }
-  records:clean: { internal: true, dir: loop/records, cmds: ['rm -rf dist *.db *.db-journal'] }
+  records:dev: { internal: true, dir: loop/records, cmds: ['bun --hot run src/server.ts'] }
   records:start: { internal: true, dir: loop/records, cmds: ['task start'] }
   records:stop: { internal: true, dir: loop/records, cmds: ['task stop'] }
   records:test: { internal: true, dir: loop/records, cmds: ['task test'] }
-  records:typecheck: { internal: true, dir: loop/records, cmds: ['task typecheck'] }
+  records:clean: { internal: true, dir: loop/records, cmds: ['rm -rf dist *.db *.db-journal'] }
 
   rewards:clean: { internal: true, dir: loop/rewards, cmds: ['rm -rf dist'] }
-  rewards:typecheck: { internal: true, dir: loop/rewards, cmds: ['task typecheck'] }
 
-  demo:build: { internal: true, dir: demo, cmds: ['task build'] }
-  demo:clean: { internal: true, dir: demo, cmds: ['rm -rf www/.next www/.dist'] }
-  demo:typecheck: { internal: true, dir: demo, cmds: ['task typecheck'] }
+  demo:build:internal: { internal: true, dir: demo, cmds: ['task build'] }
+  demo:dev:internal: { internal: true, dir: demo, cmds: ['task dev'] }
+  demo:dev:local:internal: { internal: true, dir: demo, cmds: ['task dev:local'] }
+  demo:prod:internal: { internal: true, dir: demo, cmds: ['task prod'] }
+  demo:prod:local:internal: { internal: true, dir: demo, cmds: ['task prod:local'] }
+  demo:test:internal: { internal: true, dir: demo, cmds: ['task test'] }
+  demo:test:local:internal: { internal: true, dir: demo, cmds: ['task test:local'] }
+  demo:stop:internal: { internal: true, dir: demo, cmds: ['task stop'] }
+  demo:clean:internal: { internal: true, dir: demo, cmds: ['task clean'] }

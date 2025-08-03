@@ -1,4 +1,4 @@
-import { db } from '@pfp2e/sdk';
+import { db } from './index';
 import type { Campaign } from '@pfp2e/sdk';
 
 const campaigns: Campaign[] = [

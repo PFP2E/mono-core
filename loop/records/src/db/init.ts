@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { db } from '@pfp2e/sdk';
+import { db } from './index';
 
 const schemaPath = path.resolve(__dirname, 'schema.sql');
 const schema = fs.readFileSync(schemaPath, 'utf-8');
