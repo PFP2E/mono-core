@@ -1,27 +1,33 @@
+# loop/rewards/Taskfile.yml
 version: '3'
 
 tasks:
   default:
-    desc: "Show available tasks for the rewards service"
+    desc: 'Show available tasks for the rewards service'
     cmds:
       - task -l
 
-  prod:
-    desc: "Run the rewards oracle script for production"
+  build:
+    desc: 'Build the service for production'
     cmds:
-      - bun run src/index.ts
+      - tsc
 
   dev:
-    desc: "Run the rewards oracle script for development"
+    desc: 'Run the rewards oracle script'
     cmds:
-      - task: prod
+      - bun src/index.ts
 
   test:
-    desc: "Tests for the rewards service (no-op)"
+    desc: 'Tests for the rewards service (no-op)'
     cmds:
       - echo "No tests for rewards service."
 
   typecheck:
-    desc: "Type-check the project without emitting files"
+    desc: 'Type-check the project without emitting files'
     cmds:
       - tsc --noEmit
+
+  clean:
+    desc: 'Remove build artifacts'
+    cmds:
+      - rm -rf dist

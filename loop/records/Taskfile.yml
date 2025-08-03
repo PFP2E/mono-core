@@ -1,55 +1,53 @@
+# loop/records/Taskfile.yml
 version: '3'
 
 tasks:
   default:
-    desc: "Show available tasks for the records service"
+    desc: 'Show available tasks for the records service'
     cmds:
       - task -l
 
-  setup:
-    desc: "Initialize and seed the database"
+  build:
+    desc: 'Build the service for production'
     cmds:
-      - task: db:init
-      - task: db:seed
-
-  prod:
-    desc: "Start the production server"
-    deps: [setup]
-    cmds:
-      - bun run {{.TASKFILE_DIR}}/src/server.ts
+      - tsc
 
   dev:
-    desc: "Start the development server with hot-reloading"
-    deps: [setup]
+    desc: 'Start the development server with hot-reloading'
+    deps:
+      - db:setup
     cmds:
-      - bun --hot run {{.TASKFILE_DIR}}/src/server.ts
+      - bun --hot src/server.ts
 
-  typecheck:
-    desc: "Type-check the project without emitting files"
+  prod:
+    desc: 'Start the production server'
+    deps:
+      - db:setup
     cmds:
-      - tsc --noEmit
+      - bun src/server.ts
 
-  db:init:
-    desc: "Initialize the database from the schema file"
-    cmds:
-      - bun run src/db/init.ts
-
-  db:seed:
-    desc: "Seed the database with initial data"
-    cmds:
-      - bun run src/db/seed.ts
-
-  db:seed-judges:
-    desc: "Seed the database with the judges campaign"
-    cmds:
-      - bun run src/db/seed-judges.ts
-  
   test:
-    desc: "Run the unit tests with Bun"
+    desc: 'Run the unit tests'
     cmds:
       - bun test
 
-  clean:
-    desc: "Remove build artifacts"
+  typecheck:
+    desc: 'Type-check the project without emitting files'
     cmds:
-      - rm -rf dist
+      - tsc --noEmit
+
+  clean:
+    desc: 'Remove build artifacts and database files'
+    cmds:
+      - rm -rf dist *.db *.db-journal
+
+  db:setup:
+    desc: 'Initialize and seed the database'
+    cmds:
+      - bun run src/db/init.ts
+      - bun run src/db/seed.ts
+
+  db:seed-judges:
+    desc: 'Seed the database with the judges campaign'
+    cmds:
+      - bun run src/db/seed-judges.ts

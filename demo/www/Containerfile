@@ -6,7 +6,6 @@
 # =================================================================
 FROM oven/bun:1.2.19-slim AS base
 LABEL project="pfp2e-demo" stage="base"
-# Set a consistent workdir that matches the old, working file's logic.
 WORKDIR /app/www
 
 # =================================================================
@@ -15,47 +14,39 @@ WORKDIR /app/www
 # =================================================================
 FROM base AS deps
 LABEL project="pfp2e-demo" stage="deps"
-# Copy manifests and config from the 'www' subdir of the context.
-# The WORKDIR is /app/www, so they are copied into there.
 COPY www/package.json www/bun.lock www/bunfig.toml ./
-# Install all dependencies
 RUN bun install --frozen-lockfile
 
 # =================================================================
 # STAGE 3: Builder
-# This stage builds the application. It uses the deps stage as a base,
-# so it already has node_modules installed in the correct place.
+# This stage builds the application.
 # =================================================================
 FROM deps AS builder
 LABEL project="pfp2e-demo" stage="builder"
-# Copy the rest of the source code, overwriting the manifests
-# but leaving node_modules intact.
 COPY www ./
-# Run the build
 RUN bun run build
 
 # =================================================================
-# STAGE 4: Final Production Image (Standalone)
+# STAGE 4: Final Production Image (Simplified)
+# This image runs the app using a standard `bun run start`.
 # =================================================================
-FROM oven/bun:1.2.19-slim AS prod-server
+FROM base AS prod-server
 LABEL project="pfp2e-demo" stage="prod-server"
-WORKDIR /app
+WORKDIR /app/www
 ENV NODE_ENV=production
-ENV HOSTNAME=0.0.0.0
 # Install curl for a reliable healthcheck
 USER root
 RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 USER bun
-# Copy the standalone output from the builder stage
-COPY --chown=bun:bun --from=builder /app/www/.next/standalone .
-# Copy the static public assets from the builder stage
+# Copy dependencies and build artifacts
+COPY --chown=bun:bun --from=deps /app/www/node_modules ./node_modules
+COPY --chown=bun:bun --from=builder /app/www/.next ./.next
 COPY --chown=bun:bun --from=builder /app/www/public ./public
-# Copy the static assets from the builder stage
-COPY --chown=bun:bun --from=builder /app/www/.next/static ./.next/static
+COPY --chown=bun:bun --from=builder /app/www/package.json .
 EXPOSE 3000
 HEALTHCHECK --interval=5s --timeout=5s --start-period=5s --retries=3 CMD curl -f http://localhost:3000/ || exit 1
-# The start command is run from the standalone server.js
-CMD ["node", "server.js"]
+# Use the standard Next.js start script from package.json
+CMD ["bun", "run", "start"]
 
 # =================================================================
 # STAGE 5: Final Test Runner Image

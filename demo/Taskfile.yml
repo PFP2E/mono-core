@@ -1,3 +1,4 @@
+# demo/Taskfile.yml
 version: '3'
 
 vars:
@@ -6,127 +7,81 @@ vars:
 
 tasks:
   default:
-    desc: Show this help message
+    desc: 'Show available tasks for the demo app'
     cmds:
       - task -l
 
-  # --- High-Level Commands ---
-
-  dev:
-    desc: 'Start the development server (container)'
-    cmds:
-      - task: _container:dev
-
-  dev:local:
-    desc: 'Start the development server (local)'
-    cmds:
-      - task: _local:dev
-
-  prod:
-    desc: 'Build and start the production server (container)'
-    cmds:
-      - task: _container:prod
-
-  prod:local:
-    desc: 'Build and start the production server (local)'
-    cmds:
-      - task: _local:prod
-
-  test:
-    desc: 'Run the full test suite (container)'
-    cmds:
-      - task: _container:test
-
-  test:local:
-    desc: 'Run the full test suite (local)'
-    cmds:
-      - task: _local:test
-
-  stop:
-    desc: 'Stop all running services (container only)'
-    cmds:
-      - task: _container:stop
-
-  logs:
-    desc: 'Follow container logs (container only)'
-    cmds:
-      - task: _container:logs
-
-  clean:
-    desc: 'Remove all project container assets'
-    prompt: Are you sure you want to permanently delete all project container assets?
-    cmds:
-      - task: _container:clean
-
   build:
-    desc: 'Build the project for production'
+    desc: 'Build the Next.js app for production'
     dir: www
     cmds:
       - bun run build
+
+  dev:
+    desc: 'Start the development server'
+    dir: www
+    cmds:
+      - bun run dev
+
+  prod:
+    desc: 'Build and start the production server'
+    dir: www
+    cmds:
+      - bun run build
+      - bun run start
+
+  test:
+    desc: 'Run the full test suite (unit + UI)'
+    dir: www
+    cmds:
+      - bun test
+      - bun run test:ui
 
   typecheck:
     desc: 'Type-check the project without emitting files'
     dir: www
     cmds:
       - tsc --noEmit
-  
-  format:
-    desc: 'Format all code in the project'
+
+  clean:
+    desc: 'Remove build artifacts'
     dir: www
     cmds:
-      - bun run format
+      - rm -rf .next out
 
-  # --- Internal Tasks ---
+  # --- Container Commands ---
+  # These are kept for reference but will be updated in the next phase.
 
-  _local:dev:
-    internal: true
-    dir: www
-    cmds:
-      - bun run dev
-
-  _local:prod:
-    internal: true
-    dir: www
-    cmds:
-      - bun run build
-      - bun run start
-
-  _local:test:
-    internal: true
-    dir: www
-    cmds:
-      - bun test
-      - bun run test:ui
-
-  _container:dev:
-    internal: true
+  container:dev:
+    desc: 'Start the development server (container)'
     cmds:
       - '{{.COMPOSE_CMD}} up -d --build dev'
 
-  _container:prod:
-    internal: true
+  container:prod:
+    desc: 'Build and start the production server (container)'
     cmds:
       - '{{.COMPOSE_CMD}} up -d --build prod'
 
-  _container:test:
-    internal: true
+  container:test:
+    desc: 'Run the full test suite (container)'
     cmds:
       - '{{.COMPOSE_CMD}} --profile test up --build --abort-on-container-exit --exit-code-from test'
     finally:
       - '{{.COMPOSE_CMD}} down'
 
-  _container:stop:
-    internal: true
+  container:stop:
+    desc: 'Stop all running services (container only)'
     cmds:
       - '{{.COMPOSE_CMD}} down --remove-orphans'
 
-  _container:logs:
-    internal: true
+  container:logs:
+    desc: 'Follow container logs (container only)'
     cmds:
       - '{{.COMPOSE_CMD}} logs -f'
 
-  _container:clean:
-    internal: true
+  container:clean:
+    desc: 'Remove all project container assets'
+    prompt: Are you sure you want to permanently delete all project container assets?
     cmds:
       - '{{.COMPOSE_CMD}} down --volumes --remove-orphans'
       - 'docker image prune -a -f --filter "label=project={{.PROJECT_NAME}}"'

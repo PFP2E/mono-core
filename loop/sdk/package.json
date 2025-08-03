@@ -11,19 +11,13 @@
     "./types": {
       "types": "./dist/types.d.ts",
       "default": "./dist/types.js"
-    },
-    "./client": {
-      "types": "./dist/client/index.d.ts",
-      "default": "./dist/client/index.js"
     }
   },
   "scripts": {
-    "build": "tsc",
-    "generate:client": "openapi --input http://localhost:8787/v1/openapi.json --output ./src/client --client fetch"
+    "build": "tsc"
   },
   "devDependencies": {
     "bun-types": "latest",
-    "openapi-typescript-codegen": "^0.29.0",
     "typescript": "^5.9.2"
   }
 }

@@ -59,7 +59,7 @@ try {
 
     // 2. Seed the Campaign
     const campaignStmt = db.prepare('INSERT INTO campaigns (id, name, description, type, reward_info, created_at) VALUES (?, ?, ?, ?, ?, ?)');
-    campaignStmt.run(campaign.id, campaign.name, campaign.description, campaign.type, JSON.stringify(campaign.reward_info), campaign.created_at);
+    campaignStmt.run(campaign.id, campaign.name, campaign.description ?? null, campaign.type, JSON.stringify(campaign.reward_info) ?? null, campaign.created_at);
     console.log(`- Seeded campaign: ${campaign.name}`);
 
     // 3. Seed Target PFPs (NFT Collection + Judges)

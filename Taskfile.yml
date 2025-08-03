@@ -1,53 +1,45 @@
-# Taskfile.yml
-# Root task file for the monorepo.
-# This file includes tasks from all sub-projects, allowing you to run them from the root.
+# /Taskfile.yml
 version: '3'
 
 includes:
   contracts: { taskfile: contracts/Taskfile.yml, dir: contracts }
-  sdk:     { taskfile: loop/sdk/Taskfile.yml,     dir: loop/sdk }
+  sdk: { taskfile: loop/sdk/Taskfile.yml, dir: loop/sdk }
   records: { taskfile: loop/records/Taskfile.yml, dir: loop/records }
   rewards: { taskfile: loop/rewards/Taskfile.yml, dir: loop/rewards }
-  demo:    { taskfile: demo/Taskfile.yml,       dir: demo }
+  demo: { taskfile: demo/Taskfile.yml, dir: demo }
 
 tasks:
   default:
-    desc: 'Show available tasks. Run `task bootstrap` for first-time setup.'
+    desc: 'Show all available commands for the monorepo'
     cmds:
       - task -l
 
-  bootstrap:
-    desc: "One-command setup: Install deps, generate client, and run tests."
-    cmds:
-      - echo "--- Bootstrapping Project ---"
-      - bun install
-      - task: generate:client
-      - task: records:test
-      - task: rewards:test
-
-  clean:
-    desc: "Remove all generated files, caches, and dependencies"
-    cmds:
-      - echo "--- Cleaning Project ---"
-      - rm -rf demo/www/.next
-
-  generate:client:
-    desc: "Generate the SDK client from the records API (starts server automatically)"
-    cmds:
-      - task records:prod &
-      - |
-        echo "Waiting for records API to be ready..."
-        until curl -s -f -o /dev/null http://localhost:8787/v1/openapi.json; do
-          printf '.'
-          sleep 1
-        done
-        echo "\nAPI is ready. Generating client..."
-      - task: sdk:generate:client
-    # The records:prod task will continue running in the background.
-    # You can stop it manually with `kill <PID>` or by stopping the terminal session.
+  # --- High-Level Commands ---
 
   build-all:
-    desc: "Build all packages"
+    desc: 'Build all packages in the monorepo'
     cmds:
+      - bun install
+      - task: contracts:build
       - task: sdk:build
+      - task: records:build
+      - task: rewards:build
       - task: demo:build
+
+  test-all:
+    desc: 'Run all tests in the monorepo'
+    cmds:
+      - task: contracts:test
+      - task: records:test
+      - task: rewards:test
+      - task: demo:test
+
+  clean-all:
+    desc: 'Clean all build artifacts and dependencies'
+    cmds:
+      - task: contracts:clean
+      - task: sdk:clean
+      - task: records:clean
+      - task: rewards:clean
+      - task: demo:clean
+      - rm -rf node_modules

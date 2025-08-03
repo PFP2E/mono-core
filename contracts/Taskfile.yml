@@ -1,8 +1,23 @@
-# Taskfile.yml for contracts
+# contracts/Taskfile.yml
 version: '3'
 
 tasks:
-  test:
-    desc: "Run smart contract tests"
+  default:
+    desc: 'Show available tasks for the contracts package'
     cmds:
-      - bunx hardhat test
+      - task -l
+
+  build:
+    desc: 'Compile the smart contracts'
+    cmds:
+      - bun run compile
+
+  test:
+    desc: 'Run smart contract tests'
+    cmds:
+      - bun run test
+
+  clean:
+    desc: 'Clear the Hardhat cache and artifacts'
+    cmds:
+      - bun run clean

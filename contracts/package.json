@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "description": "On-chain settlement layer for pfp2e",
   "scripts": {
-    "test": "hardhat test",
-    "compile": "hardhat compile",
-    "deploy": "hardhat run scripts/deploy.ts"
+    "test": "bunx hardhat test",
+    "compile": "bunx hardhat compile",
+    "deploy": "bunx hardhat run scripts/deploy.ts",
+    "clean": "bunx hardhat clean"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.0",
