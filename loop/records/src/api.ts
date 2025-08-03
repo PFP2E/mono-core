@@ -308,6 +308,7 @@ apiRouter.get('/user-status/:socialHandle', (req, res) => {
         const user = userStmt.get(socialHandle) as any;
 
         if (!user) {
+            // Return a 404 if the user is not in the database at all.
             return res.status(404).json({ error: 'User not found' });
         }
 
@@ -319,7 +320,8 @@ apiRouter.get('/user-status/:socialHandle', (req, res) => {
         `);
         const verifications = verificationStmt.all(user.id) as any[];
 
-        // In a real app, we'd check the live contract here. For the demo, we'll assume not claimed.
+        // It's valid for a user to exist but have no verifications yet.
+        // In this case, the campaigns array will be empty.
         const response = {
             user,
             campaigns: verifications.map(v => ({

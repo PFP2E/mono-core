@@ -9,8 +9,6 @@ tasks:
 
   dev:
     desc: 'Start the development server with hot-reloading'
-    deps:
-      - db:setup
     cmds:
       - bun --hot src/server.ts
 
@@ -30,12 +28,19 @@ tasks:
       - rm -rf dist *.db *.db-journal
 
   db:setup:
-    desc: 'Initialize and seed the database'
+    desc: 'Initialize and seed the database with default data'
     cmds:
       - bun run src/db/init.ts
       - bun run src/db/seed.ts
 
   db:seed-judges:
-    desc: 'Seed the database with the judges campaign'
+    desc: 'Initialize and seed the database with the judges campaign'
+    deps:
+      - db:init
     cmds:
       - bun run src/db/seed-judges.ts
+
+  db:init:
+    desc: 'Initialize the database schema'
+    cmds:
+      - bun run src/db/init.ts

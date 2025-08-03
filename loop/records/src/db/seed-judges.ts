@@ -29,6 +29,7 @@ const JUDGES = [
   { social_handle: 'judge_1', wallet_address: '0x1000000000000000000000000000000000000001' },
   { social_handle: 'judge_2', wallet_address: '0x2000000000000000000000000000000000000002' },
   { social_handle: 'judge_3', wallet_address: '0x3000000000000000000000000000000000000003' },
+  { social_handle: 'mr13tech', wallet_address: '0x1b3fd358c66974572cd7c77b5Be7759C67c178B1' },
 ];
 
 // 2. TARGET PFP: The PFP that the judges should be using.

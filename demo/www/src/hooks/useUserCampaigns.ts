@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { useXSession } from './useXSession';
+import { DefaultService } from '@pfp2e/sdk/client';
 
 interface CampaignStatus {
   campaignId: string;
@@ -37,12 +38,8 @@ export function useUserCampaigns() {
       setError(null);
 
       try {
-        const res = await fetch(`/api/records/user-status/${session.username}`);
-        if (!res.ok) {
-          const errorData = await res.json();
-          throw new Error(errorData.error || 'Failed to fetch user status');
-        }
-        const data: UserStatus = await res.json();
+        // Note: The SDK function is generated from the path parameters, so it becomes getV1UserStatus.
+        const data: UserStatus = await DefaultService.getV1UserStatus(session.username);
         setCampaigns(data.campaigns || []);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An unknown error occurred');
