@@ -7,22 +7,13 @@ tasks:
     cmds:
       - task -l
 
-  build:
-    desc: 'Build the service for production'
-    cmds:
-      - tsc
-
   dev:
     desc: 'Start the development server with hot-reloading'
-    deps:
-      - db:setup
     cmds:
       - bun --hot src/server.ts
 
-  prod:
+  start:
     desc: 'Start the production server'
-    deps:
-      - db:setup
     cmds:
       - bun src/server.ts
 
@@ -31,23 +22,19 @@ tasks:
     cmds:
       - bun test
 
-  typecheck:
-    desc: 'Type-check the project without emitting files'
-    cmds:
-      - tsc --noEmit
-
   clean:
     desc: 'Remove build artifacts and database files'
     cmds:
       - rm -rf dist *.db *.db-journal
 
-  db:setup:
-    desc: 'Initialize and seed the database'
+  db:seed:
+    desc: 'Initialize and seed the database with default data'
+    deps:
+      - db:init
     cmds:
-      - bun run src/db/init.ts
       - bun run src/db/seed.ts
 
-  db:seed-judges:
-    desc: 'Seed the database with the judges campaign'
+  db:init:
+    desc: 'Initialize the database schema'
     cmds:
-      - bun run src/db/seed-judges.ts
+      - bun run src/db/init.ts

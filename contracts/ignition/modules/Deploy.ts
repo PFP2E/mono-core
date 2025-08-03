@@ -9,6 +9,13 @@ const DeployModule = buildModule("DeployModule", (m) => {
   // Get the deployer account from Hardhat's configured accounts.
   const deployer = m.getAccount(0);
 
+  // A placeholder address for the 1inch router.
+  // Replace with the actual address on a live network.
+  const oneInchRouter = m.getParameter(
+    "oneInchRouter",
+    "0x1111111111111111111111111111111111111111"
+  );
+
   // Deploy the RewardToken contract, making the deployer the owner.
   const rewardToken = m.contract("RewardToken", [deployer]);
 
@@ -16,6 +23,7 @@ const DeployModule = buildModule("DeployModule", (m) => {
   // and making the deployer the initial owner.
   const distributor = m.contract("MerkleDistributor", [
     rewardToken,
+    oneInchRouter,
     deployer,
   ]);
 

@@ -1,7 +1,7 @@
 <div align="center">
   <img src="docs/logo.png" alt="PFP2E Logo" width="128" />
-  <h1>PFP2E Protocol</h1>
-  <p>Verifiable Visual Identity · Programmable Rewards</p>
+  <h1>PFP2E: Proof of PFP Engine</h1>
+  <p>A decentralized protocol for creating powerful, verifiable, and rewarding social campaigns.</p>
   
   <p>
     <img src="https://img.shields.io/badge/Bun-%23000000.svg?style=for-the-badge&logo=bun&logoColor=white" alt="Bun" />
@@ -17,7 +17,19 @@
 
 ---
 
-PFP2E is a hybrid on-chain/off-chain protocol for verifying visual identity and linking it to a trustless reward system. This repository contains the reference implementation of the system, structured as a professional monorepo.
+## The Problem
+
+Projects and communities need to incentivize user engagement, but traditional reward systems are centralized, inefficient, and lack transparency. How can you reward users for on-chain and off-chain actions in a way that is both verifiable and trustless?
+
+## The Solution: PFP2E
+
+PFP2E is a hybrid on-chain/off-chain protocol that allows anyone to create "Proof of PFP" campaigns. It links a user's visual identity (like a profile picture) to a flexible and programmable reward system, powered by a robust off-chain engine and settled on-chain.
+
+**Key Features:**
+- **Verifiable Actions:** Prove ownership of assets, social engagement, and more.
+- **Programmable Rewards:** Distribute ERC-20 tokens via a secure, epoch-based Merkle distributor.
+- **1inch Integration:** Allow users to claim rewards in any token they choose, instantly swapping via the 1inch Aggregation Protocol.
+- **Decentralized & Trustless:** No central party controls the reward distribution.
 
 ## System Architecture
 
@@ -37,7 +49,7 @@ This repository is a monorepo managed by **[Bun](https://bun.sh/)** and **[Task]
 | :--- | :--- |
 | **[`/contracts`](./contracts)** | The on-chain settlement layer, built with Solidity and Hardhat. |
 | **[`/loop`](./loop)** | The off-chain verification engine, structured as a set of services. |
-| **[`/demo`](./demo)** | Frontend proofs-of-concept, built with Next.js. |
+| **[`/demo`](./demo)** | A Next.js frontend demonstrating the protocol in action. |
 | **[`/docs`](./docs)** | System architecture diagrams and documentation. |
 
 ---
@@ -49,14 +61,14 @@ This repository is a monorepo managed by **[Bun](https://bun.sh/)** and **[Task]
 -   [**Bun**](https://bun.sh/)
 
 **1. Bootstrap the Project**
-This is the only command you need to run for a first-time setup. It will install all dependencies across the monorepo.
+This command installs all dependencies across the monorepo.
 
 ```bash
 task bootstrap
 ```
 
-**2. Run the Services**
-The off-chain system requires two services running in separate terminals:
+**2. Run the Full System**
+The off-chain system requires two services. Run each command in a separate terminal.
 
 *   **Terminal 1: Start the Records API**
     ```bash
@@ -67,7 +79,6 @@ The off-chain system requires two services running in separate terminals:
     ```bash
     task rewards:prod
     ```
-
 
 ---
 

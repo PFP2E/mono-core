@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -8,251 +8,273 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { CheckCircle, Clock } from 'lucide-react'
-import { campaigns, type Campaign } from '@/lib/mock-data'
 import { DepositModal } from '@/components/deposit-modal'
 import { useStakingStore } from '@/store/staking.store'
+import type { Campaign } from '@pfp2e/sdk'
+import { Skeleton } from '@/components/ui/skeleton'
 
-interface EligibilityCriteria {
-  id: string
-  text: string
-  completed: boolean
-  verified: boolean
-}
-
-interface CampaignDetail {
-  id: number
-  slug: string
-  name: string
-  imageUrl: string
-  creator: string
-  totalSupply: number
-  stakers: number
-  rewardPool: string
-  dailyReward: string
-  apy: number | 'N/A'
-  apyColor: 'green' | 'orange'
-  description: string
-  eligibilityCriteria: EligibilityCriteria[]
-  rewardTimer: string
-  fundable: boolean
-  claimable: boolean
-  token: string
-}
-
-// Mock detailed campaign data - using the same data as marketplace but with additional fields
-const campaignDetails: CampaignDetail[] = campaigns.map((campaign, index) => {
-  // Additional data for campaign pages
-  const additionalData = {
-    creator: [
-      'Yuga Labs',
-      'ETHGlobal',
-      '1inch Network',
-      'Larva Labs',
-      'Sproto Labs',
-      'Mog Labs'
-    ][index],
-    totalSupply: [10000, 5000, 1500000000, 10000, 10000, 1000000][index],
-    description: [
-      'The Bored Ape Yacht Club is a collection of 10,000 unique Bored Ape NFTs— unique digital collectibles living on the Ethereum blockchain. Your Bored Ape doubles as your Yacht Club membership card and grants access to members-only benefits.',
-      'ETHGlobal is the premier Ethereum hackathon series, bringing together developers, designers, and creators to build the future of Web3. Join the global community of Ethereum builders.',
-      '1INCH is a decentralized exchange aggregator that sources liquidity from various DEXs to provide users with the best trading rates and lowest fees.',
-      'CryptoPunks is one of the first NFT projects on Ethereum, featuring 10,000 unique collectible characters with proof of ownership stored on the Ethereum blockchain.',
-      "Sproto Gremlins are 3,333 exclusive unique manifestations of harrypotterobamasonic10inu's egregore. Imbued with high speed presidential wizardry and lifelong loyalty, Sproto Gremlins are vibrant, mischievous, quirky NFTs with chaotic energy. Blending humor and creativity, it appeals to collectors who love playful, haywire aesthetics.",
-      '$MOG is the internets first culture coin. A community-driven meme token that has evolved into a comprehensive DeFi ecosystem, offering staking, farming, and governance opportunities.'
-    ][index],
+// NOTE: In a real app, this detailed info would also come from the API.
+// For the hackathon, we merge API data with this static UI data.
+const MOCK_CAMPAIGN_DETAILS: { [key: string]: any } = {
+  'bayc-pfp-staking': {
+    imageUrl: '/images/BAYC.jpg',
+    stakers: 1234,
+    apy: 12.5,
+    apyColor: 'green',
+    fundable: true,
+    claimable: true,
+    token: 'BAYC',
+    reward_info: {
+      totalPool: '1,000,000',
+      dailyRate: '1,000'
+    },
     eligibilityCriteria: [
-      [
-        {
-          id: '1',
-          text: 'Set BAYC as profile picture',
-          completed: true,
-          verified: true
-        },
-        {
-          id: '2',
-          text: 'Hold BAYC NFT for more than 30 days',
-          completed: false,
-          verified: false
-        },
-        {
-          id: '3',
-          text: 'Attend ETHGlobal hackathon',
-          completed: true,
-          verified: true
-        }
-      ],
-      [
-        {
-          id: '1',
-          text: 'Attend ETHGlobal hackathon',
-          completed: true,
-          verified: true
-        },
-        {
-          id: '2',
-          text: 'Build and submit a project',
-          completed: true,
-          verified: true
-        },
-        {
-          id: '3',
-          text: 'Win a prize or recognition',
-          completed: false,
-          verified: false
-        }
-      ],
-      [
-        {
-          id: '1',
-          text: 'Use 1inch hoodie on your X PFP',
-          completed: true,
-          verified: true
-        },
-        {
-          id: '2',
-          text: 'Use for 30 days consecurtive days',
-          completed: false,
-          verified: false
-        },
-        {
-          id: '3',
-          text: 'Participate in governance voting',
-          completed: false,
-          verified: false
-        }
-      ],
-      [
-        {
-          id: '1',
-          text: 'Set CryptoPunk as profile picture',
-          completed: true,
-          verified: true
-        },
-        {
-          id: '2',
-          text: 'Hold for more than 30 days',
-          completed: true,
-          verified: true
-        },
-        {
-          id: '3',
-          text: 'Participate in community',
-          completed: false,
-          verified: false
-        }
-      ],
-      [
-        {
-          id: '1',
-          text: 'Set Sproto Gremlin as profile picture',
-          completed: true,
-          verified: true
-        },
-        {
-          id: '2',
-          text: 'Provide liquidity to BITCOIN LP',
-          completed: false,
-          verified: false
-        },
-        {
-          id: '3',
-          text: 'Participate in governance',
-          completed: false,
-          verified: false
-        }
-      ],
-      [
-        {
-          id: '1',
-          text: 'Wear MOG/ACC stylyed image on X',
-          completed: true,
-          verified: true
-        },
-        {
-          id: '2',
-          text: 'Hold 1B MOG tokens',
-          completed: true,
-          verified: true
-        },
-        {
-          id: '3',
-          text: 'Participate in community events',
-          completed: false,
-          verified: false
-        }
-      ]
-    ][index],
-    rewardTimer: [
-      '12:34:56:78',
-      '08:15:42:33',
-      '12:45:30:22',
-      '03:45:12:22',
-      '19:33:07:14',
-      '07:18:55:42'
-    ][index]
+      { id: '1', text: 'Set BAYC as profile picture', completed: true, verified: true },
+      { id: '2', text: 'Hold BAYC NFT for > 30 days', completed: false, verified: false }
+    ]
+  },
+  'ethglobal-pfp-staking': {
+    imageUrl: '/images/ETHGLOBAL.jpg',
+    stakers: 16,
+    apy: 15.2,
+    apyColor: 'green',
+    fundable: true,
+    claimable: false,
+    token: 'ETHG',
+    reward_info: {
+      totalPool: '500,000',
+      dailyRate: '500'
+    },
+    eligibilityCriteria: [
+        { id: '1', text: 'Be an ETHGlobal participant', completed: true, verified: true }
+    ]
+  },
+  '1inch-derivative': {
+    imageUrl: '/images/1INCH.jpg',
+    stakers: 2341,
+    apy: 'N/A',
+    apyColor: 'green',
+    fundable: true,
+    claimable: true,
+    token: '1INCH',
+    reward_info: {
+      totalPool: '2,500,000',
+      dailyRate: '2,500'
+    },
+    eligibilityCriteria: [
+        { id: '1', text: 'Use 1inch branded overlay', completed: true, verified: true }
+    ]
+  },
+  'punks-pfp-staking': {
+    imageUrl: '/images/CRYPTOPUNKS.jpg',
+    stakers: 567,
+    apy: 8.2,
+    apyColor: 'green',
+    fundable: true,
+    claimable: false,
+    token: 'PUNK',
+    reward_info: {
+      totalPool: '750,000',
+      dailyRate: '750'
+    },
+    eligibilityCriteria: [
+        { id: '1', text: 'Set CryptoPunk as PFP', completed: true, verified: true }
+    ]
+  },
+  'sproto-pfp-staking': {
+    imageUrl: '/images/SPROTO.jpg',
+    stakers: 890,
+    apy: 22.1,
+    apyColor: 'orange',
+    fundable: false,
+    claimable: true,
+    token: 'SPROTO',
+    reward_info: {
+      totalPool: '1,200,000',
+      dailyRate: '1,200'
+    },
+    eligibilityCriteria: [
+        { id: '1', text: 'Set Sproto Gremlin as PFP', completed: true, verified: true }
+    ]
+  },
+  'mog-acc-derivative': {
+    imageUrl: '/images/MOG.jpg',
+    stakers: 2456,
+    apy: 'N/A',
+    apyColor: 'green',
+    fundable: true,
+    claimable: true,
+    token: 'MOG',
+    reward_info: {
+      totalPool: '3,000,000',
+      dailyRate: '3,000'
+    },
+    eligibilityCriteria: [
+        { id: '1', text: 'Use MOG/ACC overlay', completed: true, verified: true }
+    ]
+  },
+  'default-x-campaign': {
+    imageUrl: '/images/SPROTO.jpg',
+    stakers: 5678,
+    apy: 'N/A',
+    apyColor: 'orange',
+    fundable: true,
+    claimable: true,
+    token: 'DEFAULT',
+    reward_info: {
+      totalPool: '5,000,000',
+      dailyRate: '5,000'
+    },
+    eligibilityCriteria: [
+      { id: '1', text: 'Sign in with X', completed: true, verified: true }
+    ]
+  },
+  'judges-campaign': {
+    imageUrl: '/images/ETHGLOBAL.jpg',
+    stakers: 3,
+    apy: 'N/A',
+    apyColor: 'green',
+    fundable: true,
+    claimable: true,
+    token: 'JUDGE',
+    reward_info: {
+      totalPool: '100,000',
+      dailyRate: '100'
+    },
+    eligibilityCriteria: [
+      { id: '1', text: 'Be a hackathon judge', completed: true, verified: true }
+    ]
   }
-
-  return {
-    id: campaign.id,
-    slug: campaign.campaignName,
-    name: campaign.name.split('<br/>')[0],
-    imageUrl: campaign.imageUrl,
-    creator: additionalData.creator,
-    totalSupply: additionalData.totalSupply,
-    stakers: campaign.stakers,
-    rewardPool: campaign.rewardPool,
-    dailyReward: campaign.dailyReward,
-    apy: campaign.apy,
-    apyColor: campaign.apyColor,
-    description: additionalData.description,
-    eligibilityCriteria: additionalData.eligibilityCriteria,
-    rewardTimer: additionalData.rewardTimer,
-    fundable: campaign.fundable,
-    claimable: campaign.claimable,
-    token: campaign.token
-  }
-})
+};
 
 export default function CampaignPage() {
   const params = useParams()
   const router = useRouter()
   const { activeCampaign } = useStakingStore()
   const slug = decodeURIComponent(params.slug as string)
-  const [isModalOpen, setIsModalOpen] = React.useState(false)
-  const [selectedCampaign, setSelectedCampaign] =
-    React.useState<Campaign | null>(null)
 
-  // Find campaign by name, handling spaces and case sensitivity
-  const campaign = campaigns.find(
-    c => c.campaignName.toLowerCase() === slug.toLowerCase()
-  )
+  const [campaign, setCampaign] = useState<any | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  const [isModalOpen, setIsModalOpen] = React.useState(false)
+
+  useEffect(() => {
+    if (!slug) return
+
+    const fetchCampaign = async () => {
+      setIsLoading(true)
+      setError(null)
+      setCampaign(null)
+
+      try {
+        const res = await fetch(`/api/records/campaigns/${slug}`)
+        if (res.ok) {
+          const data: Campaign = await res.json()
+          // Merge API data with mock UI data
+          setCampaign({ ...data, ...MOCK_CAMPAIGN_DETAILS[data.id] })
+        } else {
+          // The API call was made but returned an error (e.g., 404)
+          // We'll fall through to the catch block's logic
+          throw new Error('API request failed')
+        }
+      } catch (err) {
+        // This block will be hit on network error or if we threw from the try block
+        const mockData = MOCK_CAMPAIGN_DETAILS[slug]
+        if (mockData) {
+          // If we have mock data, use it as a fallback
+          setCampaign({
+            id: slug,
+            name: slug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+            description: 'A decentralized visual identity campaign.',
+            type: slug.includes('derivative') ? 'Derivative' : 'PFP Staking',
+            ...mockData
+          })
+        } else {
+          // No API data and no mock data, so it's truly not found
+          setError('Campaign not found')
+        }
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchCampaign()
+  }, [slug])
 
   const handleFundClick = () => {
     if (campaign) {
-      setSelectedCampaign(campaign)
       setIsModalOpen(true)
     }
   }
 
   const handleCloseModal = () => {
     setIsModalOpen(false)
-    setSelectedCampaign(null)
   }
 
   const handleClaimClick = () => {
-    if (
-      activeCampaign &&
-      activeCampaign.campaignName === campaign?.campaignName
-    ) {
+    if (activeCampaign && activeCampaign.id === campaign?.id) {
       router.push('/rewards')
     }
   }
 
-  if (!campaign) {
+  if (isLoading) {
+    return (
+      <div className='container mx-auto px-4 py-8'>
+        <Skeleton className='mb-6 h-10 w-32' />
+        <div className='grid grid-cols-1 gap-8 lg:grid-cols-3'>
+          <div className='space-y-6 lg:col-span-2'>
+            <Card>
+              <CardContent className='p-6'>
+                <Skeleton className='h-24 w-full' />
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <Skeleton className='h-8 w-48' />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className='h-32 w-full' />
+              </CardContent>
+            </Card>
+          </div>
+          <div className='space-y-6'>
+            <div className='flex gap-3'>
+              <Skeleton className='h-10 w-full' />
+              <Skeleton className='h-10 w-full' />
+            </div>
+            <Card>
+              <CardHeader>
+                <Skeleton className='h-8 w-32' />
+              </CardHeader>
+              <CardContent className='space-y-4'>
+                <Skeleton className='h-5 w-full' />
+                <Skeleton className='h-5 w-full' />
+                <Skeleton className='h-5 w-full' />
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <Skeleton className='h-8 w-40' />
+              </CardHeader>
+              <CardContent className='space-y-3'>
+                <Skeleton className='h-12 w-full' />
+                <Skeleton className='h-12 w-full' />
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (error || !campaign) {
     return (
       <div className='container mx-auto px-4 py-8'>
         <div className='text-center'>
-          <h1 className='mb-4 text-2xl font-bold'>Campaign not found</h1>
+          <h1 className='mb-4 text-2xl font-bold'>
+            {error || 'Campaign not found'}
+          </h1>
           <Button asChild>
             <Link href='/'>Back Home</Link>
           </Button>
@@ -278,20 +300,14 @@ export default function CampaignPage() {
               <div className='flex items-start gap-4'>
                 <Image
                   src={campaign.imageUrl}
-                  alt={campaign.campaignName}
+                  alt={campaign.name}
                   width={80}
                   height={80}
                   className='rounded-lg'
                 />
                 <div className='flex-1'>
-                  <h1 className='mb-2 text-2xl font-bold'>
-                    {campaign.campaignName === 'MOG'
-                      ? 'MOG/ACC'
-                      : campaign.campaignName}
-                  </h1>
-                  <p className='text-muted-foreground mb-2'>
-                    {campaign.campaignType}
-                  </p>
+                  <h1 className='mb-2 text-2xl font-bold'>{campaign.name}</h1>
+                  <p className='text-muted-foreground mb-2'>{campaign.type}</p>
                   <p className='text-muted-foreground text-sm'>
                     Stakers: {campaign.stakers.toLocaleString()}
                   </p>
@@ -307,25 +323,8 @@ export default function CampaignPage() {
             </CardHeader>
             <CardContent>
               <p className='text-muted-foreground leading-relaxed'>
-                {
-                  campaignDetails.find(c => c.slug === campaign.campaignName)
-                    ?.description
-                }
+                {campaign.description}
               </p>
-              {campaign.campaignName === 'MOG' && (
-                <div className='mt-4'>
-                  <p className='text-muted-foreground mb-2 text-sm'>
-                    Sample MOG/ACC Styles:
-                  </p>
-                  <Image
-                    src='/images/mogacc/mogaccmontage.jpg'
-                    alt='MOG/ACC Style Examples'
-                    width={300}
-                    height={200}
-                    className='w-1/2 rounded-lg'
-                  />
-                </div>
-              )}
             </CardContent>
           </Card>
         </div>
@@ -365,11 +364,15 @@ export default function CampaignPage() {
               </div>
               <div className='flex justify-between'>
                 <span className='text-muted-foreground'>Reward Pool</span>
-                <span className='font-medium'>{campaign.rewardPool}</span>
+                <span className='font-medium'>
+                  {campaign.reward_info.totalPool}
+                </span>
               </div>
               <div className='flex justify-between'>
                 <span className='text-muted-foreground'>Daily Reward</span>
-                <span className='font-medium'>{campaign.dailyReward}</span>
+                <span className='font-medium'>
+                  {campaign.reward_info.dailyRate}
+                </span>
               </div>
               <div className='flex justify-between'>
                 <span className='text-muted-foreground'>NFT floor APY</span>
@@ -389,36 +392,32 @@ export default function CampaignPage() {
             </CardHeader>
             <CardContent>
               <div className='space-y-3'>
-                {campaignDetails
-                  .find(c => c.slug === campaign.campaignName)
-                  ?.eligibilityCriteria.map((criteria: EligibilityCriteria) => (
-                    <div key={criteria.id} className='rounded-lg border p-3'>
-                      <div className='flex items-center justify-between'>
-                        <div className='flex items-center gap-2'>
-                          <span className='text-sm'>{criteria.text}</span>
-                        </div>
-                        <div className='flex items-center gap-2'>
-                          <Badge
-                            variant={
-                              criteria.completed ? 'secondary' : 'outline'
-                            }
-                            className={
-                              criteria.completed
-                                ? 'bg-green-100 text-green-800'
-                                : ''
-                            }
-                          >
-                            {criteria.completed ? (
-                              <CheckCircle className='mr-1 h-3 w-3' />
-                            ) : (
-                              <Clock className='mr-1 h-3 w-3' />
-                            )}
-                            {criteria.completed ? 'Completed' : 'Pending'}
-                          </Badge>
-                        </div>
+                {campaign.eligibilityCriteria.map((criteria: any) => (
+                  <div key={criteria.id} className='rounded-lg border p-3'>
+                    <div className='flex items-center justify-between'>
+                      <div className='flex items-center gap-2'>
+                        <span className='text-sm'>{criteria.text}</span>
+                      </div>
+                      <div className='flex items-center gap-2'>
+                        <Badge
+                          variant={criteria.completed ? 'secondary' : 'outline'}
+                          className={
+                            criteria.completed
+                              ? 'bg-green-100 text-green-800'
+                              : ''
+                          }
+                        >
+                          {criteria.completed ? (
+                            <CheckCircle className='mr-1 h-3 w-3' />
+                          ) : (
+                            <Clock className='mr-1 h-3 w-3' />
+                          )}
+                          {criteria.completed ? 'Completed' : 'Pending'}
+                        </Badge>
                       </div>
                     </div>
-                  ))}
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>
@@ -429,7 +428,7 @@ export default function CampaignPage() {
       <DepositModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
-        campaign={selectedCampaign}
+        campaign={campaign}
       />
     </div>
   )

@@ -82,7 +82,7 @@ export function AuthComponent() {
   if (isXAuthenticated || isWalletConnected) {
     return (
       <div className='flex items-center gap-2'>
-        {!isXAuthenticated && isWalletConnected && (
+        {isWalletConnected && !isXAuthenticated && (
           <Dialog>
             <DialogTrigger asChild>
               <Button variant='outline'>

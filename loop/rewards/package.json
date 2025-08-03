@@ -3,10 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "bun --watch src/server.ts",
-    "start": "bun src/server.ts",
-    "test": "bun test",
-    "typecheck": "tsc --noEmit"
+    "dev": "bun --watch src/index.ts",
+    "start": "bun src/index.ts",
+    "test": "bun test"
   },
   "dependencies": {
     "@pfp2e/sdk": "workspace:*",
