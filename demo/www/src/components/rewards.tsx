@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Card, CardContent } from '@/components/ui/card'
@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { Trash2 } from 'lucide-react'
 import { useXSession } from '@/hooks/useXSession'
 import { useAuthStore } from '@/store/auth.store'
+import { useStakingStore } from '@/store/staking.store'
 
 // Token conversion rates for testing
 const CONVERSION_RATES = {
@@ -45,14 +46,7 @@ const initialStake = {
 
 // Main Rewards Component
 export const Rewards = () => {
-  // Check global staking state
-  const [isStakingEnabled, setIsStakingEnabled] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('isStakingEnabled')
-      return saved ? JSON.parse(saved) : false
-    }
-    return false
-  })
+  const { isStakingEnabled } = useStakingStore()
 
   const [stakeData, setStakeData] = useState(() => {
     // Load saved data on component mount
@@ -79,19 +73,6 @@ export const Rewards = () => {
   const saveStakeData = React.useCallback((data: typeof initialStake) => {
     setStakeData(data)
     localStorage.setItem('stakeData', JSON.stringify(data))
-  }, [])
-
-  // Listen for changes to staking state from dashboard
-  useEffect(() => {
-    const handleStorageChange = () => {
-      const saved = localStorage.getItem('isStakingEnabled')
-      if (saved !== null) {
-        setIsStakingEnabled(JSON.parse(saved))
-      }
-    }
-
-    window.addEventListener('storage', handleStorageChange)
-    return () => window.removeEventListener('storage', handleStorageChange)
   }, [])
 
   // Calculate rewards based on elapsed time since last reward
@@ -232,7 +213,6 @@ export const Rewards = () => {
                   width={48}
                   height={48}
                   className='rounded-lg'
-                  unoptimized // Required for Twitter image URLs
                 />
                 <div>
                   <div className='text-xl font-semibold text-white'>

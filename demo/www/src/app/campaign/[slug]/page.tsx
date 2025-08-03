@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge'
 import { CheckCircle, Clock } from 'lucide-react'
 import { campaigns, type Campaign } from '@/lib/mock-data'
 import { DepositModal } from '@/components/deposit-modal'
+import { useStakingStore } from '@/store/staking.store'
 
 interface EligibilityCriteria {
   id: string
@@ -214,6 +215,8 @@ const campaignDetails: CampaignDetail[] = campaigns.map((campaign, index) => {
 
 export default function CampaignPage() {
   const params = useParams()
+  const router = useRouter()
+  const { activeCampaign } = useStakingStore()
   const slug = decodeURIComponent(params.slug as string)
   const [isModalOpen, setIsModalOpen] = React.useState(false)
   const [selectedCampaign, setSelectedCampaign] =
@@ -234,6 +237,15 @@ export default function CampaignPage() {
   const handleCloseModal = () => {
     setIsModalOpen(false)
     setSelectedCampaign(null)
+  }
+
+  const handleClaimClick = () => {
+    if (
+      activeCampaign &&
+      activeCampaign.campaignName === campaign?.campaignName
+    ) {
+      router.push('/rewards')
+    }
   }
 
   if (!campaign) {
@@ -333,6 +345,7 @@ export default function CampaignPage() {
               disabled={!campaign.claimable}
               variant='outline'
               className='flex-1'
+              onClick={handleClaimClick}
             >
               Claim Rewards
             </Button>
