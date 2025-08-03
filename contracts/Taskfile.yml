@@ -18,6 +18,12 @@ tasks:
       - bun run test
 
   clean:
-    desc: 'Clear the Hardhat cache and artifacts'
+    desc: 'Clear the Hardhat cache, artifacts, and deployment records'
     cmds:
-      - bun run clean
+      - bunx hardhat clean
+      - rm -rf ignition/deployments
+
+  node:
+    desc: 'Start a local Hardhat network node'
+    cmds:
+      - bunx hardhat node

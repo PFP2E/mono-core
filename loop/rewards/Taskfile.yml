@@ -7,13 +7,13 @@ tasks:
     cmds:
       - task -l
 
-  build:
-    desc: 'Build the service for production'
-    cmds:
-      - tsc
-
   dev:
-    desc: 'Run the rewards oracle script'
+    desc: 'Run the rewards oracle script in watch mode'
+    cmds:
+      - bun --watch src/index.ts
+
+  start:
+    desc: 'Run the rewards oracle script for production'
     cmds:
       - bun src/index.ts
 
@@ -21,11 +21,6 @@ tasks:
     desc: 'Tests for the rewards service (no-op)'
     cmds:
       - echo "No tests for rewards service."
-
-  typecheck:
-    desc: 'Type-check the project without emitting files'
-    cmds:
-      - tsc --noEmit
 
   clean:
     desc: 'Remove build artifacts'

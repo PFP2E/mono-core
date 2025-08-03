@@ -16,16 +16,6 @@ tasks:
 
   # --- High-Level Commands ---
 
-  build-all:
-    desc: 'Build all packages in the monorepo'
-    cmds:
-      - bun install
-      - task: contracts:build
-      - task: sdk:build
-      - task: records:build
-      - task: rewards:build
-      - task: demo:build
-
   test-all:
     desc: 'Run all tests in the monorepo'
     cmds:
@@ -48,3 +38,9 @@ tasks:
       - task: rewards:clean
       - task: demo:clean
       - rm -rf node_modules
+
+  contracts:deploy:
+    desc: 'Deploy contracts to the local network'
+    dir: contracts
+    cmds:
+      - bunx hardhat run scripts/deploy.ts --network localhost

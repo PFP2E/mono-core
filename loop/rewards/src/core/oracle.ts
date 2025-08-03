@@ -2,6 +2,7 @@ import { ethers } from 'ethers';
 import { MerkleTree } from 'merkletreejs';
 import { keccak256 } from 'js-sha3';
 import { MERKLE_DISTRIBUTOR_ABI } from './abi';
+import { DefaultService, type Campaign } from '@pfp2e/sdk/client';
 
 // =============================================================================
 // TYPES
@@ -14,7 +15,7 @@ interface Participant {
 }
 
 interface Reward {
-  address: string;
+  social_handle: string;
   amount: bigint;
 }
 
@@ -34,18 +35,21 @@ interface OracleConfig {
 /**
  * Fetches the ground truth data for the oracle to run against.
  * @param {OracleConfig} config - The oracle's configuration.
- * @returns {Promise<{targetHashesSet: Set<string>, participants: Participant[]}>} The set of valid PFP hashes and the list of participants.
+ * @returns {Promise<{campaign: Campaign, targetHashesSet: Set<string>, participants: Participant[]}>} The campaign, the set of valid PFP hashes, and the list of participants.
  */
 export async function fetchGroundTruthData(config: OracleConfig) {
-  console.log(`[1/5] Fetching ground truth from ${config.recordsApiUrl}...`);
-  const targetHashes: string[] = await fetch(`${config.recordsApiUrl}/v1/target-pfps/${config.campaignId}`).then(res => res.json());
-  const participants: Participant[] = await fetch(`${config.recordsApiUrl}/v1/users`).then(res => res.json());
+  console.log(`[1/5] Fetching ground truth for campaign "${config.campaignId}" from ${config.recordsApiUrl}...`);
+  
+  const campaign: Campaign = await DefaultService.getV1Campaigns(config.campaignId);
+  const targetHashes: string[] = await DefaultService.getV1TargetPfps(config.campaignId);
+  const participants: any[] = await DefaultService.getV1Users();
   
   const targetHashesSet = new Set(targetHashes);
+  console.log(`  - Loaded campaign type: ${campaign.type}`);
   console.log(`  - Loaded ${targetHashesSet.size} target PFP hashes.`);
   console.log(`  - Loaded ${participants.length} participants to verify.`);
   
-  return { targetHashesSet, participants };
+  return { campaign, targetHashesSet, participants };
 }
 
 /**
@@ -54,7 +58,8 @@ export async function fetchGroundTruthData(config: OracleConfig) {
  * @returns {Promise<string>} The simulated hash of the user's live PFP.
  */
 async function getLivePfpHash(user: Participant): Promise<string> {
-  console.log(`  - [Simulating] Fetching live PFP for ${user.social_handle}...`);
+  // This is a simulation for the hackathon.
+  // A real implementation would fetch the user's live PFP from the social media API.
   if (user.social_handle.startsWith('judge_')) {
     return keccak256('pfp2e-judge-pfp');
   }
@@ -71,23 +76,39 @@ async function getLivePfpHash(user: Participant): Promise<string> {
  * Runs the verification loop, checking each participant against the set of valid hashes.
  * @param {Participant[]} participants - The list of users to verify.
  * @param {Set<string>} targetHashesSet - The set of valid PFP hashes.
+ * @param {Campaign} campaign - The campaign being processed.
  * @returns {Set<string>} A set of unique wallet addresses that passed verification.
  */
-export async function runVerificationLoop(participants: Participant[], targetHashesSet: Set<string>): Promise<Set<string>> {
+export async function runVerificationLoop(participants: Participant[], targetHashesSet: Set<string>, campaign: Campaign): Promise<Set<string>> {
   console.log(`[2/5] Running verification loop for ${participants.length} participants...`);
-  const verifiedWallets = new Set<string>();
-  for (const user of participants) {
-    const livePfpHash = await getLivePfpHash(user);
-    if (targetHashesSet.has(livePfpHash)) {
-      const checksummedAddress = ethers.getAddress(user.wallet_address);
-      verifiedWallets.add(checksummedAddress);
-      console.log(`    ✅ [SUCCESS] ${user.social_handle} is verified.`);
+  const verifiedHandles = new Set<string>();
+
+  if (targetHashesSet.size === 0) {
+    if (campaign.type === 'overlay') {
+      // This is a "default" or "overlay" campaign, verify all participants
+      for (const user of participants) {
+        verifiedHandles.add(user.social_handle);
+      }
+      console.log(`  - ✅ Campaign type is 'overlay' with no targets. Verified all ${participants.length} participants by default.`);
     } else {
-      console.log(`    ❌ [FAILURE] ${user.social_handle} is not verified.`);
+      // This is an 'nft' campaign with no target hashes, which means no one can be verified.
+      console.log(`  - ⚠️  Campaign type is 'nft' but has no target PFPs. No users can be verified.`);
+    }
+  } else {
+    // Standard verification against target hashes
+    for (const user of participants) {
+      const livePfpHash = await getLivePfpHash(user);
+      if (targetHashesSet.has(livePfpHash)) {
+        verifiedHandles.add(user.social_handle);
+        console.log(`    ✅ [SUCCESS] ${user.social_handle} is verified.`);
+      } else {
+        // This is very verbose, so we can comment it out for cleaner logs.
+        // console.log(`    ❌ [FAILURE] ${user.social_handle} is not verified.`);
+      }
     }
   }
-  console.log(`  - Found ${verifiedWallets.size} unique verified wallets.`);
-  return verifiedWallets;
+  console.log(`  - Found ${verifiedHandles.size} unique verified handles.`);
+  return verifiedHandles;
 }
 
 /**
@@ -96,10 +117,10 @@ export async function runVerificationLoop(participants: Participant[], targetHas
  * @param {bigint} rewardAmount - The amount each wallet will receive.
  * @returns {{tree: MerkleTree, root: string} | null} The generated Merkle tree and its root, or null if no one is eligible.
  */
-export function generateMerkleTree(verifiedWallets: Set<string>, rewardAmount: bigint): { tree: MerkleTree; root: string; } | null {
+export function generateMerkleTree(verifiedHandles: Set<string>, rewardAmount: bigint): { tree: MerkleTree; root: string; } | null {
   console.log('[3/5] Calculating rewards and generating Merkle tree...');
-  const rewards: Reward[] = Array.from(verifiedWallets).map(address => ({
-    address,
+  const rewards: Reward[] = Array.from(verifiedHandles).map(social_handle => ({
+    social_handle,
     amount: rewardAmount
   }));
 
@@ -109,7 +130,7 @@ export function generateMerkleTree(verifiedWallets: Set<string>, rewardAmount: b
   }
 
   const leaves = rewards.map(r =>
-    ethers.solidityPackedKeccak256(["address", "uint256"], [r.address, r.amount])
+    ethers.solidityPackedKeccak256(["string", "uint256"], [r.social_handle, r.amount])
   );
   const tree = new MerkleTree(leaves, keccak256, { sortPairs: true });
   const merkleRoot = tree.getHexRoot();
@@ -129,7 +150,6 @@ export async function settleOnChain(merkleRoot: string, config: OracleConfig) {
   const contract = new ethers.Contract(config.contractAddress, MERKLE_DISTRIBUTOR_ABI, wallet);
 
   console.log(`  - Submitting transaction to set Merkle root on contract ${config.contractAddress}...`);
-  // NOTE: The contract function is `startNewEpoch`, not `setMerkleRoot`.
   const tx = await contract.startNewEpoch(merkleRoot);
   console.log(`  - Transaction sent! Hash: ${tx.hash}`);
 

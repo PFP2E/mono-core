@@ -57,6 +57,7 @@ export const MERKLE_DISTRIBUTOR_ABI = [
   {
     "inputs": [
       { "internalType": "uint256", "name": "_epoch", "type": "uint256" },
+      { "internalType": "string", "name": "_socialHandle", "type": "string" },
       { "internalType": "uint256", "name": "_amount", "type": "uint256" },
       { "internalType": "bytes32[]", "name": "_merkleProof", "type": "bytes32[]" }
     ],
@@ -74,8 +75,7 @@ export const MERKLE_DISTRIBUTOR_ABI = [
   },
   {
     "inputs": [
-      { "internalType": "uint256", "name": "", "type": "uint256" },
-      { "internalType": "address", "name": "", "type": "address" }
+      { "internalType": "bytes32", "name": "", "type": "bytes32" }
     ],
     "name": "hasClaimed",
     "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],

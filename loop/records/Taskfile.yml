@@ -7,11 +7,6 @@ tasks:
     cmds:
       - task -l
 
-  build:
-    desc: 'Build the service for production'
-    cmds:
-      - tsc
-
   dev:
     desc: 'Start the development server with hot-reloading'
     deps:
@@ -19,10 +14,8 @@ tasks:
     cmds:
       - bun --hot src/server.ts
 
-  prod:
+  start:
     desc: 'Start the production server'
-    deps:
-      - db:setup
     cmds:
       - bun src/server.ts
 
@@ -30,11 +23,6 @@ tasks:
     desc: 'Run the unit tests'
     cmds:
       - bun test
-
-  typecheck:
-    desc: 'Type-check the project without emitting files'
-    cmds:
-      - tsc --noEmit
 
   clean:
     desc: 'Remove build artifacts and database files'

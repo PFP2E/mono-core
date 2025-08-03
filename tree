@@ -1,0 +1,365 @@
+.
+├── .gitignore
+├── bun.lock
+├── contracts
+│   ├── .env.example
+│   ├── .gitignore
+│   ├── contracts
+│   │   ├── MerkleDistributor.sol
+│   │   ├── ProofOfPFP.sol
+│   │   └── RewardToken.sol
+│   ├── hardhat.config.ts
+│   ├── ignition
+│   │   └── modules
+│   │       ├── Deploy.ts
+│   │       └── Lock.ts
+│   ├── package.json
+│   ├── readme.md
+│   ├── scripts
+│   │   ├── deploy.ts
+│   │   ├── e2e-test.ts
+│   │   └── judges-e2e-test.ts
+│   ├── Taskfile.yml
+│   ├── test
+│   │   └── MerkleDistributor.ts
+│   └── tsconfig.json
+├── demo
+│   ├── .dockerignore
+│   ├── compose.yml
+│   ├── readme.md
+│   ├── Taskfile.yml
+│   └── www
+│       ├── .gitignore
+│       ├── .prettierignore
+│       ├── .prettierrc.json
+│       ├── bunfig.toml
+│       ├── components.json
+│       ├── Containerfile
+│       ├── eslint.config.mjs
+│       ├── next-env.d.ts
+│       ├── next.config.ts
+│       ├── package.json
+│       ├── playwright.config.ts
+│       ├── postcss.config.mjs
+│       ├── public
+│       │   ├── ahash+color (1).mdZone.Identifier
+│       │   ├── android-chrome-192x192.png
+│       │   ├── android-chrome-512x512.png
+│       │   ├── apple-touch-icon.png
+│       │   ├── docs
+│       │   │   └── ahash+color.md
+│       │   ├── favicon-16x16.png
+│       │   ├── favicon-32x32.png
+│       │   ├── favicon.ico
+│       │   ├── icons
+│       │   │   ├── injected.svg
+│       │   │   ├── metamask.svg
+│       │   │   ├── safe.svg
+│       │   │   └── walletconnect.svg
+│       │   ├── images
+│       │   │   ├── 1INCH.jpg
+│       │   │   ├── BAYC.jpg
+│       │   │   ├── BAYC.jpgZone.Identifier
+│       │   │   ├── BAYCNFT
+│       │   │   │   ├── 0.png
+│       │   │   │   ├── 1.png
+│       │   │   │   ├── 2.png
+│       │   │   │   ├── 3.png
+│       │   │   │   └── 4.png
+│       │   │   ├── CRYPTOPUNKS.jpg
+│       │   │   ├── ETHGLOBAL.jpg
+│       │   │   ├── LOSER.jpg
+│       │   │   ├── LOSER.jpgZone.Identifier
+│       │   │   ├── makemypfp.jpg
+│       │   │   ├── MILADY.jpg
+│       │   │   ├── MILADY.jpgZone.Identifier
+│       │   │   ├── MOG.jpg
+│       │   │   ├── mogacc
+│       │   │   │   └── mogaccmontage.jpg
+│       │   │   ├── poweredby1inch.png
+│       │   │   ├── PUDGY.jpg
+│       │   │   ├── SPROTO.jpg
+│       │   │   ├── SPROTO.jpgZone.Identifier
+│       │   │   └── Users
+│       │   │       ├── 0xbe1ac
+│       │   │       │   ├── 0xbe1ac_mogacc.jpg
+│       │   │       │   └── 0xbe1ac_xpfp.jpg
+│       │   │       ├── 0xQuintus
+│       │   │       │   ├── 0xquintus_1inch.jpg
+│       │   │       │   ├── 0xquintus_mogacc.jpg
+│       │   │       │   └── 0xquintus_xpfp.jpg
+│       │   │       ├── annawliang
+│       │   │       │   ├── annawliang_mogacc.jpg
+│       │   │       │   └── annawliang_xpfp.jpg
+│       │   │       ├── ape7458
+│       │   │       │   ├── ape7458_mogacc.jpg
+│       │   │       │   └── ape7458_xpfp.jpg
+│       │   │       ├── beatkalipska
+│       │   │       │   ├── beatkalipska_mogacc.jpg
+│       │   │       │   └── beatkalipska_xpfp.jpg
+│       │   │       ├── bhodl2
+│       │   │       │   ├── bhodl2_1inch.jpg
+│       │   │       │   ├── bhodl2_giants.jpg
+│       │   │       │   ├── bhodl2_mogacc.jpg
+│       │   │       │   ├── bhodl2_nike.jpg
+│       │   │       │   └── bhodl2_xpfp.jpg
+│       │   │       ├── CarstenJacobsen
+│       │   │       │   ├── carstenjacobsen_mogacc.jpg
+│       │   │       │   └── carstenjacobsen_xpfp.jpg
+│       │   │       ├── deacix
+│       │   │       │   ├── deacix_mogacc.jpg
+│       │   │       │   └── deacix_xpfp.jpg
+│       │   │       ├── dylankugler
+│       │   │       │   ├── dylankugler_mogacc.jpg
+│       │   │       │   └── dylankugler_xpfp.jpg
+│       │   │       ├── francescoswiss
+│       │   │       │   ├── francesoswiss_mogacc.jpg
+│       │   │       │   └── francesoswiss_xpfp.jpg
+│       │   │       ├── Greg_Nazario
+│       │   │       │   ├── greg_nazario_mogacc.jpg
+│       │   │       │   └── greg_nazario_xpfp.jpg
+│       │   │       ├── heyadebola
+│       │   │       │   ├── headebola_mogacc.jpg
+│       │   │       │   └── headebola_xpfp.jpg
+│       │   │       ├── k06a
+│       │   │       │   ├── k06a_mogacc.jpg
+│       │   │       │   └── k06a_xpfp.jpg
+│       │   │       ├── MartinFromTon
+│       │   │       │   └── martinfromton_xpfp.jpg
+│       │   │       ├── mr13tech
+│       │   │       │   ├── mr13tech_mogacc.jpg
+│       │   │       │   └── mr13tech_xpfp.jpg
+│       │   │       ├── MTschimev
+│       │   │       │   ├── mtschimev_mogacc.jpg
+│       │   │       │   └── mtschimev_xpfp.jpg
+│       │   │       ├── robertkp13
+│       │   │       │   ├── robertkp13_mogacc.jpg
+│       │   │       │   └── robertkp13_xpfp.jpg
+│       │   │       ├── rudolf6_
+│       │   │       │   ├── rudolf6__mogacc.jpg
+│       │   │       │   └── rudolf6__xpfp.jpg
+│       │   │       ├── solangegueiros
+│       │   │       │   ├── solangegueiros_mogacc.jpg
+│       │   │       │   └── solangegueiros_xpfp.jpg
+│       │   │       ├── thePalenimbus
+│       │   │       │   ├── thepalenimbus_mogacc.jpg
+│       │   │       │   └── thepalenimbus_xpfp.jpg
+│       │   │       ├── ThePiVortex
+│       │   │       │   ├── thepivortex_mogacc.jpg
+│       │   │       │   └── thepivortex_xpfp.jpg
+│       │   │       ├── TheRealKartik
+│       │   │       │   ├── therealkartik_mogacc.jpg
+│       │   │       │   └── therealkartik_xpfp.jpg
+│       │   │       └── thisiscalvin_
+│       │   │           ├── thisiscalvin__mogacc.jpg
+│       │   │           └── thisiscalvin__xpfp.jpg
+│       │   ├── logo.png
+│       │   └── safe.png
+│       ├── src
+│       │   ├── app
+│       │   │   ├── api
+│       │   │   │   ├── auth
+│       │   │   │   │   ├── logout
+│       │   │   │   │   │   └── route.ts
+│       │   │   │   │   ├── me
+│       │   │   │   │   │   └── route.ts
+│       │   │   │   │   ├── nonce
+│       │   │   │   │   │   └── route.ts
+│       │   │   │   │   ├── verify
+│       │   │   │   │   │   └── route.ts
+│       │   │   │   │   └── x
+│       │   │   │   │       ├── callback
+│       │   │   │   │       │   └── route.ts
+│       │   │   │   │       └── redirect
+│       │   │   │   │           └── route.ts
+│       │   │   │   └── records
+│       │   │   │       └── [...slug]
+│       │   │   │           └── route.ts
+│       │   │   ├── campaign
+│       │   │   │   └── [slug]
+│       │   │   │       └── page.tsx
+│       │   │   ├── create-campaign
+│       │   │   │   └── page.tsx
+│       │   │   ├── globals.css
+│       │   │   ├── layout.tsx
+│       │   │   ├── mogacc-generator
+│       │   │   │   └── page.tsx
+│       │   │   ├── nike-generator
+│       │   │   │   └── page.tsx
+│       │   │   ├── oauth2
+│       │   │   │   └── page.tsx
+│       │   │   ├── page.tsx
+│       │   │   ├── PresetPicker
+│       │   │   │   └── page.tsx
+│       │   │   ├── providers.tsx
+│       │   │   ├── rewards
+│       │   │   │   └── page.tsx
+│       │   │   ├── siwe
+│       │   │   │   └── page.tsx
+│       │   │   ├── SpiderPicker
+│       │   │   │   └── page.tsx
+│       │   │   └── vision
+│       │   │       └── page.tsx
+│       │   ├── components
+│       │   │   ├── auth-component.tsx
+│       │   │   ├── create-campaign.tsx
+│       │   │   ├── dashboard.tsx
+│       │   │   ├── deposit-modal.tsx
+│       │   │   ├── footer.tsx
+│       │   │   ├── header.tsx
+│       │   │   ├── hero.tsx
+│       │   │   ├── icons.tsx
+│       │   │   ├── marketplace.tsx
+│       │   │   ├── rewards.tsx
+│       │   │   ├── theme-toggle.tsx
+│       │   │   ├── ui
+│       │   │   │   ├── alert.tsx
+│       │   │   │   ├── badge.tsx
+│       │   │   │   ├── button.tsx
+│       │   │   │   ├── card.tsx
+│       │   │   │   ├── checkbox.tsx
+│       │   │   │   ├── collapsible.tsx
+│       │   │   │   ├── dialog.tsx
+│       │   │   │   ├── dropdown-menu.tsx
+│       │   │   │   ├── input.tsx
+│       │   │   │   ├── label.tsx
+│       │   │   │   ├── navigation-menu.tsx
+│       │   │   │   ├── progress.tsx
+│       │   │   │   ├── radio-group.tsx
+│       │   │   │   ├── select.tsx
+│       │   │   │   ├── sheet.tsx
+│       │   │   │   ├── skeleton.tsx
+│       │   │   │   ├── stepper.tsx
+│       │   │   │   ├── toast.tsx
+│       │   │   │   ├── toaster.tsx
+│       │   │   │   ├── tooltip.tsx
+│       │   │   │   └── use-toast.ts
+│       │   │   ├── use-cases.tsx
+│       │   │   ├── wallet
+│       │   │   │   ├── wallet-connection-dialog.tsx
+│       │   │   │   └── wallet-option.tsx
+│       │   │   └── x-signin-modal.tsx
+│       │   ├── config
+│       │   │   ├── wagmi-config.ts
+│       │   │   ├── wagmi.ts
+│       │   │   └── wallet.ts
+│       │   ├── hooks
+│       │   │   ├── use-mobile.ts
+│       │   │   ├── use-wallet.ts
+│       │   │   ├── useSIWE.ts
+│       │   │   └── useXSession.ts
+│       │   ├── lib
+│       │   │   ├── logger.ts
+│       │   │   ├── mock-data.ts
+│       │   │   ├── services
+│       │   │   │   └── ens.service.ts
+│       │   │   ├── session.ts
+│       │   │   └── utils
+│       │   │       ├── cn.ts
+│       │   │       ├── index.ts
+│       │   │       └── pfp-hash.ts
+│       │   ├── store
+│       │   │   ├── activity.store.ts
+│       │   │   ├── auth.store.ts
+│       │   │   ├── rewards.store.ts
+│       │   │   └── staking.store.ts
+│       │   └── types
+│       │       └── rewards.d.ts
+│       ├── tests
+│       │   └── unit
+│       │       └── utils
+│       │           └── cn.test.ts
+│       ├── tests-ui
+│       │   └── objective.test.ts
+│       └── tsconfig.json
+├── docs
+│   ├── components.jpg
+│   ├── data
+│   │   ├── base
+│   │   │   ├── 1-introdiction
+│   │   │   │   ├── 1-vision.md
+│   │   │   │   ├── 2-use-cases.md
+│   │   │   │   ├── 3-triadic-loop.md
+│   │   │   │   ├── 4-campaign-types.md
+│   │   │   │   └── index.md
+│   │   │   ├── 2-quickstart.md
+│   │   │   └── 3-community.md
+│   │   ├── frontend-onboarding.md
+│   │   ├── readme.md
+│   │   └── tech
+│   │       ├── 1-Requirements
+│   │       │   ├── 1-Functional.md
+│   │       │   └── 2-Non_Functional.md
+│   │       ├── 2-Specification
+│   │       │   ├── 1-System_Architecture.md
+│   │       │   ├── 2-API_Specification.md
+│   │       │   └── 3-Settlement_Layer.md
+│   │       └── 3-Developer_Guides
+│   │           ├── 1-Getting_Started.md
+│   │           └── 2-Advanced_Guides.md
+│   └── logo.png
+├── intent.context
+├── LICENSE
+├── loop
+│   ├── indexer
+│   │   └── readme.md
+│   ├── readme.md
+│   ├── records
+│   │   ├── .gitignore
+│   │   ├── bunfig.toml
+│   │   ├── package-lock.json
+│   │   ├── package.json
+│   │   ├── readme.md
+│   │   ├── src
+│   │   │   ├── api.test.ts
+│   │   │   ├── api.ts
+│   │   │   ├── db
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── init.ts
+│   │   │   │   ├── records.db.test.ts
+│   │   │   │   ├── schema.sql
+│   │   │   │   ├── seed-judges.ts
+│   │   │   │   └── seed.ts
+│   │   │   ├── lib
+│   │   │   │   └── logger.ts
+│   │   │   └── server.ts
+│   │   ├── Taskfile.yml
+│   │   └── tsconfig.json
+│   ├── rewards
+│   │   ├── .env.example
+│   │   ├── package.json
+│   │   ├── readme.md
+│   │   ├── src
+│   │   │   ├── core
+│   │   │   │   ├── abi.ts
+│   │   │   │   └── oracle.ts
+│   │   │   └── index.ts
+│   │   ├── Taskfile.yml
+│   │   └── tsconfig.json
+│   ├── sdk
+│   │   ├── package.json
+│   │   ├── readme.md
+│   │   ├── src
+│   │   │   ├── client
+│   │   │   │   ├── core
+│   │   │   │   │   ├── ApiError.ts
+│   │   │   │   │   ├── ApiRequestOptions.ts
+│   │   │   │   │   ├── ApiResult.ts
+│   │   │   │   │   ├── CancelablePromise.ts
+│   │   │   │   │   ├── OpenAPI.ts
+│   │   │   │   │   └── request.ts
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── models
+│   │   │   │   └── services
+│   │   │   ├── index.ts
+│   │   │   └── types.ts
+│   │   ├── Taskfile.yml
+│   │   ├── tsconfig.json
+│   │   └── types.js
+│   └── tsconfig.base.json
+├── package.json
+├── readme.md
+├── Taskfile.yml
+└── tree
+
+100 directories, 263 files

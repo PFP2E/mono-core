@@ -12,63 +12,139 @@ import {
   generateMerkleTree,
   settleOnChain,
 } from './core/oracle';
+import { OpenAPI } from '@pfp2e/sdk/client';
+import { MERKLE_DISTRIBUTOR_ABI } from './core/abi';
 
 // =============================================================================
 // ORACLE CONFIGURATION
 // =============================================================================
 
-/**
- * @description The configuration for the oracle run.
- * Values are sourced from environment variables for security and flexibility.
- */
+const {
+    RECORDS_API_URL = 'http://localhost:8787',
+    DEPLOYER_PRIVATE_KEY,
+    RPC_URL,
+    MERKLE_DISTRIBUTOR_ADDRESS,
+    EPOCH_INTERVAL_MS = '30000', // Default to 30 seconds
+} = process.env;
+
 const config = {
-  recordsApiUrl: process.env.RECORDS_API_URL || 'http://localhost:8787',
-  campaignId: 'bayc-social-staking-mvp',
-  privateKey: process.env.PRIVATE_KEY!,
-  rpcUrl: process.env.RPC_URL!,
-  contractAddress: process.env.CONTRACT_ADDRESS!,
+  recordsApiUrl: RECORDS_API_URL,
+  privateKey: DEPLOYER_PRIVATE_KEY!,
+  rpcUrl: RPC_URL!,
+  contractAddress: MERKLE_DISTRIBUTOR_ADDRESS!,
   rewardAmount: ethers.parseEther('100'), // 100 tokens per verified user
 };
 
-const CURRENT_EPOCH = 1; // In a production system, this would be dynamic.
+// Configure the SDK to use the correct API endpoint
+OpenAPI.BASE = config.recordsApiUrl;
+
+const CAMPAIGN_IDS = ['bayc-social-staking-mvp', 'default-x-campaign', 'judges-campaign'];
 
 // =============================================================================
-// MAIN EXECUTION
+// HELPER FUNCTIONS
+// =============================================================================
+
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+async function checkApiHealth() {
+    console.log(`[HEALTH] Checking health of records API at ${config.recordsApiUrl}...`);
+    try {
+        const response = await fetch(`${config.recordsApiUrl}/v1/campaigns`);
+        if (!response.ok) {
+            throw new Error(`API returned a non-ok status: ${response.status}`);
+        }
+        console.log("   ✅ API is healthy.");
+        return true;
+    } catch (error) {
+        console.error("   ❌ API is unreachable or unhealthy.");
+        console.error("      Please ensure the @pfp2e/records service is running.");
+        console.error(`      Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        return false;
+    }
+}
+
+async function getCurrentEpochFromChain(): Promise<bigint> {
+    console.log("[CHAIN] Fetching current epoch from contract...");
+    const provider = new ethers.JsonRpcProvider(config.rpcUrl);
+    const contract = new ethers.Contract(config.contractAddress, MERKLE_DISTRIBUTOR_ABI, provider);
+    const epoch = await contract.currentEpoch();
+    console.log(`   ✅ Current on-chain epoch is: ${epoch}`);
+    return epoch;
+}
+
+
+// =============================================================================
+// MAIN ORACLE LOOP
 // =============================================================================
 
 /**
- * @description The main function of the oracle. It executes one full epoch run.
+ * @description The main function of the oracle. It executes one full epoch run for all campaigns.
+ */
+async function runOracleCycle() {
+  // 1. Fetch current on-chain epoch
+  const currentEpoch = await getCurrentEpochFromChain();
+  const nextEpoch = currentEpoch + 1n;
+  console.log(`\n--- Starting Oracle Cycle for Epoch ${nextEpoch} ---`);
+
+  for (const campaignId of CAMPAIGN_IDS) {
+    console.log(`\n--- Processing Campaign: ${campaignId} ---`);
+    const campaignConfig = { ...config, campaignId };
+
+    // 2. Fetch Off-Chain Data
+    const { campaign, targetHashesSet, participants } = await fetchGroundTruthData(campaignConfig);
+
+    // 3. Run Verification
+    const verifiedHandles = await runVerificationLoop(participants, targetHashesSet, campaign);
+
+    // 4. Generate Merkle Tree
+    const merkleData = generateMerkleTree(verifiedHandles, config.rewardAmount);
+    if (!merkleData) {
+      console.log(`\n--- Campaign ${campaignId} Completed: No rewards to settle for epoch ${nextEpoch}. ---`);
+      continue;
+    }
+
+    // 5. Settle On-Chain
+    // Note: The contract auto-increments the epoch, so we don't pass it in.
+    await settleOnChain(merkleData.root, campaignConfig);
+  }
+
+  console.log(`\n--- Oracle Cycle for Epoch ${nextEpoch} Completed Successfully ---`);
+}
+
+/**
+ * @description The main entry point that runs the oracle as a daemon.
  */
 async function main() {
-  console.log(`\n--- Starting Oracle Epoch ${CURRENT_EPOCH} ---`);
+    console.log("🚀 Starting PFP2E Rewards Oracle Daemon...");
+    // 1. Validate Configuration & Health
+    if (!config.privateKey || !config.rpcUrl || !config.contractAddress) {
+        throw new Error("Missing required environment variables: DEPLOYER_PRIVATE_KEY, RPC_URL, MERKLE_DISTRIBUTOR_ADDRESS");
+    }
+    if (!(await checkApiHealth())) {
+        process.exit(1);
+    }
 
-  // 1. Validate Configuration
-  if (!config.privateKey || !config.rpcUrl || !config.contractAddress) {
-    throw new Error("Missing required environment variables: PRIVATE_KEY, RPC_URL, CONTRACT_ADDRESS");
-  }
-
-  // 2. Fetch Off-Chain Data
-  const { targetHashesSet, participants } = await fetchGroundTruthData(config);
-
-  // 3. Run Verification
-  const verifiedWallets = await runVerificationLoop(participants, targetHashesSet);
-
-  // 4. Generate Merkle Tree
-  const merkleData = generateMerkleTree(verifiedWallets, config.rewardAmount);
-  if (!merkleData) {
-    console.log(`\n--- Oracle Epoch ${CURRENT_EPOCH} Completed: No rewards to settle. ---`);
-    return;
-  }
-
-  // 5. Settle On-Chain
-  await settleOnChain(merkleData.root, config);
-
-  console.log(`\n--- Oracle Epoch ${CURRENT_EPOCH} Completed Successfully ---`);
+    // 2. Start the main processing loop
+    while (true) {
+        try {
+            await runOracleCycle();
+            const interval = parseInt(EPOCH_INTERVAL_MS, 10);
+            console.log(`\n[DAEMON] Cycle complete. Waiting ${interval / 1000} seconds for next cycle...`);
+            await delay(interval);
+        } catch (error) {
+            console.error("\n--- ORACLE CYCLE FAILED ---");
+            console.error(error);
+            const errorInterval = 10000; // Wait 10 seconds before retrying on error
+            console.log(`[DAEMON] Retrying in ${errorInterval / 1000} seconds...`);
+            await delay(errorInterval);
+        }
+    }
 }
+
 
 // Run the oracle and handle any top-level errors.
 main().catch(error => {
-  console.error("\n--- ORACLE RUN FAILED ---");
+  console.error("\n--- ORACLE DAEMON FAILED TO START ---");
   console.error(error);
   process.exit(1);
 });
