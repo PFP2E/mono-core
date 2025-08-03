@@ -1,6 +1,7 @@
 // src/components/dashboard.tsx
 'use client'
 
+import React from 'react'
 import { useSIWE } from '@/hooks/useSIWE'
 import { useXSession } from '@/hooks/useXSession'
 import { useWallet } from '@/hooks/use-wallet'
@@ -10,6 +11,8 @@ import { Button } from './ui/button'
 import Link from 'next/link'
 import { Trash2 } from 'lucide-react'
 import { useActivityStore } from '@/store/activity.store'
+import { useStakingStore } from '@/store/staking.store'
+import { campaigns } from '@/lib/mock-data'
 
 export function UserDashboard() {
   const { isAuthenticated, ens } = useSIWE()
@@ -17,6 +20,40 @@ export function UserDashboard() {
   const { formattedAddress } = useWallet()
   // Use the hook to get reactive updates
   const { activities, clearHistory } = useActivityStore()
+  const {
+    isStakingEnabled,
+    activeCampaign,
+    stakingDetails,
+    initializeStaking,
+    disableStaking
+  } = useStakingStore()
+
+  // Handle staking toggle
+  const handleStakingToggle = () => {
+    if (!isStakingEnabled) {
+      // Turn staking ON - initialize with BAYC campaign
+      const baycCampaign = campaigns.find(c => c.campaignName.includes('BAYC'))
+      if (baycCampaign) {
+        initializeStaking(
+          {
+            id: String(baycCampaign.id),
+            name: 'BAYC',
+            campaignName: baycCampaign.campaignName,
+            imageUrl: baycCampaign.imageUrl,
+            campaignType: baycCampaign.campaignType
+          },
+          {
+            nftTokenId: '1234',
+            walletAddress: '0x23a45678901234567890123456789012345639d3',
+            stakedDate: '8/3/2025'
+          }
+        )
+      }
+    } else {
+      // Turn staking OFF
+      disableStaking()
+    }
+  }
 
   // Debug log to see activities
   console.log('Current activities:', activities)
@@ -38,36 +75,120 @@ export function UserDashboard() {
 
   return (
     <div className='my-8 space-y-6'>
+      {/* Staking Toggle - Desktop */}
+      <div className='mb-4 hidden justify-center md:flex'>
+        <div className='flex items-center gap-2 rounded-lg bg-gray-800 p-2'>
+          <span className='text-sm text-gray-300'>Staking:</span>
+          <button
+            onClick={handleStakingToggle}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+              isStakingEnabled ? 'bg-green-500' : 'bg-gray-600'
+            }`}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                isStakingEnabled ? 'translate-x-6' : 'translate-x-1'
+              }`}
+            />
+          </button>
+          <span className='text-sm text-gray-300'>
+            {isStakingEnabled ? 'ON' : 'OFF'}
+          </span>
+        </div>
+      </div>
+
+      {/* Staking Toggle - Mobile */}
+      <div className='mb-4 flex justify-center md:hidden'>
+        <div className='flex items-center gap-2 rounded-lg bg-gray-800 p-1.5'>
+          <span className='text-xs text-gray-300'>Staking:</span>
+          <button
+            onClick={handleStakingToggle}
+            className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
+              isStakingEnabled ? 'bg-green-500' : 'bg-gray-600'
+            }`}
+          >
+            <span
+              className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
+                isStakingEnabled ? 'translate-x-5' : 'translate-x-0.5'
+              }`}
+            />
+          </button>
+          <span className='text-xs text-gray-300'>
+            {isStakingEnabled ? 'ON' : 'OFF'}
+          </span>
+        </div>
+      </div>
+
       <Card className='mx-auto max-w-2xl'>
         <CardHeader className='flex flex-row items-center justify-between'>
-          <CardTitle>Welcome Back</CardTitle>
+          <CardTitle>
+            Welcome{' '}
+            {xSession?.username
+              ? `${xSession.username.charAt(0).toUpperCase() + xSession.username.slice(1)} (😈,😇,💸,📼)`
+              : ''}
+          </CardTitle>
         </CardHeader>
-        <CardContent className='flex items-center justify-between'>
-          {/* Profile Section */}
+        <CardContent className='space-y-4'>
+          {/* Profile Section - Fixed Container */}
           <div className='flex items-center gap-4'>
-            {isXAuthenticated && xSession && pfpUrl && (
-              <Image
-                src={pfpUrl}
-                alt={'pfp'}
-                width={80}
-                height={80}
-                className='rounded-full'
-              />
-            )}
-            {isAuthenticated && ens?.avatar && (
-              <Image
-                src={ens.avatar}
-                alt={ens.name || 'ENS Avatar'}
-                width={80}
-                height={80}
-                className='rounded-full'
-              />
-            )}
+            {/* Profile Picture with Staking Indicator */}
+            <div className='relative'>
+              {isXAuthenticated && xSession && pfpUrl && (
+                <Image
+                  src={pfpUrl}
+                  alt={'pfp'}
+                  width={80}
+                  height={80}
+                  className={`rounded-full border-4 ${
+                    isStakingEnabled
+                      ? 'border-black shadow-[0_0_0_3px_#11FF74]'
+                      : 'border-gray-600'
+                  }`}
+                />
+              )}
+              {isAuthenticated && ens?.avatar && (
+                <Image
+                  src={ens.avatar}
+                  alt={ens.name || 'ENS Avatar'}
+                  width={80}
+                  height={80}
+                  className={`rounded-full border-4 ${
+                    isStakingEnabled
+                      ? 'border-black shadow-[0_0_0_3px_#11FF74]'
+                      : 'border-gray-600'
+                  }`}
+                />
+              )}
+
+              {/* Staked Badge - Only show when staking is ON */}
+              {isStakingEnabled && (
+                <div className='absolute -bottom-2 left-1/2 -translate-x-1/2 transform'>
+                  <div className='flex items-center gap-1 rounded-full bg-gradient-to-r from-green-400 to-green-500 px-3 py-1'>
+                    <span className='text-xs font-semibold text-black'>
+                      Staked
+                    </span>
+                    <svg
+                      className='h-3 w-3 text-black'
+                      fill='currentColor'
+                      viewBox='0 0 20 20'
+                    >
+                      <path
+                        fillRule='evenodd'
+                        d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z'
+                        clipRule='evenodd'
+                      />
+                    </svg>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Username and Wallet Info - Fixed Container */}
             <div className='flex flex-col gap-1'>
               {isXAuthenticated && xSession && (
                 <div>
                   <p className='text-muted-foreground text-sm'>Signed in as</p>
-                  <p className='text-lg font-medium'>{xSession.username}</p>
+                  <p className='text-lg font-medium'>@{xSession.username}</p>
                 </div>
               )}
               {isAuthenticated && (
@@ -83,8 +204,36 @@ export function UserDashboard() {
             </div>
           </div>
 
+          {/* Staking Status - Separate section below profile, above buttons */}
+          {isStakingEnabled && activeCampaign && stakingDetails && (
+            <div className='mt-2 flex items-center gap-2'>
+              <svg
+                className='h-4 w-4 text-green-500'
+                fill='currentColor'
+                viewBox='0 0 20 20'
+              >
+                <path
+                  fillRule='evenodd'
+                  d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z'
+                  clipRule='evenodd'
+                />
+              </svg>
+              <span className='text-sm text-green-500'>
+                Staked: {activeCampaign.name} #{stakingDetails.nftTokenId}{' '}
+                staked with wallet {stakingDetails.walletAddress.slice(0, 6)}...
+                {stakingDetails.walletAddress.slice(-4)}
+              </span>
+            </div>
+          )}
+
           {/* Desktop Buttons */}
           <div className='hidden flex-col gap-2 md:flex'>
+            <Button
+              asChild
+              className='bg-green-600 text-white hover:bg-green-700'
+            >
+              <Link href='/rewards'>Rewards</Link>
+            </Button>
             <Button
               asChild
               className='bg-blue-600 text-white hover:bg-blue-700'
@@ -93,19 +242,30 @@ export function UserDashboard() {
             </Button>
             <Button
               asChild
-              className='bg-green-600 text-white hover:bg-green-700'
+              className='bg-orange-700 text-white hover:bg-orange-800'
             >
-              <Link href='/create-campaign'>Create Campaign</Link>
+              <Link href='/create-campaign'>Campaign Constructor</Link>
             </Button>
           </div>
 
           {/* Mobile Buttons */}
-          <div className='flex flex-col gap-2 md:hidden'>
-            <Button asChild variant='outline' size='lg'>
+          <div className='flex flex-col gap-3 md:hidden'>
+            <Button
+              asChild
+              size='lg'
+              className='bg-green-600 hover:bg-green-700'
+            >
+              <Link href='/rewards'>Rewards</Link>
+            </Button>
+            <Button asChild size='lg' className='bg-blue-600 hover:bg-blue-700'>
               <Link href='/mogacc-generator'>MOG/ACC Generator</Link>
             </Button>
-            <Button asChild size='lg'>
-              <Link href='/create-campaign'>Create Campaign</Link>
+            <Button
+              asChild
+              size='lg'
+              className='bg-orange-700 hover:bg-orange-800'
+            >
+              <Link href='/create-campaign'>Campaign Constructor</Link>
             </Button>
           </div>
         </CardContent>

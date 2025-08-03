@@ -273,7 +273,9 @@ export default function CampaignPage() {
                 />
                 <div className='flex-1'>
                   <h1 className='mb-2 text-2xl font-bold'>
-                    {campaign.campaignName}
+                    {campaign.campaignName === 'MOG'
+                      ? 'MOG/ACC'
+                      : campaign.campaignName}
                   </h1>
                   <p className='text-muted-foreground mb-2'>
                     {campaign.campaignType}
@@ -298,6 +300,20 @@ export default function CampaignPage() {
                     ?.description
                 }
               </p>
+              {campaign.campaignName === 'MOG' && (
+                <div className='mt-4'>
+                  <p className='text-muted-foreground mb-2 text-sm'>
+                    Sample MOG/ACC Styles:
+                  </p>
+                  <Image
+                    src='/images/mogacc/mogaccmontage.jpg'
+                    alt='MOG/ACC Style Examples'
+                    width={300}
+                    height={200}
+                    className='w-1/2 rounded-lg'
+                  />
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
