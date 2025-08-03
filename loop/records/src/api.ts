@@ -5,9 +5,94 @@ import { logger } from './lib/logger';
 
 export const apiRouter = Router();
 
+// OpenAPI Schema definitions for JSDoc
 /**
- * GET /v1/campaigns
- * Returns a list of all campaigns.
+ * @swagger
+ * components:
+ *   schemas:
+ *     Campaign:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *           description: The unique identifier for the campaign.
+ *         name:
+ *           type: string
+ *           description: The name of the campaign.
+ *         description:
+ *           type: string
+ *           description: A brief description of the campaign.
+ *         type:
+ *           type: string
+ *           enum: [nft, overlay]
+ *           description: The type of the campaign.
+ *         rules:
+ *           type: object
+ *           description: The rules governing the campaign.
+ *         reward_info:
+ *           type: object
+ *           description: Information about the campaign's rewards.
+ *         created_at:
+ *           type: integer
+ *           description: Unix timestamp of when the campaign was created.
+ *       example:
+ *         id: "bayc-social-staking"
+ *         name: "Bored Ape Yacht Club Social Staking"
+ *         description: "Get rewarded for using your BAYC NFT as your PFP on Twitter/X."
+ *         type: "nft"
+ *         rules:
+ *           type: "nft"
+ *           collectionAddress: "0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D"
+ *           requireOwnership: true
+ *         reward_info:
+ *           totalPool: "1,000,000 $APE"
+ *           dailyRate: "10,000 $APE"
+ *         created_at: 1678886400
+ *     VerificationRequest:
+ *       type: object
+ *       required:
+ *         - campaignId
+ *         - user
+ *       properties:
+ *         campaignId:
+ *           type: string
+ *           description: The ID of the campaign to verify against.
+ *         user:
+ *           type: object
+ *           required:
+ *             - twitter
+ *           properties:
+ *             twitter:
+ *               type: string
+ *               description: The user's Twitter handle.
+ *     VerificationResponse:
+ *       type: object
+ *       properties:
+ *         staked:
+ *           type: boolean
+ *           description: Whether the user is successfully verified for the campaign.
+ *         timestamp:
+ *           type: integer
+ *           description: The Unix timestamp of the verification.
+ */
+
+/**
+ * @swagger
+ * /v1/campaigns:
+ *   get:
+ *     summary: Retrieve a list of all campaigns
+ *     tags: [Campaigns]
+ *     responses:
+ *       200:
+ *         description: A list of campaigns.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Campaign'
+ *       500:
+ *         description: Internal Server Error
  */
 apiRouter.get('/campaigns', (req, res) => {
   logger.info('Request received: GET /v1/campaigns');
@@ -31,8 +116,29 @@ apiRouter.get('/campaigns', (req, res) => {
 });
 
 /**
- * GET /v1/campaigns/:id
- * Returns a single campaign by its ID.
+ * @swagger
+ * /v1/campaigns/{id}:
+ *   get:
+ *     summary: Get a campaign by ID
+ *     tags: [Campaigns]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The campaign ID
+ *     responses:
+ *       200:
+ *         description: The campaign description by id
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Campaign'
+ *       404:
+ *         description: The campaign was not found
+ *       500:
+ *         description: Internal Server Error
  */
 apiRouter.get('/campaigns/:id', (req, res) => {
   const { id } = req.params;
@@ -60,9 +166,26 @@ apiRouter.get('/campaigns/:id', (req, res) => {
 });
 
 /**
- * POST /v1/verify
- * Verifies a user's PFP against a campaign.
- * (Placeholder implementation)
+ * @swagger
+ * /v1/verify:
+ *   post:
+ *     summary: Verify a user's PFP against a campaign
+ *     tags: [Verification]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/VerificationRequest'
+ *     responses:
+ *       200:
+ *         description: Verification status
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/VerificationResponse'
+ *       400:
+ *         description: Bad Request - Missing parameters
  */
 apiRouter.post('/verify', (req, res) => {
   const { campaignId, user } = req.body;

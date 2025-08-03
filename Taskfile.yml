@@ -19,22 +19,30 @@ tasks:
       - echo "--- Installing Loop dependencies... ---"
       - bun install
 
-  loop:build:
-    desc: 'Build all loop packages (sdk, records, rewards)'
+  loop:setup:
+    desc: 'Initialize and seed the database for the records service'
+    dir: loop/records
     cmds:
-      - echo "--- Building Loop packages... ---"
-      - task: sdk:build
-      - task: records:build
+      - task setup
+
+  loop:typecheck:
+    desc: 'Type-check all loop packages (sdk, records, rewards)'
+    cmds:
+      - echo "--- Type-checking Loop packages... ---"
+      - task: sdk:typecheck
+      - task: records:typecheck
+      - task: rewards:typecheck
 
   loop:dev:
-    desc: 'Start the loop backend in development mode (hot-reloading)'
+    desc: 'Initialize DB and start the loop backend in development mode (hot-reloading)'
+    deps: [loop:setup]
     cmds:
       - echo "--- Starting Loop dev server (hot-reloading)... ---"
       - task: records:dev
 
   loop:prod:
-    desc: 'Start the loop backend in production mode (from dist)'
-    deps: [loop:build]
+    desc: 'Initialize DB and start the loop backend in production mode'
+    deps: [loop:setup]
     cmds:
       - echo "--- Starting Loop prod server... ---"
       - task: records:start
@@ -127,16 +135,17 @@ tasks:
   # Internal Helper Tasks (for orchestration)
   # ==============================================================================
 
-  sdk:build: { internal: true, dir: loop/sdk, cmds: ['task build'] }
+  sdk:typecheck: { internal: true, dir: loop/sdk, cmds: ['task typecheck'] }
   sdk:clean: { internal: true, dir: loop/sdk, cmds: ['task clean'] }
 
-  records:build: { internal: true, dir: loop/records, cmds: ['task build'] }
+  records:typecheck: { internal: true, dir: loop/records, cmds: ['task typecheck'] }
   records:dev: { internal: true, dir: loop/records, cmds: ['bun --hot run src/server.ts'] }
   records:start: { internal: true, dir: loop/records, cmds: ['task start'] }
   records:stop: { internal: true, dir: loop/records, cmds: ['task stop'] }
   records:test: { internal: true, dir: loop/records, cmds: ['task test'] }
   records:clean: { internal: true, dir: loop/records, cmds: ['rm -rf dist *.db *.db-journal'] }
 
+  rewards:typecheck: { internal: true, dir: loop/rewards, cmds: ['task typecheck'] }
   rewards:clean: { internal: true, dir: loop/rewards, cmds: ['rm -rf dist'] }
 
   demo:build:internal: { internal: true, dir: demo, cmds: ['task build'] }

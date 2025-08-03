@@ -15,18 +15,14 @@ tasks:
   start:
     desc: "Start the production server"
     cmds:
-      # Use {{.TASKFILE_DIR}} to ensure the path is always correct
-      - bun {{.TASKFILE_DIR}}/dist/server.js
+      # Use bun for production to leverage its workspace resolution
+      - bun run {{.TASKFILE_DIR}}/src/server.ts
 
   stop:
     desc: "Stop the server"
     cmds:
-      - pkill -f 'bun {{.TASKFILE_DIR}}/dist/server.js' || true
-
-  build:
-    desc: "Build the project for production"
-    cmds:
-      - tsc
+      - pkill -f 'node {{.TASKFILE_DIR}}/src/server.ts' || true
+      - pkill -f 'bun --hot run src/server.ts' || true
 
   typecheck:
     desc: "Type-check the project without emitting files"

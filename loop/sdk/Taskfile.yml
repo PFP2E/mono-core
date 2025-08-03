@@ -6,10 +6,10 @@ tasks:
     cmds:
       - task -l
 
-  build:
-    desc: "Build the SDK for production"
+  typecheck:
+    desc: "Type-check the SDK"
     cmds:
-      - tsc
+      - tsc --noEmit
 
   clean:
     desc: "Remove build artifacts"

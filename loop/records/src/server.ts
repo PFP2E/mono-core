@@ -1,4 +1,6 @@
 import express from 'express';
+import swaggerJsdoc from 'swagger-jsdoc';
+import swaggerUi from 'swagger-ui-express';
 import { apiRouter } from './api';
 import { logger } from './lib/logger';
 import type { Server } from 'http';
@@ -6,7 +8,32 @@ import type { Server } from 'http';
 export const app = express();
 const port = process.env.PORT || 3000;
 
+// Swagger definition
+const swaggerOptions = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'PFP2E Records API',
+      version: '1.0.0',
+      description: 'API for managing the verification lifecycle of PFP campaigns.',
+    },
+    servers: [
+      {
+        url: `http://localhost:${port}`,
+      },
+    ],
+  },
+  // Path to the API docs
+  apis: ['./src/api.ts'],
+};
+
+const swaggerSpec = swaggerJsdoc(swaggerOptions);
+
 app.use(express.json());
+
+// Serve Swagger docs
+app.use('/v1/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+logger.info(`API documentation available at http://localhost:${port}/v1/docs`);
 
 // Mount the API router
 app.use('/v1', apiRouter);
