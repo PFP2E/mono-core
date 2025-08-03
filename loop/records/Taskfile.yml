@@ -12,17 +12,17 @@ tasks:
       - task: db:init
       - task: db:seed
 
-  start:
+  prod:
     desc: "Start the production server"
+    deps: [setup]
     cmds:
-      # Use bun for production to leverage its workspace resolution
       - bun run {{.TASKFILE_DIR}}/src/server.ts
 
-  stop:
-    desc: "Stop the server"
+  dev:
+    desc: "Start the development server with hot-reloading"
+    deps: [setup]
     cmds:
-      - pkill -f 'node {{.TASKFILE_DIR}}/src/server.ts' || true
-      - pkill -f 'bun --hot run src/server.ts' || true
+      - bun --hot run {{.TASKFILE_DIR}}/src/server.ts
 
   typecheck:
     desc: "Type-check the project without emitting files"

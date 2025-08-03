@@ -6,10 +6,20 @@ tasks:
     cmds:
       - task -l
 
-  start:
-    desc: "Run the rewards oracle script"
+  prod:
+    desc: "Run the rewards oracle script for production"
     cmds:
       - bun run src/index.ts
+
+  dev:
+    desc: "Run the rewards oracle script for development"
+    cmds:
+      - task: prod
+
+  test:
+    desc: "Tests for the rewards service (no-op)"
+    cmds:
+      - echo "No tests for rewards service."
 
   typecheck:
     desc: "Type-check the project without emitting files"

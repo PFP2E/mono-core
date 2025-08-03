@@ -6,7 +6,7 @@ import { logger } from './lib/logger';
 import type { Server } from 'http';
 
 export const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 8787;
 
 // Swagger definition
 const swaggerOptions = {
@@ -30,6 +30,12 @@ const swaggerOptions = {
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
 
 app.use(express.json());
+
+// Serve the raw OpenAPI spec
+app.get('/v1/openapi.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(swaggerSpec);
+});
 
 // Serve Swagger docs
 app.use('/v1/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));

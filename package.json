@@ -5,6 +5,7 @@
     "loop/sdk",
     "loop/records",
     "loop/rewards",
-    "demo/www"
+    "demo/www",
+    "contracts"
   ]
 }

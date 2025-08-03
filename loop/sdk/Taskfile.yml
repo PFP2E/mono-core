@@ -11,6 +11,11 @@ tasks:
     cmds:
       - tsc --noEmit
 
+  generate:client:
+    desc: "Generate the API client from the records service OpenAPI spec"
+    cmds:
+      - bun run generate:client
+
   clean:
     desc: "Remove build artifacts"
     cmds:

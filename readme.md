@@ -31,35 +31,42 @@ This repository is a monorepo managed by **[Bun](https://bun.sh/)** and **[Task]
 -   [**Task**](https://taskfile.dev/installation/)
 -   [**Bun**](https://bun.sh/)
 
-**1. Install Dependencies**
-This command installs all dependencies for all workspaces (`sdk`, `records`, `rewards`, `demo`).
+**1. Bootstrap the Project**
+This is the only command you need to run for a first-time setup. It will:
+- Install all dependencies.
+- Generate the type-safe SDK client.
+- Run all tests to ensure everything is working.
 
 ```bash
-task project:install
+task bootstrap
 ```
 
-**2. Build Local Packages**
-This command builds the local packages (like the SDK) that are dependencies for other services.
+**2. Run the Backend Services**
+The backend is composed of independent services that must be run in separate terminal sessions.
+
+**Terminal 1: Start the Records API**
+This service manages the database and exposes the core API.
 
 ```bash
-task project:build
+# For development with hot-reloading
+task records:dev
+
+# For production
+task records:prod
 ```
 
-**3. Setup the Database**
-This is a one-time command to initialize the database schema and populate it with seed data.
+**Terminal 2: Start the Rewards Service**
+This service consumes data from the `records` API to calculate rewards.
 
 ```bash
-task records:setup
+# For development
+task rewards:dev
+
+# For production
+task rewards:prod
 ```
 
-**4. Run the Backend**
-This command starts the backend API services.
-
-```bash
-task loop:start
-```
-
-The `records` API server will now be running and accessible.
+The `records` API server will now be running on `http://localhost:8787`.
 
 ---
 

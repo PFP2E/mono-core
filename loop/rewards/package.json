@@ -1,6 +1,9 @@
 {
   "name": "@pfp2e/rewards",
   "version": "1.0.0",
+  "scripts": {
+    "test": "bun test"
+  },
   "dependencies": {
     "@pfp2e/sdk": "1.0.0"
   },

@@ -10,7 +10,8 @@
     "baseUrl": ".",
     "paths": {
       "@pfp2e/sdk": ["./sdk/src"],
-      "@pfp2e/sdk/*": ["./sdk/src/*"]
+      "@pfp2e/sdk/*": ["./sdk/src/*"],
+      "@pfp2e/sdk/client": ["./sdk/src/client"]
     },
     "types": ["bun-types"]
   }
