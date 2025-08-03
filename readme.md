@@ -2,6 +2,17 @@
   <img src="docs/logo.png" alt="PFP2E Logo" width="128" />
   <h1>PFP2E Protocol</h1>
   <p>Verifiable Visual Identity · Programmable Rewards</p>
+  
+  <p>
+    <img src="https://img.shields.io/badge/Bun-%23000000.svg?style=for-the-badge&logo=bun&logoColor=white" alt="Bun" />
+    <img src="https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
+    <img src="https://img.shields.io/badge/Solidity-%23363636.svg?style=for-the-badge&logo=solidity&logoColor=white" alt="Solidity" />
+    <img src="https://img.shields.io/badge/Hardhat-222222?style=for-the-badge&logo=hardhat&logoColor=white" alt="Hardhat" />
+    <img src="https://img.shields.io/badge/Ethers.js-2C2C2C?style=for-the-badge&logo=ethers&logoColor=white" alt="Ethers.js" />
+    <img src="https://img.shields.io/badge/Next-black?style=for-the-badge&logo=next.js&logoColor=white" alt="Next.js" />
+    <img src="https://img.shields.io/badge/Task-2A91B8?style=for-the-badge&logo=task&logoColor=white" alt="Task" />
+    <img src="https://img.shields.io/badge/1inch-1C1C1C?style=for-the-badge&logo=1inch&logoColor=white" alt="1inch" />
+  </p>
 </div>
 
 ---
@@ -12,25 +23,9 @@ PFP2E is a hybrid on-chain/off-chain protocol for verifying visual identity and 
 
 The system is composed of two primary layers: an **Off-Chain Loop** for data processing and an **On-Chain Layer** for settlement.
 
-```mermaid
-graph TD
-    subgraph Off-Chain Loop
-        A[(@pfp2e/records API)] -- Serves user & campaign data --> B[(@pfp2e/rewards Oracle)];
-    end
-
-    subgraph On-Chain Layer
-        C[MerkleDistributor.sol] -- Manages reward epochs --> D[Claimants];
-    end
-
-    B -- 1. Calculates Merkle Root --> C;
-    C -- 2. Stores Root --> C;
-    D -- 3. Submits Proof to Claim --> C;
-
-    style A fill:#f9f,stroke:#333,stroke-width:2px
-    style B fill:#f9f,stroke:#333,stroke-width:2px
-    style C fill:#ccf,stroke:#333,stroke-width:2px
-    style D fill:#ccf,stroke:#333,stroke-width:2px
-```
+<div align="center">
+  <img src="docs/components.jpg" alt="PFP2E System Architecture Diagram" />
+</div>
 
 ---
 
@@ -54,23 +49,25 @@ This repository is a monorepo managed by **[Bun](https://bun.sh/)** and **[Task]
 -   [**Bun**](https://bun.sh/)
 
 **1. Bootstrap the Project**
-This is the only command you need to run for a first-time setup. It will install all dependencies and ensure the system is ready.
+This is the only command you need to run for a first-time setup. It will install all dependencies across the monorepo.
 
 ```bash
 task bootstrap
 ```
 
-**2. Run the End-to-End Demo**
-To see the entire system in action, run the master `e2e:run` task. This will:
-1. Start a local blockchain node.
-2. Start the `@pfp2e/records` API server.
-3. Deploy the smart contracts.
-4. Run the `@pfp2e/rewards` oracle to settle a new epoch on-chain.
-5. Run a test script to claim a reward from the newly settled epoch.
+**2. Run the Services**
+The off-chain system requires two services running in separate terminals:
 
-```bash
-task e2e:run
-```
+*   **Terminal 1: Start the Records API**
+    ```bash
+    task records:prod
+    ```
+*   **Terminal 2: Run the Rewards Oracle**
+    (Ensure your `.env` file is configured in `/loop/rewards`)
+    ```bash
+    task rewards:prod
+    ```
+
 
 ---
 
