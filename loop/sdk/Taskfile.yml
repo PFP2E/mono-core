@@ -11,6 +11,11 @@ tasks:
     cmds:
       - tsc --noEmit
 
+  build:
+    desc: "Build the SDK"
+    cmds:
+      - tsc
+
   generate:client:
     desc: "Generate the API client from the records service OpenAPI spec"
     cmds:

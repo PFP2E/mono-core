@@ -15,9 +15,9 @@ export const config = createConfig({
   chains: [mainnet, sepolia],
   connectors: [
     injected(),
-    walletConnect({ projectId: projectId || '' }),
-    metaMask(),
-    safe()
+    ...(typeof indexedDB !== 'undefined'
+      ? [walletConnect({ projectId: projectId || '' }), metaMask(), safe()]
+      : [])
   ],
   storage: createStorage({
     storage: cookieStorage

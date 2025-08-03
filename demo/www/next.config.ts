@@ -6,7 +6,6 @@ const withBundleAnalyzer = bundleAnalyzer({
 })
 
 const config: NextConfig = {
-  output: 'standalone',
   reactStrictMode: true,
   transpilePackages: ['@pfp2e/sdk'],
   pageExtensions: ['ts', 'tsx'],

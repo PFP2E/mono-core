@@ -38,6 +38,11 @@ tasks:
     desc: "Seed the database with initial data"
     cmds:
       - bun run src/db/seed.ts
+
+  db:seed-judges:
+    desc: "Seed the database with the judges campaign"
+    cmds:
+      - bun run src/db/seed-judges.ts
   
   test:
     desc: "Run the unit tests with Bun"

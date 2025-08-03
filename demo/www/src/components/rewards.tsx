@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Card, CardContent } from '@/components/ui/card'
@@ -76,10 +76,10 @@ export const Rewards = () => {
   const pfpUrl = session?.pfpUrl || '/images/BAYCNFT/0.png' // Fallback if no PFP
 
   // Save stake data helper
-  const saveStakeData = (data: typeof initialStake) => {
+  const saveStakeData = React.useCallback((data: typeof initialStake) => {
     setStakeData(data)
     localStorage.setItem('stakeData', JSON.stringify(data))
-  }
+  }, [])
 
   // Listen for changes to staking state from dashboard
   useEffect(() => {
@@ -120,7 +120,7 @@ export const Rewards = () => {
       // First time: set initial timestamp
       localStorage.setItem('lastRewardTime', now.toString())
     }
-  }, [session, isStakingEnabled])
+  }, [session, isStakingEnabled, stakeData])
 
   // Update timestamp and countdown timer when staking is enabled
   useEffect(() => {

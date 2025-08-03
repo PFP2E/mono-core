@@ -2,7 +2,7 @@
 'use client'
 
 import * as React from 'react'
-import type { Campaign } from '@pfp2e/sdk/types'
+import type { Campaign } from '@pfp2e/sdk'
 import {
   Card,
   CardContent,

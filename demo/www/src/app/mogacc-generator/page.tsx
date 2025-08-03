@@ -5,19 +5,21 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogTrigger } from '@/components/ui/dialog'
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription
+} from '@/components/ui/dialog'
 import { XSignInModal } from '@/components/x-signin-modal'
 import { Icons } from '@/components/icons'
 import { useXSession } from '@/hooks/useXSession'
 import { useSIWE } from '@/hooks/useSIWE'
 import { Upload, CheckCircle, Loader2 } from 'lucide-react'
 import { campaigns, type Campaign } from '@/lib/mock-data'
-import {
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription
-} from '@/components/ui/dialog'
+
 import { useActivityStore } from '@/store/activity.store'
 
 export default function AIGeneratorPage() {

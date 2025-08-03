@@ -5,8 +5,13 @@ import { Marketplace } from '@/components/marketplace'
 import { UseCases } from '@/components/use-cases'
 import { useSIWE } from '@/hooks/useSIWE'
 import { useXSession } from '@/hooks/useXSession'
-import { UserDashboard } from '@/components/dashboard'
+import dynamic from 'next/dynamic'
 import * as React from 'react'
+
+const UserDashboard = dynamic(
+  () => import('@/components/dashboard').then(mod => mod.UserDashboard),
+  { ssr: false }
+)
 
 const Home = () => {
   const { isAuthenticated } = useSIWE()

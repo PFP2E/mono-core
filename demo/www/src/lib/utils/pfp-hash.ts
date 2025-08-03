@@ -18,7 +18,7 @@ async function calculateColorHistogram(_imageUrl: string): Promise<number[]> {
 // Update the processPFPAndFindMatches function to return multiple matches
 export async function processPFPAndFindMatches(
   pfpUrl: string,
-  _dataset: any // This would be your actual dataset
+  _dataset: unknown // This would be your actual dataset
 ): Promise<{
   matches: Array<{
     poolName: string

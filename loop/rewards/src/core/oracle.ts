@@ -55,6 +55,9 @@ export async function fetchGroundTruthData(config: OracleConfig) {
  */
 async function getLivePfpHash(user: Participant): Promise<string> {
   console.log(`  - [Simulating] Fetching live PFP for ${user.social_handle}...`);
+  if (user.social_handle.startsWith('judge_')) {
+    return keccak256('pfp2e-judge-pfp');
+  }
   if (user.social_handle === 'user_A_valid') {
     return keccak256('bayc_1');
   }

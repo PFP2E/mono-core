@@ -4,6 +4,7 @@
 version: '3'
 
 includes:
+  contracts: { taskfile: contracts/Taskfile.yml, dir: contracts }
   sdk:     { taskfile: loop/sdk/Taskfile.yml,     dir: loop/sdk }
   records: { taskfile: loop/records/Taskfile.yml, dir: loop/records }
   rewards: { taskfile: loop/rewards/Taskfile.yml, dir: loop/rewards }
@@ -28,11 +29,7 @@ tasks:
     desc: "Remove all generated files, caches, and dependencies"
     cmds:
       - echo "--- Cleaning Project ---"
-      - rm -rf node_modules
-      - find . -name "node_modules" -type d -prune -exec rm -rf '{}' +
-      - find . -name "dist" -type d -prune -exec rm -rf '{}' +
-      - rm -rf loop/sdk/src/client
-      - rm -rf loop/records/records.db*
+      - rm -rf demo/www/.next
 
   generate:client:
     desc: "Generate the SDK client from the records API (starts server automatically)"
@@ -48,3 +45,9 @@ tasks:
       - task: sdk:generate:client
     # The records:prod task will continue running in the background.
     # You can stop it manually with `kill <PID>` or by stopping the terminal session.
+
+  build-all:
+    desc: "Build all packages"
+    cmds:
+      - task: sdk:build
+      - task: demo:build
