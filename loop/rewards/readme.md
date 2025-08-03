@@ -1,11 +1,11 @@
 # Service: `@pfp2e/rewards`
 
-> Calculates and prepares rewards for all verified participants.
+> The "Oracle" that connects the off-chain world to the on-chain settlement layer.
 
 | | |
 | :--- | :--- |
-| **Input** | Reads all entries from the `verifications` table. |
-| **Process** | Consumes the `@pfp2e/sdk` to query the database. It aggregates verification data to calculate the total reward due for each user. |
-| **Output** | A JSON object mapping user wallet addresses to their claimable reward amounts, ready to be used as input for a Merkle tree. |
+| **Input** | Reads user and campaign data from the `@pfp2e/records` API. |
+| **Process** | 1. Simulates PFP verification for all users. <br> 2. Calculates a Merkle Tree from the verified users. <br> 3. Connects to an EVM and calls the `startNewEpoch` function on the `MerkleDistributor` contract. |
+| **Output** | A new epoch is started on the smart contract with a new Merkle Root, ready for users to claim against. |
 
 [↰ Back to `/loop`](../readme.md)

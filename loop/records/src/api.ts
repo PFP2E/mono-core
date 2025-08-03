@@ -104,7 +104,6 @@ apiRouter.get('/campaigns', (req, res) => {
     // Parse the JSON fields before sending
     const parsedCampaigns = campaigns.map(c => ({
       ...c,
-      rules: JSON.parse(c.rules),
       reward_info: c.reward_info ? JSON.parse(c.reward_info) : undefined,
     }));
 
@@ -153,7 +152,6 @@ apiRouter.get('/campaigns/:id', (req, res) => {
     }
 
     // Parse the JSON fields
-    campaign.rules = JSON.parse(campaign.rules);
     if (campaign.reward_info) {
       campaign.reward_info = JSON.parse(campaign.reward_info);
     }
@@ -167,9 +165,107 @@ apiRouter.get('/campaigns/:id', (req, res) => {
 
 /**
  * @swagger
+ * /v1/verifications:
+ *   get:
+ *     summary: Retrieve a list of all verifications, joined with user wallet addresses
+ *     tags: [Verification]
+ *     responses:
+ *       200:
+ *         description: A list of verifications.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *       500:
+ *         description: Internal Server Error
+ */
+apiRouter.get('/verifications', (req, res) => {
+  logger.info('Request received: GET /v1/verifications');
+  try {
+    const stmt = db.query(`
+      SELECT
+        v.id,
+        v.user_id,
+        u.wallet_address,
+        v.campaign_id,
+        v.epoch,
+        v.verified_at
+      FROM verifications v
+      JOIN users u ON v.user_id = u.id
+    `);
+    const verifications = stmt.all();
+    logger.info(`Found ${verifications.length} verifications.`);
+    res.json(verifications);
+  } catch (error) {
+    logger.error('Failed to fetch verifications:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+/**
+ * @swagger
+ * /v1/target-pfps/{campaignId}:
+ *   get:
+ *     summary: Retrieve the set of target PFP hashes for a campaign
+ *     tags: [Campaigns]
+ *     parameters:
+ *       - in: path
+ *         name: campaignId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The campaign ID
+ *     responses:
+ *       200:
+ *         description: A list of target PFP hashes.
+ *       500:
+ *         description: Internal Server Error
+ */
+apiRouter.get('/target-pfps/:campaignId', (req, res) => {
+  const { campaignId } = req.params;
+  logger.info(`Request received: GET /v1/target-pfps/${campaignId}`);
+  try {
+    const stmt = db.prepare('SELECT pfp_hash FROM target_pfps WHERE campaign_id = ?');
+    const hashes = stmt.all(campaignId) as { pfp_hash: string }[];
+    res.json(hashes.map(h => h.pfp_hash));
+  } catch (error) {
+    logger.error(`Failed to fetch target PFPs for campaign ${campaignId}:`, error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+/**
+ * @swagger
+ * /v1/users:
+ *   get:
+ *     summary: Retrieve a list of all users
+ *     tags: [Users]
+ *     responses:
+ *       200:
+ *         description: A list of users.
+ *       500:
+ *         description: Internal Server Error
+ */
+apiRouter.get('/users', (req, res) => {
+  logger.info('Request received: GET /v1/users');
+  try {
+    const stmt = db.query('SELECT id, social_handle, wallet_address FROM users');
+    const users = stmt.all();
+    res.json(users);
+  } catch (error) {
+    logger.error('Failed to fetch users:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+/**
+ * @swagger
  * /v1/verify:
  *   post:
- *     summary: Verify a user's PFP against a campaign
+ *     summary: Verify a user's PFP against a campaign (READ-ONLY)
+ *     description: This endpoint is a placeholder to demonstrate the original API design. In the oracle-centric model, the core verification logic is handled by the rewards service.
  *     tags: [Verification]
  *     requestBody:
  *       required: true
@@ -196,12 +292,8 @@ apiRouter.post('/verify', (req, res) => {
     return res.status(400).json({ error: 'Missing campaignId or user.twitter in request body' });
   }
 
-  // TODO: Implement full verification logic
-  // 1. Fetch campaign from DB to get rules
-  // 2. Fetch user's PFP from Twitter
-  // 3. Compare PFP against campaign rules
-  // 4. Write to DB tables (users, pfps, verifications)
-
+  // In the new model, this endpoint would look up the *last known* verification status from the DB.
+  // For the hackathon, we return a placeholder.
   logger.info(`Placeholder verification for ${user.twitter} on campaign ${campaignId}`);
 
   res.json({

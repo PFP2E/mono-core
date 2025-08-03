@@ -1,16 +1,18 @@
 # Service: `@pfp2e/records`
 
-> Manages the real-time verification lifecycle via a REST API.
+> Owns the database and serves as the "ground truth" for off-chain data via a REST API.
 
 | | |
 | :--- | :--- |
-| **Input** | A user identifier and a campaign ID via the API. |
-| **Process** | Consumes the `@pfp2e/sdk` to interact with the database. It validates requests, fetches campaign rules, and (in the future) will perform PFP hashing and comparison. |
-| **Output** | A verification status via the API and a new record in the `verifications` table upon success. |
+| **Input** | N/A. This service is the source of data. |
+| **Process** | Manages an SQLite database and exposes it via a REST API with Swagger documentation. |
+| **Output** | Serves user and campaign data to other services in the loop. |
 
 ### API Endpoints
+The full API is described by the OpenAPI spec and can be viewed interactively.
+-   `GET /v1/docs`: Interactive Swagger UI.
 -   `GET /v1/campaigns`: Lists all available campaigns.
--   `GET /v1/campaigns/:id`: Fetches details for a single campaign.
--   `POST /v1/verify`: Submits a user for verification against a campaign.
+-   `GET /v1/users`: Lists all users.
+-   `GET /v1/target-pfps/:campaignId`: Lists the target PFP hashes for a campaign.
 
 [↰ Back to `/loop`](../readme.md)

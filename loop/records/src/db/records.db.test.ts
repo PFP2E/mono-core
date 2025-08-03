@@ -30,13 +30,14 @@ describe('Database Schema and Integrity', () => {
     expect(tableNames).toContain('users');
     expect(tableNames).toContain('pfps');
     expect(tableNames).toContain('verifications');
+    expect(tableNames).toContain('target_pfps'); // New table
 
     const indexesQuery = db.query("SELECT name FROM sqlite_master WHERE type='index' ORDER BY name;");
     const indexes = indexesQuery.all() as { name: string }[];
     const indexNames = indexes.map((i) => i.name);
     expect(indexNames).toContain('idx_users_social_handle');
-    expect(indexNames).toContain('idx_verifications_campaign_id');
-    expect(indexNames).toContain('idx_verifications_user_id');
+    expect(indexNames).toContain('idx_target_pfps_hash'); // New index
+    expect(indexNames).toContain('idx_verifications_user_id_epoch'); // New index
   });
 
   it('should insert and retrieve a user', () => {
@@ -70,36 +71,36 @@ describe('Database Schema and Integrity', () => {
 
   it('should successfully create a full verification record with foreign keys', () => {
     const now = Date.now();
+    const campaignId = 'test-campaign';
 
     // 1. Create a user
     const { id: userId } = db.query('INSERT INTO users (social_platform, social_handle, created_at) VALUES (?, ?, ?) RETURNING id')
       .get('twitter', 'verified_user', now) as { id: number };
 
     // 2. Create a campaign
-    db.query('INSERT INTO campaigns (id, name, type, rules, created_at) VALUES (?, ?, ?, ?, ?)')
-      .run('test-campaign', 'Test Campaign', 'nft', '{"type":"nft","collectionAddress":"0x0","requireOwnership":false}', now);
+    db.query('INSERT INTO campaigns (id, name, type, created_at) VALUES (?, ?, ?, ?)')
+      .run(campaignId, 'Test Campaign', 'nft', now);
 
     // 3. Create a PFP record
-    const { id: pfpId } = db.query('INSERT INTO pfps (user_id, source_url, captured_at, ahash, colorhist) VALUES (?, ?, ?, ?, ?) RETURNING id')
-      .get(userId, 'http://example.com/pfp.png', now, 'ahash123', 'colorhist123') as { id: number };
+    const { id: pfpId } = db.query('INSERT INTO pfps (user_id, source_url, captured_at, pfp_hash) VALUES (?, ?, ?, ?) RETURNING id')
+      .get(userId, 'http://example.com/pfp.png', now, 'hash123') as { id: number };
 
     // 4. Create the verification record linking them all
-    const verificationResult = db.query('INSERT INTO verifications (user_id, campaign_id, pfp_id, verified_at) VALUES (?, ?, ?, ?)')
-      .run(userId, 'test-campaign', pfpId, now);
+    const verificationResult = db.query('INSERT INTO verifications (user_id, campaign_id, pfp_id, epoch, verified_at) VALUES (?, ?, ?, ?, ?)')
+      .run(userId, campaignId, pfpId, 1, now);
     
-    // .run() returns an object with changes and lastInsertRowid
     expect(verificationResult.changes).toBe(1);
   });
 
   it('should fail to create a verification with a non-existent user_id', () => {
     const now = Date.now();
-    db.query('INSERT INTO campaigns (id, name, type, rules, created_at) VALUES (?, ?, ?, ?, ?)')
-      .run('test-campaign', 'Test Campaign', 'nft', '{"type":"nft","collectionAddress":"0x0","requireOwnership":false}', now);
+    const campaignId = 'test-campaign';
+    db.query('INSERT INTO campaigns (id, name, type, created_at) VALUES (?, ?, ?, ?)')
+      .run(campaignId, 'Test Campaign', 'nft', now);
     
     const insertVerification = () => {
-        // Note: pfp_id=1 also does not exist, but user_id is checked first
-        db.query('INSERT INTO verifications (user_id, campaign_id, pfp_id, verified_at) VALUES (?, ?, ?, ?)')
-          .run(999, 'test-campaign', 1, now); // 999 is a non-existent user_id
+        db.query('INSERT INTO verifications (user_id, campaign_id, pfp_id, epoch, verified_at) VALUES (?, ?, ?, ?, ?)')
+          .run(999, campaignId, 1, 1, now); // 999 is a non-existent user_id
     };
 
     expect(insertVerification).toThrow('FOREIGN KEY constraint failed');

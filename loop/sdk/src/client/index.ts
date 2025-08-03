@@ -12,4 +12,5 @@ export type { VerificationRequest } from './models/VerificationRequest';
 export type { VerificationResponse } from './models/VerificationResponse';
 
 export { CampaignsService } from './services/CampaignsService';
+export { UsersService } from './services/UsersService';
 export { VerificationService } from './services/VerificationService';

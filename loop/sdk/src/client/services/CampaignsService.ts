@@ -42,4 +42,24 @@ export class CampaignsService {
             },
         });
     }
+    /**
+     * Retrieve the set of target PFP hashes for a campaign
+     * @param campaignId The campaign ID
+     * @returns any A list of target PFP hashes.
+     * @throws ApiError
+     */
+    public static getV1TargetPfps(
+        campaignId: string,
+    ): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/target-pfps/{campaignId}',
+            path: {
+                'campaignId': campaignId,
+            },
+            errors: {
+                500: `Internal Server Error`,
+            },
+        });
+    }
 }

@@ -4,9 +4,18 @@ CREATE TABLE IF NOT EXISTS campaigns (
   name TEXT NOT NULL,
   description TEXT,
   type TEXT NOT NULL, -- 'nft' or 'overlay'
-  rules TEXT NOT NULL, -- JSON blob for campaign-specific rules
   reward_info TEXT, -- JSON blob for informational reward data
   created_at INTEGER NOT NULL
+);
+
+-- Target PFPs Table: The ground truth for a campaign.
+CREATE TABLE IF NOT EXISTS target_pfps (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  campaign_id TEXT NOT NULL,
+  pfp_hash TEXT NOT NULL,
+  description TEXT, -- e.g., "BAYC #1234" or "Judge: vitalik.eth"
+  FOREIGN KEY (campaign_id) REFERENCES campaigns(id),
+  UNIQUE(campaign_id, pfp_hash)
 );
 
 -- Users Table: Stores unique user profiles.
@@ -25,18 +34,17 @@ CREATE TABLE IF NOT EXISTS pfps (
   user_id INTEGER NOT NULL,
   source_url TEXT NOT NULL,
   captured_at INTEGER NOT NULL,
-  ahash TEXT NOT NULL,
-  colorhist TEXT NOT NULL,
-  FOREIGN KEY (user_id) REFERENCES users(id),
-  UNIQUE(user_id, ahash)
+  pfp_hash TEXT NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
--- Verifications Table: Links users, campaigns, and pfps for successful verifications.
+-- Verifications Table: Links users and campaigns for successful verifications within an epoch.
 CREATE TABLE IF NOT EXISTS verifications (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   user_id INTEGER NOT NULL,
   campaign_id TEXT NOT NULL,
   pfp_id INTEGER NOT NULL,
+  epoch INTEGER NOT NULL, -- The epoch number for this verification
   verified_at INTEGER NOT NULL,
   onchain_receipt_tx_hash TEXT,
   FOREIGN KEY (user_id) REFERENCES users(id),
@@ -45,6 +53,6 @@ CREATE TABLE IF NOT EXISTS verifications (
 );
 
 -- Indexes for performance
-CREATE INDEX IF NOT EXISTS idx_verifications_user_id ON verifications(user_id);
-CREATE INDEX IF NOT EXISTS idx_verifications_campaign_id ON verifications(campaign_id);
+CREATE INDEX IF NOT EXISTS idx_target_pfps_hash ON target_pfps(pfp_hash);
+CREATE INDEX IF NOT EXISTS idx_verifications_user_id_epoch ON verifications(user_id, epoch);
 CREATE INDEX IF NOT EXISTS idx_users_social_handle ON users(social_handle);

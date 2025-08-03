@@ -9,7 +9,22 @@ import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 export class VerificationService {
     /**
-     * Verify a user's PFP against a campaign
+     * Retrieve a list of all verifications, joined with user wallet addresses
+     * @returns any A list of verifications.
+     * @throws ApiError
+     */
+    public static getV1Verifications(): CancelablePromise<Array<Record<string, any>>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/verifications',
+            errors: {
+                500: `Internal Server Error`,
+            },
+        });
+    }
+    /**
+     * Verify a user's PFP against a campaign (READ-ONLY)
+     * This endpoint is a placeholder to demonstrate the original API design. In the oracle-centric model, the core verification logic is handled by the rewards service.
      * @param requestBody
      * @returns VerificationResponse Verification status
      * @throws ApiError
