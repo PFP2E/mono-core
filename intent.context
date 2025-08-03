@@ -1,0 +1,48 @@
+# Session Debrief & Strategic Go-Forward
+
+## Objective
+Refactor the `@loop` backend to a professional, decoupled service-oriented architecture.
+
+## Architectural Transformation
+
+#### **`BEFORE`** (Tightly Coupled, Unsafe for Frontend)
+```
+  (@pfp2e/demo) --[uses]--> (@pfp2e/sdk) <--[uses]-- (@pfp2e/records)
+                             |      ^
+                             |      |
+                             +----[contains DB logic]
+```
+*   **Critical Flaw**: The shared `@pfp2e/sdk` contained a direct `bun:sqlite` connection, making it server-side code. This prevented its use in the frontend and created a monolithic backend structure where any service could directly access the database.
+
+#### **`AFTER`** (Service-Oriented, API-Driven)
+```
+  (@pfp2e/demo) --[will use]--> (@pfp2e/sdk/client) --[HTTP]--> (@pfp2e/records API) --[owns]--> [records.db]
+                                                                      ^
+                                                                      |
+(@pfp2e/rewards) --[will use]------------------------------------------+
+```
+*   **Key Improvement**: `@pfp2e/records` is now the sole owner of the database. All other services (`rewards`, `demo`) are consumers of its well-defined API. The `@pfp2e/sdk` is now a clean, universal package containing only shared types and a generated API client.
+
+## Work Completed (Phases 1 & 2)
+
+1.  **DB Centralization**: Moved all database logic exclusively into `@pfp2e/records`.
+2.  **SDK Decoupling**: Stripped `@pfp2e/sdk` of all server-side code, leaving only shared types.
+3.  **API Contract**: Established a formal OpenAPI 3.0 specification for the `records` API, complete with interactive Swagger UI documentation (`/v1/docs`).
+4.  **Workflow Simplification**: Refactored the `Taskfile`s to remove the build step in favor of a faster `typecheck` and direct execution with Bun's runtime for local development.
+5.  **Test Hardening**: Implemented a robust integration test suite for the `records` API, validating the refactoring.
+6.  **DB Seeding**: Integrated a database initialization and seeding step into the `loop:dev` and `loop:prod` tasks, ensuring the API always starts with a known data set.
+
+## Current State
+The project is now in a stable, well-architected state. The `records` service is a fully functional, documented, and tested standalone API server that automatically seeds itself on startup. The `sdk` is a clean, shared library of types. The development workflow is simple and efficient.
+
+## Leftovers: Go-Forward Plan
+
+The following phases from our strategic plan are ready to be executed in a future session:
+
+### Phase 3: Automated SDK Client Generation
+*   **Goal**: Auto-generate a universal, type-safe API client from our new OpenAPI spec.
+*   **Action**: Use `openapi-typescript-codegen` to generate a `fetch`-based client and package it within `@pfp2e/sdk` under the `@pfp2e/sdk/client` export.
+
+### Phase 4: Service Integration & E2E Validation
+*   **Goal**: Refactor the `@pfp2e/rewards` service to consume the new SDK client, proving the end-to-end architecture.
+*   **Action**: Rewrite the `rewards` service to call the `records` API via the generated client. Implement an end-to-end test that starts the `records` API and validates the `rewards` service output.

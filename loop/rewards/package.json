@@ -1,0 +1,27 @@
+{
+  "name": "@pfp2e/rewards",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "bun --watch src/server.ts",
+    "start": "bun src/server.ts",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@pfp2e/sdk": "workspace:*",
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "merkletreejs": "^0.5.2",
+    "keccak256": "^1.0.6"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "bun-types": "latest",
+    "dotenv": "^17.2.1",
+    "ethers": "^6.15.0",
+    "js-sha3": "^0.9.3",
+    "typescript": "^5.4.5"
+  }
+}

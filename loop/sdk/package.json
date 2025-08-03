@@ -1,0 +1,20 @@
+{
+  "name": "@pfp2e/sdk",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js",
+    "./types": "./dist/types.js",
+    "./client": "./dist/client/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "generate:client": "openapi --input http://localhost:8787/v1/openapi.json --output ./src/client --client fetch"
+  },
+  "devDependencies": {
+    "bun-types": "latest",
+    "openapi-typescript-codegen": "^0.29.0",
+    "typescript": "^5.9.2"
+  }
+}

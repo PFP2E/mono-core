@@ -1,0 +1,40 @@
+# Operating System Files
+.DS_Store
+
+# Dependency Directories
+node_modules
+
+# Bun
+bun.lockb
+
+# Build Artifacts
+dist
+.next
+out
+
+# Local Environment
+.env
+.env.local
+
+# Test & Coverage Output
+test-results/
+coverage/
+
+# SQLite Databases
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+
+# Large Files
+*.tar
+*.zip
+*.gz
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*\n# Generated SDK client\nloop/sdk/src/client

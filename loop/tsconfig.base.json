@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",
+    "paths": {
+      "@pfp2e/sdk": ["./sdk/src"],
+      "@pfp2e/sdk/*": ["./sdk/src/*"],
+      "@pfp2e/sdk/client": ["./sdk/src/client"]
+    },
+    "types": ["bun-types"]
+  }
+}

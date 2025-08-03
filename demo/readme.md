@@ -3,21 +3,9 @@
 > Frontend applications and proofs-of-concept, built with Next.js.
 
 ### Development Workflow
-This project uses a containerized environment managed by **[Task](https://taskfile.dev/)** and **Docker Compose**. `Taskfile.yml` is the single entry point for all commands, providing a consistent and simple developer experience.
+This project uses a containerized environment managed by **[Task](https://taskfile.dev/)** and **Docker Compose**. The root `Taskfile.yml` is the single entry point for all commands.
 
-```bash
-# Start the development server with hot-reloading
-task dev
-
-# Build and start the production server
-task prod
-
-# Run the full test suite (unit & UI)
-task test
-
-# Stop all running services
-task stop
-```
+See the [root `readme.md`](../readme.md) for a full list of available commands.
 
 ### Proofs-of-Concept
 -   **`/vision`**: Demonstrates the core PFP matching engine.

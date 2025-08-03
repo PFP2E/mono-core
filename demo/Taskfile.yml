@@ -58,36 +58,45 @@ tasks:
     cmds:
       - task: _container:clean
 
-  install:
-    desc: 'Install/update dependencies after package.json changes'
+  build:
+    desc: 'Build the project for production'
     dir: www
     cmds:
-      - bun install
+      - bun run build
+
+  typecheck:
+    desc: 'Type-check the project without emitting files'
+    dir: www
+    cmds:
+      - tsc --noEmit
+  
+  format:
+    desc: 'Format all code in the project'
+    dir: www
+    cmds:
+      - bun run format
 
   # --- Internal Tasks ---
-  # The following tasks are not shown in the default help message.
 
   _local:dev:
     internal: true
+    dir: www
     cmds:
-      - cmd: (cd www && bun install && bun run dev)
+      - bun run dev
 
   _local:prod:
     internal: true
+    dir: www
     cmds:
-      - task: _local:build:www
-      - cmd: (cd www && bun start)
+      - bun run build
+      - bun run start
 
   _local:test:
     internal: true
+    dir: www
     cmds:
-      - echo "🧪 Running www tests..."
-      - cmd: (cd www && bun install && bun test ./tests/unit && bun run test:ui)
-
-  _local:build:www:
-    internal: true
-    cmds:
-      - cmd: (cd www && bun install && bun run format && bun run build)
+      - bun test
+      - bun run test:ui
 
   _container:dev:
     internal: true

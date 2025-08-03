@@ -2,6 +2,7 @@
 'use client'
 
 import * as React from 'react'
+import type { Campaign } from '@pfp2e/sdk/types'
 import {
   Card,
   CardContent,
@@ -77,7 +78,7 @@ const mockRewardTokens = [
   }
 ]
 
-type CampaignType = 'nft' | 'overlay'
+type CampaignType = Campaign['type']
 const steps = [
   'Basic Details',
   'Campaign Type',

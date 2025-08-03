@@ -1,75 +1,50 @@
 # Taskfile.yml
-# This is the root task file for the monorepo.
-# It delegates commands to the appropriate module's Taskfile.
+# Root task file for the monorepo.
+# This file includes tasks from all sub-projects, allowing you to run them from the root.
 version: '3'
+
+includes:
+  sdk:     { taskfile: loop/sdk/Taskfile.yml,     dir: loop/sdk }
+  records: { taskfile: loop/records/Taskfile.yml, dir: loop/records }
+  rewards: { taskfile: loop/rewards/Taskfile.yml, dir: loop/rewards }
+  demo:    { taskfile: demo/Taskfile.yml,       dir: demo }
 
 tasks:
   default:
-    desc: Show available tasks for this project
-    summary: |
-      This is the root Taskfile. It provides commands to orchestrate the modules.
-      Tasks are namespaced by module (e.g., `demo:<command>`).
+    desc: 'Show available tasks. Run `task bootstrap` for first-time setup.'
     cmds:
       - task -l
 
-  # --- Demo Module Tasks ---
-
-  demo:dev:
-    desc: 'Start the demo development server (container)'
-    dir: demo
+  bootstrap:
+    desc: "One-command setup: Install deps, generate client, and run tests."
     cmds:
-      - task dev
+      - echo "--- Bootstrapping Project ---"
+      - bun install
+      - task: generate:client
+      - task: records:test
+      - task: rewards:test
 
-  demo:dev:local:
-    desc: 'Start the demo development server (local)'
-    dir: demo
+  clean:
+    desc: "Remove all generated files, caches, and dependencies"
     cmds:
-      - task dev:local
+      - echo "--- Cleaning Project ---"
+      - rm -rf node_modules
+      - find . -name "node_modules" -type d -prune -exec rm -rf '{}' +
+      - find . -name "dist" -type d -prune -exec rm -rf '{}' +
+      - rm -rf loop/sdk/src/client
+      - rm -rf loop/records/records.db*
 
-  demo:prod:
-    desc: 'Build and start the demo production server (container)'
-    dir: demo
+  generate:client:
+    desc: "Generate the SDK client from the records API (starts server automatically)"
     cmds:
-      - task prod
-
-  demo:prod:local:
-    desc: 'Build and start the demo production server (local)'
-    dir: demo
-    cmds:
-      - task prod:local
-
-  demo:test:
-    desc: 'Run the demo test suite (container)'
-    dir: demo
-    cmds:
-      - task test
-
-  demo:test:local:
-    desc: 'Run the demo test suite (local)'
-    dir: demo
-    cmds:
-      - task test:local
-
-  demo:stop:
-    desc: 'Stop all running demo services (container only)'
-    dir: demo
-    cmds:
-      - task stop
-
-  demo:logs:
-    desc: 'Follow demo container logs'
-    dir: demo
-    cmds:
-      - task logs
-
-  demo:clean:
-    desc: 'Remove all demo container assets'
-    dir: demo
-    cmds:
-      - task clean
-
-  demo:install:
-    desc: 'Install/update demo dependencies after package.json changes'
-    dir: demo
-    cmds:
-      - task install
+      - task records:prod &
+      - |
+        echo "Waiting for records API to be ready..."
+        until curl -s -f -o /dev/null http://localhost:8787/v1/openapi.json; do
+          printf '.'
+          sleep 1
+        done
+        echo "\nAPI is ready. Generating client..."
+      - task: sdk:generate:client
+    # The records:prod task will continue running in the background.
+    # You can stop it manually with `kill <PID>` or by stopping the terminal session.
