@@ -37,7 +37,7 @@ interface StakingStore {
 
 export const useStakingStore = create<StakingStore>()(
   persist(
-    (set, get) => ({
+    (set, _get) => ({
       // Initial state
       isStakingEnabled: false,
       activeCampaign: null,

@@ -1,9 +1,24 @@
-// ... (keep existing interfaces and utility functions) ...
+interface ImageFeatures {
+  aHash: string
+  colorHist: number[]
+}
+
+// Mock function to calculate average hash
+async function calculateAHash(_imageUrl: string): Promise<string> {
+  // Mock implementation - in real app this would calculate actual hash
+  return 'mock_hash_' + Math.random().toString(36).substring(7)
+}
+
+// Mock function to calculate color histogram
+async function calculateColorHistogram(_imageUrl: string): Promise<number[]> {
+  // Mock implementation - in real app this would calculate actual histogram
+  return Array.from({ length: 256 }, () => Math.random())
+}
 
 // Update the processPFPAndFindMatches function to return multiple matches
 export async function processPFPAndFindMatches(
   pfpUrl: string,
-  dataset: any // This would be your actual dataset
+  _dataset: any // This would be your actual dataset
 ): Promise<{
   matches: Array<{
     poolName: string
@@ -15,7 +30,7 @@ export async function processPFPAndFindMatches(
   // Calculate features for the PFP
   const pfpAHash = await calculateAHash(pfpUrl)
   const pfpColorHist = await calculateColorHistogram(pfpUrl)
-  const pfpFeatures: ImageFeatures = {
+  const _pfpFeatures: ImageFeatures = {
     aHash: pfpAHash,
     colorHist: pfpColorHist
   }

@@ -22,7 +22,6 @@ export function UserDashboard() {
   const { activities, clearHistory } = useActivityStore()
   const {
     isStakingEnabled,
-    setIsStakingEnabled,
     activeCampaign,
     stakingDetails,
     initializeStaking,
@@ -37,7 +36,7 @@ export function UserDashboard() {
       if (baycCampaign) {
         initializeStaking(
           {
-            id: baycCampaign.id,
+            id: String(baycCampaign.id),
             name: 'BAYC',
             campaignName: baycCampaign.campaignName,
             imageUrl: baycCampaign.imageUrl,

@@ -62,7 +62,9 @@ export const Rewards = () => {
     }
     return initialStake
   })
-  const [selectedStake, setSelectedStake] = useState<any>(null)
+  const [selectedStake, setSelectedStake] = useState<
+    typeof initialStake | null
+  >(null)
   const [selectedOption, setSelectedOption] = useState<
     'ape' | 'usdt' | 'eth' | 'sui' | null
   >(null)
@@ -150,7 +152,7 @@ export const Rewards = () => {
     }, 1000)
 
     return () => clearInterval(timer)
-  }, [session, isStakingEnabled, stakeData])
+  }, [session, isStakingEnabled, stakeData, saveStakeData])
 
   const handleSuiAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const address = e.target.value
@@ -212,13 +214,14 @@ export const Rewards = () => {
         <Card className='w-full max-w-[400px] min-w-[280px] border-[#333] bg-[#1a1a1a]'>
           <CardContent className='p-4'>
             {/* Reset Button */}
-            <div
+            <button
               className='mb-4 flex cursor-pointer items-center gap-1 text-[#888] transition-colors hover:text-white'
               onClick={handleTrashClick}
+              type='button'
             >
               <Trash2 className='h-4 w-4' />
               <span className='text-sm'>Reset</span>
-            </div>
+            </button>
 
             {/* Header with PFP and Token Info */}
             <div className='mb-4 flex items-center justify-between'>
@@ -321,6 +324,16 @@ export const Rewards = () => {
             setSuiAddress('')
             setAddressError('')
           }}
+          onKeyDown={e => {
+            if (e.key === 'Escape') {
+              setSelectedStake(null)
+              setSelectedOption(null)
+              setSuiAddress('')
+              setAddressError('')
+            }
+          }}
+          role='button'
+          tabIndex={0}
         >
           <Card
             className='mx-4 w-[calc(100%-2rem)] max-w-md min-w-[280px]'
@@ -414,10 +427,11 @@ export const Rewards = () => {
               {/* SUI Address Input */}
               {selectedOption === 'sui' && (
                 <div className='mb-4 space-y-2'>
-                  <label className='text-sm text-[#888]'>
+                  <label htmlFor='sui-address' className='text-sm text-[#888]'>
                     Enter SUI wallet address to receive funds
                   </label>
                   <input
+                    id='sui-address'
                     type='text'
                     placeholder='0x906b5fc264539be8b1a5faa84441cf65e13e99ee555c0025d282770797cf99d1'
                     value={suiAddress}
