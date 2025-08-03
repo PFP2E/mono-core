@@ -37,6 +37,12 @@ tasks:
       - bun test
       - bun run test:ui
 
+  format:
+    desc: 'Format the project code'
+    dir: www
+    cmds:
+      - bun run format
+
   typecheck:
     desc: 'Type-check the project without emitting files'
     dir: www

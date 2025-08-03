@@ -34,6 +34,11 @@ tasks:
       - task: rewards:test
       - task: demo:test
 
+  format-all:
+    desc: 'Format all code in the monorepo'
+    cmds:
+      - task: demo:format
+
   clean-all:
     desc: 'Clean all build artifacts and dependencies'
     cmds:
