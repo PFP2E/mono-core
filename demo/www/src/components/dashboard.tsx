@@ -1,6 +1,7 @@
 // src/components/dashboard.tsx
 'use client'
 
+import React from 'react'
 import { useSIWE } from '@/hooks/useSIWE'
 import { useXSession } from '@/hooks/useXSession'
 import { useWallet } from '@/hooks/use-wallet'
@@ -17,6 +18,7 @@ export function UserDashboard() {
   const { formattedAddress } = useWallet()
   // Use the hook to get reactive updates
   const { activities, clearHistory } = useActivityStore()
+  const [isStakingEnabled, setIsStakingEnabled] = React.useState(false)
 
   // Debug log to see activities
   console.log('Current activities:', activities)
@@ -38,50 +40,133 @@ export function UserDashboard() {
 
   return (
     <div className='my-8 space-y-6'>
+      {/* Staking Toggle - Desktop */}
+      <div className='hidden md:flex justify-center mb-4'>
+        <div className='flex items-center gap-2 bg-gray-800 rounded-lg p-2'>
+          <span className='text-sm text-gray-300'>Staking:</span>
+          <button
+            onClick={() => setIsStakingEnabled(!isStakingEnabled)}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+              isStakingEnabled ? 'bg-green-500' : 'bg-gray-600'
+            }`}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                isStakingEnabled ? 'translate-x-6' : 'translate-x-1'
+              }`}
+            />
+          </button>
+          <span className='text-sm text-gray-300'>
+            {isStakingEnabled ? 'ON' : 'OFF'}
+          </span>
+        </div>
+      </div>
+
+      {/* Staking Toggle - Mobile */}
+      <div className='flex md:hidden justify-center mb-4'>
+        <div className='flex items-center gap-2 bg-gray-800 rounded-lg p-1.5'>
+          <span className='text-xs text-gray-300'>Staking:</span>
+          <button
+            onClick={() => setIsStakingEnabled(!isStakingEnabled)}
+            className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
+              isStakingEnabled ? 'bg-green-500' : 'bg-gray-600'
+            }`}
+          >
+            <span
+              className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
+                isStakingEnabled ? 'translate-x-5' : 'translate-x-0.5'
+              }`}
+            />
+          </button>
+          <span className='text-xs text-gray-300'>
+            {isStakingEnabled ? 'ON' : 'OFF'}
+          </span>
+        </div>
+      </div>
+
       <Card className='mx-auto max-w-2xl'>
-        <CardHeader className='flex flex-row items-center justify-between'>
-          <CardTitle>Welcome Back</CardTitle>
-        </CardHeader>
+                 <CardHeader className='flex flex-row items-center justify-between'>
+           <CardTitle>
+             Welcome {xSession?.username ? `${xSession.username.charAt(0).toUpperCase() + xSession.username.slice(1)} (😈,😇,💸,📼)` : ''}
+           </CardTitle>
+         </CardHeader>
         <CardContent className='space-y-4'>
-          {/* Profile Section */}
-          <div className='flex items-center gap-4'>
-            {isXAuthenticated && xSession && pfpUrl && (
-              <Image
-                src={pfpUrl}
-                alt={'pfp'}
-                width={80}
-                height={80}
-                className='rounded-full'
-              />
-            )}
-            {isAuthenticated && ens?.avatar && (
-              <Image
-                src={ens.avatar}
-                alt={ens.name || 'ENS Avatar'}
-                width={80}
-                height={80}
-                className='rounded-full'
-              />
-            )}
-            <div className='flex flex-col gap-1'>
-              {isXAuthenticated && xSession && (
-                <div>
-                  <p className='text-muted-foreground text-sm'>Signed in as</p>
-                  <p className='text-lg font-medium'>{xSession.username}</p>
-                </div>
-              )}
-              {isAuthenticated && (
-                <div>
-                  <p className='text-muted-foreground text-sm'>
-                    Wallet Connected
-                  </p>
-                  <p className='text-lg font-medium'>
-                    {ens?.name || formattedAddress}
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
+                                {/* Profile Section - Fixed Container */}
+           <div className='flex items-center gap-4'>
+             {/* Profile Picture with Staking Indicator */}
+             <div className='relative'>
+               {isXAuthenticated && xSession && pfpUrl && (
+                 <Image
+                   src={pfpUrl}
+                   alt={'pfp'}
+                   width={80}
+                   height={80}
+                   className={`rounded-full border-4 ${
+                     isStakingEnabled 
+                       ? 'border-black shadow-[0_0_0_3px_#11FF74]' 
+                       : 'border-gray-600'
+                   }`}
+                 />
+               )}
+               {isAuthenticated && ens?.avatar && (
+                 <Image
+                   src={ens.avatar}
+                   alt={ens.name || 'ENS Avatar'}
+                   width={80}
+                   height={80}
+                   className={`rounded-full border-4 ${
+                     isStakingEnabled 
+                       ? 'border-black shadow-[0_0_0_3px_#11FF74]' 
+                       : 'border-gray-600'
+                   }`}
+                 />
+               )}
+               
+               {/* Staked Badge - Only show when staking is ON */}
+               {isStakingEnabled && (
+                 <div className='absolute -bottom-2 left-1/2 transform -translate-x-1/2'>
+                   <div className='bg-gradient-to-r from-green-400 to-green-500 rounded-full px-3 py-1 flex items-center gap-1'>
+                     <span className='text-black text-xs font-semibold'>Staked</span>
+                     <svg className='w-3 h-3 text-black' fill='currentColor' viewBox='0 0 20 20'>
+                       <path fillRule='evenodd' d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z' clipRule='evenodd' />
+                     </svg>
+                   </div>
+                 </div>
+               )}
+             </div>
+
+             {/* Username and Wallet Info - Fixed Container */}
+             <div className='flex flex-col gap-1'>
+                               {isXAuthenticated && xSession && (
+                  <div>
+                    <p className='text-muted-foreground text-sm'>Signed in as</p>
+                    <p className='text-lg font-medium'>@{xSession.username}</p>
+                  </div>
+                )}
+               {isAuthenticated && (
+                 <div>
+                   <p className='text-muted-foreground text-sm'>
+                     Wallet Connected
+                   </p>
+                   <p className='text-lg font-medium'>
+                     {ens?.name || formattedAddress}
+                   </p>
+                 </div>
+               )}
+             </div>
+           </div>
+
+           {/* Staking Status - Separate section below profile, above buttons */}
+           {isStakingEnabled && (
+             <div className='flex items-center gap-2 mt-2'>
+               <svg className='w-4 h-4 text-green-500' fill='currentColor' viewBox='0 0 20 20'>
+                 <path fillRule='evenodd' d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z' clipRule='evenodd' />
+               </svg>
+               <span className='text-sm text-green-500'>
+                 Staked: BAYC #1234 staked with wallet 0x23...39d3
+               </span>
+             </div>
+           )}
 
           {/* Desktop Buttons */}
           <div className='hidden flex-col gap-2 md:flex'>
