@@ -218,6 +218,88 @@ apiRouter.get('/users', (req, res) => {
 // NEW ENDPOINTS
 // =============================================================================
 
+/**
+ * @swagger
+ * /v1/verifications:
+ *   post:
+ *     summary: Record a batch of new verifications for an epoch
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               campaignId:
+ *                 type: string
+ *               epoch:
+ *                 type: number
+ *               verifiedHandles:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *     responses:
+ *       201:
+ *         description: Verifications recorded successfully.
+ */
+apiRouter.post('/verifications', (req, res) => {
+  const { campaignId, epoch, verifiedHandles } = req.body;
+  logger.info(`Request received: POST /v1/verifications for campaign ${campaignId}, epoch ${epoch}`);
+
+  if (!campaignId || !epoch || !Array.isArray(verifiedHandles)) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  try {
+    const recordVerifications = db.transaction((verifications: string[]) => {
+      const userStmt = db.prepare('SELECT id FROM users WHERE social_handle = ?');
+      const pfpStmt = db.prepare('INSERT INTO pfps (user_id, source_url, captured_at, pfp_hash) VALUES (?, ?, ?, ?) RETURNING id');
+      const verificationStmt = db.prepare('INSERT INTO verifications (user_id, campaign_id, pfp_id, epoch, verified_at) VALUES (?, ?, ?, ?, ?)');
+      
+      let count = 0;
+      for (const handle of verifications) {
+        const user = userStmt.get(handle) as { id: number } | undefined;
+        if (user) {
+          // In a real system, the oracle would provide the actual URL and hash.
+          // For the hackathon, we'll use a mock hash based on the handle.
+          const mockPfpHash = keccak256(`mock-pfp-for-${handle}-epoch-${epoch}`);
+          const pfpResult = pfpStmt.get(user.id, 'http://mock.url/pfp.png', Date.now(), mockPfpHash) as { id: number };
+          verificationStmt.run(user.id, campaignId, pfpResult.id, epoch, Date.now());
+          count++;
+        } else {
+          logger.warn(`Could not find user with handle: ${handle} to record verification.`);
+        }
+      }
+      return count;
+    });
+
+    const insertedCount = recordVerifications(verifiedHandles);
+    logger.info(`Successfully recorded ${insertedCount} verifications.`);
+    res.status(201).json({ message: `Recorded ${insertedCount} verifications` });
+
+  } catch (error) {
+    logger.error(`Failed to record verifications for campaign ${campaignId}:`, error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+/**
+ * @swagger
+ * /v1/user-status/{socialHandle}:
+ *   get:
+ *     summary: Get the verification status of a user across all campaigns
+ *     parameters:
+ *       - in: path
+ *         name: socialHandle
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: User status details.
+ *       404:
+ *         description: User not found.
+ */
 apiRouter.get('/user-status/:socialHandle', (req, res) => {
     const { socialHandle } = req.params;
     logger.info(`Request received: GET /v1/user-status/${socialHandle}`);
@@ -254,6 +336,28 @@ apiRouter.get('/user-status/:socialHandle', (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /v1/proof/{campaignId}/{socialHandle}:
+ *   get:
+ *     summary: Get a Merkle proof for a user to claim rewards for a campaign
+ *     parameters:
+ *       - in: path
+ *         name: campaignId
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: path
+ *         name: socialHandle
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: The Merkle proof and reward details.
+ *       404:
+ *         description: User or verification not found.
+ */
 apiRouter.get('/proof/:campaignId/:socialHandle', (req, res) => {
     const { campaignId, socialHandle } = req.params;
     logger.info(`Request received: GET /v1/proof/${campaignId}/${socialHandle}`);

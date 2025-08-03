@@ -12,7 +12,7 @@ import {
   generateMerkleTree,
   settleOnChain,
 } from './core/oracle';
-import { OpenAPI } from '@pfp2e/sdk/client';
+import { OpenAPI, DefaultService } from '@pfp2e/sdk/client';
 import { MERKLE_DISTRIBUTOR_ABI } from './core/abi';
 
 // =============================================================================
@@ -84,10 +84,12 @@ async function runOracleCycle() {
   // 1. Fetch current on-chain epoch
   const currentEpoch = await getCurrentEpochFromChain();
   const nextEpoch = currentEpoch + 1n;
-  console.log(`\n--- Starting Oracle Cycle for Epoch ${nextEpoch} ---`);
+  console.log(`
+--- Starting Oracle Cycle for Epoch ${nextEpoch} ---`);
 
   for (const campaignId of CAMPAIGN_IDS) {
-    console.log(`\n--- Processing Campaign: ${campaignId} ---`);
+    console.log(`
+--- Processing Campaign: ${campaignId} ---`);
     const campaignConfig = { ...config, campaignId };
 
     // 2. Fetch Off-Chain Data
@@ -99,16 +101,25 @@ async function runOracleCycle() {
     // 4. Generate Merkle Tree
     const merkleData = generateMerkleTree(verifiedHandles, config.rewardAmount);
     if (!merkleData) {
-      console.log(`\n--- Campaign ${campaignId} Completed: No rewards to settle for epoch ${nextEpoch}. ---`);
+      console.log(`
+--- Campaign ${campaignId} Completed: No rewards to settle for epoch ${nextEpoch}. ---`);
       continue;
     }
 
     // 5. Settle On-Chain
-    // Note: The contract auto-increments the epoch, so we don't pass it in.
     await settleOnChain(merkleData.root, campaignConfig);
+
+    // 6. Record Verifications in DB
+    await DefaultService.postV1Verifications({
+        campaignId,
+        epoch: Number(nextEpoch),
+        verifiedHandles: Array.from(verifiedHandles),
+    });
+    console.log(`   ✅ Recorded ${verifiedHandles.size} verifications to the database.`);
   }
 
-  console.log(`\n--- Oracle Cycle for Epoch ${nextEpoch} Completed Successfully ---`);
+  console.log(`
+--- Oracle Cycle for Epoch ${nextEpoch} Completed Successfully ---`);
 }
 
 /**
