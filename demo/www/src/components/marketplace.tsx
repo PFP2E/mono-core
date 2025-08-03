@@ -24,9 +24,12 @@ export const Marketplace = () => {
 
   return (
     <div className='py-16'>
-      <h2 className='text-foreground mb-8 text-center text-3xl font-bold sm:text-4xl'>
-        PFP2E Reward Pools
+      <h2 className='text-foreground mb-2 text-center text-3xl font-bold sm:text-4xl'>
+        PFP2E Campaigns
       </h2>
+      <p className='text-muted-foreground mb-8 text-center text-sm'>
+        Browse and interact with active staking campaigns. Click on each campaign for specific campaign details.
+      </p>
       
       {/* Desktop Layout - Keep exactly as is */}
       <div className='mx-auto w-full max-w-6xl overflow-x-auto hidden md:block'>
@@ -56,13 +59,18 @@ export const Marketplace = () => {
                 className='border-border hover:bg-muted/20 grid grid-cols-12 items-center gap-6 border-b px-6 py-5 transition-colors last:border-b-0'
               >
                 <div className='col-span-4 flex items-center gap-4'>
-                  <Image
-                    className='h-12 w-12 rounded-lg'
-                    src={campaign.imageUrl}
-                    alt={campaign.campaignName}
-                    width={48}
-                    height={48}
-                  />
+                  <Link
+                    href={`/campaign/${campaign.campaignName}`}
+                    className='hover:opacity-80 transition-opacity'
+                  >
+                    <Image
+                      className='h-12 w-12 rounded-lg cursor-pointer'
+                      src={campaign.imageUrl}
+                      alt={campaign.campaignName}
+                      width={48}
+                      height={48}
+                    />
+                  </Link>
                   <div className='flex flex-col gap-1'>
                     <Link
                       href={`/campaign/${campaign.campaignName}`}
@@ -130,13 +138,18 @@ export const Marketplace = () => {
             <CardContent className='p-4'>
               {/* Header with logo and title */}
               <div className='flex items-center gap-3 mb-4'>
-                <Image
-                  className='h-12 w-12 rounded-lg'
-                  src={campaign.imageUrl}
-                  alt={campaign.campaignName}
-                  width={48}
-                  height={48}
-                />
+                <Link
+                  href={`/campaign/${campaign.campaignName}`}
+                  className='hover:opacity-80 transition-opacity'
+                >
+                  <Image
+                    className='h-12 w-12 rounded-lg cursor-pointer'
+                    src={campaign.imageUrl}
+                    alt={campaign.campaignName}
+                    width={48}
+                    height={48}
+                  />
+                </Link>
                 <div className='flex flex-col'>
                   <Link
                     href={`/campaign/${campaign.campaignName}`}

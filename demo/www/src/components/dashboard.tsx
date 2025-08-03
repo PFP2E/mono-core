@@ -18,7 +18,20 @@ export function UserDashboard() {
   const { formattedAddress } = useWallet()
   // Use the hook to get reactive updates
   const { activities, clearHistory } = useActivityStore()
-  const [isStakingEnabled, setIsStakingEnabled] = React.useState(false)
+  const [isStakingEnabled, setIsStakingEnabled] = React.useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('isStakingEnabled')
+      return saved ? JSON.parse(saved) : false
+    }
+    return false
+  })
+
+  // Save staking state to localStorage whenever it changes
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('isStakingEnabled', JSON.stringify(isStakingEnabled))
+    }
+  }, [isStakingEnabled])
 
   // Debug log to see activities
   console.log('Current activities:', activities)

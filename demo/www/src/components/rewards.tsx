@@ -45,6 +45,15 @@ const initialStake = {
 
 // Main Rewards Component
 export const Rewards = () => {
+  // Check global staking state
+  const [isStakingEnabled, setIsStakingEnabled] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('isStakingEnabled')
+      return saved ? JSON.parse(saved) : false
+    }
+    return false
+  })
+
   const [stakeData, setStakeData] = useState(() => {
     // Load saved data on component mount
     if (typeof window !== 'undefined') {
@@ -57,8 +66,7 @@ export const Rewards = () => {
   const [selectedOption, setSelectedOption] = useState<'ape' | 'usdt' | 'eth' | 'sui' | null>(null)
   const [suiAddress, setSuiAddress] = useState('')
   const [addressError, setAddressError] = useState('')
-  const [rewardUpdate, setRewardUpdate] = useState(0) // Force re-renders
-  const [epochTime, setEpochTime] = useState(30) // Countdown from 30 seconds
+  const [timeUntilNextReward, setTimeUntilNextReward] = useState(30) // Countdown to next reward
   const { session } = useXSession()
   const { session: siweSession } = useAuthStore()
   const pfpUrl = session?.pfpUrl || '/images/BAYCNFT/0.png' // Fallback if no PFP
@@ -69,30 +77,77 @@ export const Rewards = () => {
     localStorage.setItem('stakeData', JSON.stringify(data))
   }
 
-  // Simple countdown and reward timer
+  // Listen for changes to staking state from dashboard
   useEffect(() => {
-    if (!session) return
+    const handleStorageChange = () => {
+      const saved = localStorage.getItem('isStakingEnabled')
+      if (saved !== null) {
+        setIsStakingEnabled(JSON.parse(saved))
+      }
+    }
 
-        const timer = setInterval(() => {
-      if (epochTime === 0) {
-        // At zero: add reward and reset timer
+    window.addEventListener('storage', handleStorageChange)
+    return () => window.removeEventListener('storage', handleStorageChange)
+  }, [])
+
+  // Calculate rewards based on elapsed time since last reward
+  useEffect(() => {
+    if (!session || !isStakingEnabled) return
+
+    const now = Date.now()
+    const lastRewardTime = localStorage.getItem('lastRewardTime')
+    
+    if (lastRewardTime) {
+      const timeElapsed = now - parseInt(lastRewardTime)
+      const rewardsToAdd = Math.floor(timeElapsed / 30000) // 30 seconds = 30000ms
+      
+      if (rewardsToAdd > 0) {
         const currentUnclaimed = parseApeAmount(stakeData.unclaimed)
         const currentTotal = parseApeAmount(stakeData.totalEarned)
         const newData = {
           ...stakeData,
-          unclaimed: `${(currentUnclaimed + 5).toFixed(2)} APE`,
-          totalEarned: `${(currentTotal + 5).toFixed(2)} APE`
+          unclaimed: `${(currentUnclaimed + (rewardsToAdd * 5)).toFixed(2)} APE`,
+          totalEarned: `${(currentTotal + (rewardsToAdd * 5)).toFixed(2)} APE`
         }
         saveStakeData(newData)
-        setEpochTime(30)
-      } else {
-        // Not zero: count down
-        setEpochTime(epochTime - 1)
+        localStorage.setItem('lastRewardTime', now.toString())
+      }
+    } else {
+      // First time: set initial timestamp
+      localStorage.setItem('lastRewardTime', now.toString())
+    }
+  }, [session, isStakingEnabled])
+
+  // Update timestamp and countdown timer when staking is enabled
+  useEffect(() => {
+    if (!session || !isStakingEnabled) return
+
+    const timer = setInterval(() => {
+      const now = Date.now()
+      const lastRewardTime = localStorage.getItem('lastRewardTime')
+      
+      if (lastRewardTime) {
+        const timeElapsed = now - parseInt(lastRewardTime)
+        if (timeElapsed >= 30000) { // 30 seconds
+          const currentUnclaimed = parseApeAmount(stakeData.unclaimed)
+          const currentTotal = parseApeAmount(stakeData.totalEarned)
+          const newData = {
+            ...stakeData,
+            unclaimed: `${(currentUnclaimed + 5).toFixed(2)} APE`,
+            totalEarned: `${(currentTotal + 5).toFixed(2)} APE`
+          }
+          saveStakeData(newData)
+          localStorage.setItem('lastRewardTime', now.toString())
+        }
+        
+        // Update countdown timer
+        const timeRemaining = Math.max(0, 30 - Math.floor(timeElapsed / 1000))
+        setTimeUntilNextReward(timeRemaining)
       }
     }, 1000)
 
     return () => clearInterval(timer)
-  }, [session, epochTime])
+  }, [session, isStakingEnabled, stakeData])
 
   const handleSuiAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const address = e.target.value
@@ -145,7 +200,9 @@ export const Rewards = () => {
       </div>
       <h2 className="text-2xl font-bold text-white">Active Staking Campaigns</h2>
       
-      <Card className="bg-[#1a1a1a] border-[#333] w-full max-w-[400px] min-w-[280px]">
+      {/* Only show campaign when staking is enabled */}
+      {isStakingEnabled ? (
+        <Card className="bg-[#1a1a1a] border-[#333] w-full max-w-[400px] min-w-[280px]">
         <CardContent className="p-4">
           {/* Reset Button */}
           <div className="flex items-center gap-1 cursor-pointer hover:text-white transition-colors text-[#888] mb-4" onClick={handleTrashClick}>
@@ -170,7 +227,7 @@ export const Rewards = () => {
               </div>
             </div>
             <div className="flex flex-col items-end gap-2">
-              <div className="text-[#888] text-sm">Next Reward: {epochTime}s</div>
+              <div className="text-[#888] text-sm">Next Reward: {timeUntilNextReward}s</div>
               <Badge className="bg-[#333] text-white hover:bg-[#444]">{stakeData.matchPercent}</Badge>
             </div>
           </div>
@@ -217,6 +274,13 @@ export const Rewards = () => {
           </div>
         </CardContent>
       </Card>
+      ) : (
+        // Show empty state when staking is disabled
+        <div className="text-center py-12">
+          <div className="text-[#888] text-lg mb-2">No Active Campaigns</div>
+          <div className="text-[#666] text-sm">Enable staking on the dashboard to see your campaigns</div>
+        </div>
+      )}
 
       {/* Modal */}
       {selectedStake && (
