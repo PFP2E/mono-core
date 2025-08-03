@@ -29,12 +29,14 @@ export default function AIGeneratorPage() {
   // Dialog states
   const [showConfirmDialog, setShowConfirmDialog] = React.useState(false)
   const [isSuccess, setIsSuccess] = React.useState(false)
-  
+
   // Loading state for MOG/ACC image
   const [isLoadingMogacc, setIsLoadingMogacc] = React.useState(true)
 
   // Get MOG campaign data from mock data with fallback values
-  const mogCampaign = campaigns.find((c: Campaign) => c.campaignName === 'MOG') || {
+  const mogCampaign = campaigns.find(
+    (c: Campaign) => c.campaignName === 'MOG'
+  ) || {
     stakers: 2456,
     rewardPool: '118M MOG',
     dailyReward: '480 MOG',
@@ -56,22 +58,28 @@ export default function AIGeneratorPage() {
         <div className='mx-auto max-w-md text-center'>
           <div className='mb-8'>
             <h1 className='mb-4 text-4xl font-bold'>AI Generator</h1>
-            <p className='text-lg text-muted-foreground'>
+            <p className='text-muted-foreground text-lg'>
               Create custom PFP overlays and earn rewards
             </p>
           </div>
           <Card className='shadow-lg'>
             <CardContent className='p-8'>
               <div className='mb-6'>
-                <Upload className='mx-auto mb-4 h-16 w-16 text-muted-foreground opacity-50' />
-                <h2 className='mb-2 text-xl font-semibold'>Sign in to Continue</h2>
+                <Upload className='text-muted-foreground mx-auto mb-4 h-16 w-16 opacity-50' />
+                <h2 className='mb-2 text-xl font-semibold'>
+                  Sign in to Continue
+                </h2>
                 <p className='text-muted-foreground'>
-                  Connect with X to access the AI Generator and create your custom PFP overlays.
+                  Connect with X to access the AI Generator and create your
+                  custom PFP overlays.
                 </p>
               </div>
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button size='lg' className='w-full bg-[#1D9BF0] hover:bg-[#1a8cd8] text-white'>
+                  <Button
+                    size='lg'
+                    className='w-full bg-[#1D9BF0] text-white hover:bg-[#1a8cd8]'
+                  >
                     <Icons.X className='mr-2 h-5 w-5' />
                     Sign in with X
                   </Button>
@@ -87,7 +95,7 @@ export default function AIGeneratorPage() {
 
   // Get username from X session (convert to lowercase like PresetPicker)
   const username = session?.username?.toLowerCase() || 'bhodl2'
-  
+
   // Construct image paths
   const xpfpImagePath = `/images/Users/${username}/${username}_xpfp.jpg`
   const mogaccImagePath = `/images/Users/${username}/${username}_mogacc.jpg`
@@ -100,29 +108,34 @@ export default function AIGeneratorPage() {
             <Link href='/'>← Back Home</Link>
           </Button>
         </div>
-        
+
         <div className='mb-3 text-center'>
           <h1 className='mb-1 text-4xl font-bold'>MOG/ACC AI Generator</h1>
-          <p className='text-lg text-muted-foreground'>
+          <p className='text-muted-foreground text-lg'>
             Use this MOG/ACC filter on your PFP to earn rewards
           </p>
         </div>
 
-        <div className='grid grid-cols-1 gap-2 lg:grid-cols-3 lg:grid-flow-col'>
+        <div className='grid grid-cols-1 gap-2 lg:grid-flow-col lg:grid-cols-3'>
           {/* Left Column - User Images (spans 2 columns) */}
-          <div className='lg:col-span-2 h-full'>
-            <Card className='h-full flex flex-col'>
+          <div className='h-full lg:col-span-2'>
+            <Card className='flex h-full flex-col'>
               <CardHeader className='pb-1'>
                 <CardTitle>Your Images</CardTitle>
               </CardHeader>
-              <CardContent className='p-2 flex-1'>
-                <div className='flex flex-row gap-2 h-full'>
+              <CardContent className='flex-1 p-2'>
+                <div className='flex h-full flex-row gap-2'>
                   {/* X PFP */}
                   <div className='flex-1'>
-                    <div className='text-center mb-0.5'>
-                      <div className='text-sm font-medium text-muted-foreground'>X PFP</div>
+                    <div className='mb-0.5 text-center'>
+                      <div className='text-muted-foreground text-sm font-medium'>
+                        X PFP
+                      </div>
                     </div>
-                    <div className='relative w-full overflow-hidden rounded-lg border' style={{ aspectRatio: '1/1' }}>
+                    <div
+                      className='relative w-full overflow-hidden rounded-lg border'
+                      style={{ aspectRatio: '1/1' }}
+                    >
                       <Image
                         src={xpfpImagePath}
                         alt={`${username} X PFP`}
@@ -131,18 +144,25 @@ export default function AIGeneratorPage() {
                       />
                     </div>
                   </div>
-                  
+
                   {/* MOGACC */}
                   <div className='flex-1'>
-                    <div className='text-center mb-0.5'>
-                      <div className='text-sm font-medium text-muted-foreground'>MOG/ACC</div>
+                    <div className='mb-0.5 text-center'>
+                      <div className='text-muted-foreground text-sm font-medium'>
+                        MOG/ACC
+                      </div>
                     </div>
-                    <div className='relative w-full overflow-hidden rounded-lg border' style={{ aspectRatio: '1/1' }}>
+                    <div
+                      className='relative w-full overflow-hidden rounded-lg border'
+                      style={{ aspectRatio: '1/1' }}
+                    >
                       {isLoadingMogacc ? (
-                        <div className='flex h-full w-full items-center justify-center bg-muted/20'>
+                        <div className='bg-muted/20 flex h-full w-full items-center justify-center'>
                           <div className='flex flex-col items-center gap-2'>
-                            <Loader2 className='h-8 w-8 animate-spin text-muted-foreground' />
-                            <p className='text-sm text-muted-foreground'>Processing...</p>
+                            <Loader2 className='text-muted-foreground h-8 w-8 animate-spin' />
+                            <p className='text-muted-foreground text-sm'>
+                              Processing...
+                            </p>
                           </div>
                         </div>
                       ) : (
@@ -161,7 +181,7 @@ export default function AIGeneratorPage() {
           </div>
 
           {/* Right Column - Stats and Button */}
-          <div className='flex flex-col gap-2 h-full'>
+          <div className='flex h-full flex-col gap-2'>
             {/* Stats Card */}
             <Card className='flex-1'>
               <CardHeader className='pb-1'>
@@ -171,20 +191,28 @@ export default function AIGeneratorPage() {
                 <div className='space-y-3'>
                   <div className='flex justify-between'>
                     <span className='text-muted-foreground'>Participants</span>
-                    <span className='font-medium'>{mogCampaign.stakers.toLocaleString()}</span>
+                    <span className='font-medium'>
+                      {mogCampaign.stakers.toLocaleString()}
+                    </span>
                   </div>
                   <div className='flex justify-between'>
                     <span className='text-muted-foreground'>Reward Pool</span>
-                    <span className='font-medium'>{mogCampaign.rewardPool}</span>
+                    <span className='font-medium'>
+                      {mogCampaign.rewardPool}
+                    </span>
                   </div>
                   <div className='flex justify-between'>
                     <span className='text-muted-foreground'>Daily Reward</span>
-                    <span className='font-medium'>{mogCampaign.dailyReward}</span>
+                    <span className='font-medium'>
+                      {mogCampaign.dailyReward}
+                    </span>
                   </div>
                   <div className='flex justify-between'>
                     <span className='text-muted-foreground'>NFT floor APY</span>
                     <span className='font-medium'>
-                      {typeof mogCampaign.apy === 'number' ? `${mogCampaign.apy}%` : mogCampaign.apy}
+                      {typeof mogCampaign.apy === 'number'
+                        ? `${mogCampaign.apy}%`
+                        : mogCampaign.apy}
                     </span>
                   </div>
                 </div>
@@ -194,12 +222,15 @@ export default function AIGeneratorPage() {
             {/* Button Card - Desktop Only */}
             <Card className='hidden lg:block'>
               <CardContent className='p-2 text-center'>
-                <h3 className='mb-1 text-base font-semibold'>Make Your X PFP</h3>
-                <p className='mb-2 text-sm text-muted-foreground'>
-                  Apply the MOGACC overlay to your X profile picture and start earning rewards
+                <h3 className='mb-1 text-base font-semibold'>
+                  Make Your X PFP
+                </h3>
+                <p className='text-muted-foreground mb-2 text-sm'>
+                  Apply the MOGACC overlay to your X profile picture and start
+                  earning rewards
                 </p>
-                <Button 
-                  size='lg' 
+                <Button
+                  size='lg'
                   className='w-full'
                   onClick={() => setShowConfirmDialog(true)}
                 >
@@ -214,11 +245,12 @@ export default function AIGeneratorPage() {
         <Card className='mt-2 lg:hidden'>
           <CardContent className='p-2 text-center'>
             <h3 className='mb-1 text-base font-semibold'>Make Your X PFP</h3>
-            <p className='mb-2 text-sm text-muted-foreground'>
-              Apply the MOGACC overlay to your X profile picture and start earning rewards
+            <p className='text-muted-foreground mb-2 text-sm'>
+              Apply the MOGACC overlay to your X profile picture and start
+              earning rewards
             </p>
-            <Button 
-              size='lg' 
+            <Button
+              size='lg'
               className='w-full'
               onClick={() => setShowConfirmDialog(true)}
             >
@@ -249,7 +281,8 @@ export default function AIGeneratorPage() {
                   Set MOG/ACC as X Profile Picture
                 </DialogTitle>
                 <DialogDescription className='text-base text-gray-400'>
-                  Do you want to set this MOG/ACC image as your X profile picture?
+                  Do you want to set this MOG/ACC image as your X profile
+                  picture?
                 </DialogDescription>
               </DialogHeader>
 
@@ -267,9 +300,7 @@ export default function AIGeneratorPage() {
                     <p className='text-[15px] font-bold'>
                       @{session?.username}
                     </p>
-                    <p className='text-xs text-gray-400'>
-                      MOG/ACC PFP Preview
-                    </p>
+                    <p className='text-xs text-gray-400'>MOG/ACC PFP Preview</p>
                   </div>
                 </div>
               </div>
@@ -291,16 +322,12 @@ export default function AIGeneratorPage() {
                   className='h-9 flex-1 rounded-full bg-[#1D9BF0] font-bold text-white hover:bg-[#1a8cd8]'
                   onClick={() => {
                     setIsSuccess(true)
-                    
+
                     // Add to activity history
                     if (session?.username) {
                       useActivityStore
                         .getState()
-                        .addPfpUpdate(
-                          'MOG/ACC',
-                          'MOG',
-                          session.username
-                        )
+                        .addPfpUpdate('MOG/ACC', 'MOG', session.username)
                     }
 
                     // Close dialog after 2 seconds

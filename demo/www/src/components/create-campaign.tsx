@@ -1408,7 +1408,7 @@ export function CreateCampaign() {
 
   return (
     <div className='my-8 space-y-6'>
-      <div className="mb-6">
+      <div className='mb-6'>
         <Button variant='outline' asChild>
           <Link href='/'>← Back Home</Link>
         </Button>

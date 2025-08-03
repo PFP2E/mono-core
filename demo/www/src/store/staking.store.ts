@@ -19,18 +19,18 @@ interface StakingStore {
   // Global staking state
   isStakingEnabled: boolean
   setIsStakingEnabled: (enabled: boolean) => void
-  
+
   // Active campaign data
   activeCampaign: ActiveCampaign | null
   setActiveCampaign: (campaign: ActiveCampaign | null) => void
-  
+
   // Staking details
   stakingDetails: StakingDetails | null
   setStakingDetails: (details: StakingDetails | null) => void
-  
+
   // Helper to initialize staking with a campaign
   initializeStaking: (campaign: ActiveCampaign, details: StakingDetails) => void
-  
+
   // Helper to disable staking
   disableStaking: () => void
 }
@@ -42,25 +42,25 @@ export const useStakingStore = create<StakingStore>()(
       isStakingEnabled: false,
       activeCampaign: null,
       stakingDetails: null,
-      
+
       // Actions
-      setIsStakingEnabled: (enabled) => {
+      setIsStakingEnabled: enabled => {
         set({ isStakingEnabled: enabled })
-        
+
         // If disabling staking, clear active campaign
         if (!enabled) {
           set({ activeCampaign: null, stakingDetails: null })
         }
       },
-      
-      setActiveCampaign: (campaign) => {
+
+      setActiveCampaign: campaign => {
         set({ activeCampaign: campaign })
       },
-      
-      setStakingDetails: (details) => {
+
+      setStakingDetails: details => {
         set({ stakingDetails: details })
       },
-      
+
       initializeStaking: (campaign, details) => {
         set({
           isStakingEnabled: true,
@@ -68,7 +68,7 @@ export const useStakingStore = create<StakingStore>()(
           stakingDetails: details
         })
       },
-      
+
       disableStaking: () => {
         set({
           isStakingEnabled: false,
@@ -80,11 +80,11 @@ export const useStakingStore = create<StakingStore>()(
     {
       name: 'staking-store',
       // Only persist these fields
-      partialize: (state) => ({
+      partialize: state => ({
         isStakingEnabled: state.isStakingEnabled,
         activeCampaign: state.activeCampaign,
         stakingDetails: state.stakingDetails
       })
     }
   )
-) 
+)

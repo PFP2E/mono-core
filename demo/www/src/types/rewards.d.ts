@@ -7,7 +7,9 @@ declare module '@/store/rewards.store' {
     swapTransactions: SwapTransaction[]
     stakePFP: (stake: Omit<StakedPFP, 'id' | 'stakedAt'>) => void
     removeStake: (id: string) => void
-    addReward: (reward: Omit<TokenReward, 'id' | 'earnedAt' | 'claimed'>) => void
+    addReward: (
+      reward: Omit<TokenReward, 'id' | 'earnedAt' | 'claimed'>
+    ) => void
     claimReward: (id: string) => void
     simulateEarnings: () => void
     getTotalEarned: (poolName?: string) => number
