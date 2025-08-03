@@ -87,13 +87,16 @@ async function runOracleCycle() {
   console.log(`
 --- Starting Oracle Cycle for Epoch ${nextEpoch} ---`);
 
-  for (const campaignId of CAMPAIGN_IDS) {
+  // Fetch ALL campaigns from the records service
+  const allCampaigns = await DefaultService.getV1Campaigns();
+
+  for (const campaign of allCampaigns) {
     console.log(`
---- Processing Campaign: ${campaignId} ---`);
-    const campaignConfig = { ...config, campaignId };
+--- Processing Campaign: ${campaign.id} ---`);
+    const campaignConfig = { ...config, campaignId: campaign.id };
 
     // 2. Fetch Off-Chain Data
-    const { campaign, targetHashesSet, participants } = await fetchGroundTruthData(campaignConfig);
+    const { targetHashesSet, participants } = await fetchGroundTruthData(campaignConfig);
 
     // 3. Run Verification
     const verifiedHandles = await runVerificationLoop(participants, targetHashesSet, campaign);
@@ -102,7 +105,7 @@ async function runOracleCycle() {
     const merkleData = generateMerkleTree(verifiedHandles, config.rewardAmount);
     if (!merkleData) {
       console.log(`
---- Campaign ${campaignId} Completed: No rewards to settle for epoch ${nextEpoch}. ---`);
+--- Campaign ${campaign.id} Completed: No rewards to settle for epoch ${nextEpoch}. ---`);
       continue;
     }
 
@@ -111,7 +114,7 @@ async function runOracleCycle() {
 
     // 6. Record Verifications in DB
     await DefaultService.postV1Verifications({
-        campaignId,
+        campaignId: campaign.id,
         epoch: Number(nextEpoch),
         verifiedHandles: Array.from(verifiedHandles),
     });

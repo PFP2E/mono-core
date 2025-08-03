@@ -11,12 +11,12 @@ import { CheckCircle, Clock } from 'lucide-react'
 import { DepositModal } from '@/components/deposit-modal'
 import { useStakingStore } from '@/store/staking.store'
 import type { Campaign } from '@pfp2e/sdk'
-import { Skeleton } from '../ui/skeleton'
+import { Skeleton } from '@/components/ui/skeleton'
 
 // NOTE: In a real app, this detailed info would also come from the API.
 // For the hackathon, we merge API data with this static UI data.
-const MOCK_DETAILS_MAP: { [key: string]: any } = {
-  'bayc-social-staking-mvp': {
+const MOCK_CAMPAIGN_DETAILS: { [key: string]: any } = {
+  'bayc-pfp-staking': {
     imageUrl: '/images/BAYC.jpg',
     stakers: 1234,
     apy: 12.5,
@@ -24,19 +24,93 @@ const MOCK_DETAILS_MAP: { [key: string]: any } = {
     fundable: true,
     claimable: true,
     token: 'BAYC',
+    reward_info: {
+      totalPool: '1,000,000',
+      dailyRate: '1,000'
+    },
     eligibilityCriteria: [
-      {
-        id: '1',
-        text: 'Set BAYC as profile picture',
-        completed: true,
-        verified: true
-      },
-      {
-        id: '2',
-        text: 'Hold BAYC NFT for > 30 days',
-        completed: false,
-        verified: false
-      }
+      { id: '1', text: 'Set BAYC as profile picture', completed: true, verified: true },
+      { id: '2', text: 'Hold BAYC NFT for > 30 days', completed: false, verified: false }
+    ]
+  },
+  'ethglobal-pfp-staking': {
+    imageUrl: '/images/ETHGLOBAL.jpg',
+    stakers: 16,
+    apy: 15.2,
+    apyColor: 'green',
+    fundable: true,
+    claimable: false,
+    token: 'ETHG',
+    reward_info: {
+      totalPool: '500,000',
+      dailyRate: '500'
+    },
+    eligibilityCriteria: [
+        { id: '1', text: 'Be an ETHGlobal participant', completed: true, verified: true }
+    ]
+  },
+  '1inch-derivative': {
+    imageUrl: '/images/1INCH.jpg',
+    stakers: 2341,
+    apy: 'N/A',
+    apyColor: 'green',
+    fundable: true,
+    claimable: true,
+    token: '1INCH',
+    reward_info: {
+      totalPool: '2,500,000',
+      dailyRate: '2,500'
+    },
+    eligibilityCriteria: [
+        { id: '1', text: 'Use 1inch branded overlay', completed: true, verified: true }
+    ]
+  },
+  'punks-pfp-staking': {
+    imageUrl: '/images/CRYPTOPUNKS.jpg',
+    stakers: 567,
+    apy: 8.2,
+    apyColor: 'green',
+    fundable: true,
+    claimable: false,
+    token: 'PUNK',
+    reward_info: {
+      totalPool: '750,000',
+      dailyRate: '750'
+    },
+    eligibilityCriteria: [
+        { id: '1', text: 'Set CryptoPunk as PFP', completed: true, verified: true }
+    ]
+  },
+  'sproto-pfp-staking': {
+    imageUrl: '/images/SPROTO.jpg',
+    stakers: 890,
+    apy: 22.1,
+    apyColor: 'orange',
+    fundable: false,
+    claimable: true,
+    token: 'SPROTO',
+    reward_info: {
+      totalPool: '1,200,000',
+      dailyRate: '1,200'
+    },
+    eligibilityCriteria: [
+        { id: '1', text: 'Set Sproto Gremlin as PFP', completed: true, verified: true }
+    ]
+  },
+  'mog-acc-derivative': {
+    imageUrl: '/images/MOG.jpg',
+    stakers: 2456,
+    apy: 'N/A',
+    apyColor: 'green',
+    fundable: true,
+    claimable: true,
+    token: 'MOG',
+    reward_info: {
+      totalPool: '3,000,000',
+      dailyRate: '3,000'
+    },
+    eligibilityCriteria: [
+        { id: '1', text: 'Use MOG/ACC overlay', completed: true, verified: true }
     ]
   },
   'default-x-campaign': {
@@ -47,6 +121,10 @@ const MOCK_DETAILS_MAP: { [key: string]: any } = {
     fundable: true,
     claimable: true,
     token: 'DEFAULT',
+    reward_info: {
+      totalPool: '5,000,000',
+      dailyRate: '5,000'
+    },
     eligibilityCriteria: [
       { id: '1', text: 'Sign in with X', completed: true, verified: true }
     ]
@@ -59,11 +137,15 @@ const MOCK_DETAILS_MAP: { [key: string]: any } = {
     fundable: true,
     claimable: true,
     token: 'JUDGE',
+    reward_info: {
+      totalPool: '100,000',
+      dailyRate: '100'
+    },
     eligibilityCriteria: [
       { id: '1', text: 'Be a hackathon judge', completed: true, verified: true }
     ]
   }
-}
+};
 
 export default function CampaignPage() {
   const params = useParams()
@@ -79,24 +161,44 @@ export default function CampaignPage() {
 
   useEffect(() => {
     if (!slug) return
+
     const fetchCampaign = async () => {
+      setIsLoading(true)
+      setError(null)
+      setCampaign(null)
+
       try {
-        setIsLoading(true)
         const res = await fetch(`/api/records/campaigns/${slug}`)
-        if (!res.ok) {
-          throw new Error('Campaign not found')
+        if (res.ok) {
+          const data: Campaign = await res.json()
+          // Merge API data with mock UI data
+          setCampaign({ ...data, ...MOCK_CAMPAIGN_DETAILS[data.id] })
+        } else {
+          // The API call was made but returned an error (e.g., 404)
+          // We'll fall through to the catch block's logic
+          throw new Error('API request failed')
         }
-        const data: Campaign = await res.json()
-        // Merge API data with mock UI data
-        setCampaign({ ...data, ...MOCK_DETAILS_MAP[data.id] })
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : 'An unknown error occurred'
-        )
+        // This block will be hit on network error or if we threw from the try block
+        const mockData = MOCK_CAMPAIGN_DETAILS[slug]
+        if (mockData) {
+          // If we have mock data, use it as a fallback
+          setCampaign({
+            id: slug,
+            name: slug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+            description: 'A decentralized visual identity campaign.',
+            type: slug.includes('derivative') ? 'Derivative' : 'PFP Staking',
+            ...mockData
+          })
+        } else {
+          // No API data and no mock data, so it's truly not found
+          setError('Campaign not found')
+        }
       } finally {
         setIsLoading(false)
       }
     }
+
     fetchCampaign()
   }, [slug])
 

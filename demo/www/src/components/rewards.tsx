@@ -23,7 +23,7 @@ export const Rewards = () => {
   const searchParams = useSearchParams()
   const campaignId = searchParams.get('campaignId')
   const { session } = useXSession()
-  const { writeContract, isPending, isSuccess, error } = useWriteContract()
+  const { writeContract, isPending, isSuccess, error, data: hash } = useWriteContract()
 
   const [proofData, setProofData] = useState<ProofData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -139,6 +139,18 @@ export const Rewards = () => {
                 <p className='text-destructive text-sm'>
                   Transaction Error: {error.message}
                 </p>
+              )}
+               {hash && (
+                <div className='text-center text-sm text-muted-foreground'>
+                  <a
+                    href={`https://sepolia.etherscan.io/tx/${hash}`}
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    className='hover:underline'
+                  >
+                    View on Etherscan
+                  </a>
+                </div>
               )}
             </div>
           )}

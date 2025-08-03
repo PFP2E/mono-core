@@ -1,6 +1,6 @@
 // src/config/wagmi-config.ts
 import { http, cookieStorage, createConfig, createStorage } from 'wagmi'
-import { mainnet, sepolia } from 'wagmi/chains'
+import { mainnet, sepolia, hardhat } from 'wagmi/chains'
 import { injected, walletConnect, metaMask, safe } from 'wagmi/connectors'
 
 const projectId = process.env.NEXT_PUBLIC_WC_PID
@@ -12,7 +12,7 @@ if (!projectId) {
 }
 
 export const config = createConfig({
-  chains: [mainnet, sepolia],
+  chains: [mainnet, sepolia, hardhat],
   connectors: [
     injected(),
     ...(typeof indexedDB !== 'undefined'
@@ -25,6 +25,7 @@ export const config = createConfig({
   ssr: true,
   transports: {
     [mainnet.id]: http(),
-    [sepolia.id]: http()
+    [sepolia.id]: http(),
+    [hardhat.id]: http(),
   }
 })

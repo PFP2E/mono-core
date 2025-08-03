@@ -40,7 +40,7 @@ interface OracleConfig {
 export async function fetchGroundTruthData(config: OracleConfig) {
   console.log(`[1/5] Fetching ground truth for campaign "${config.campaignId}" from ${config.recordsApiUrl}...`);
   
-  const campaign: Campaign = await DefaultService.getV1Campaigns(config.campaignId);
+  const campaign: Campaign = await DefaultService.getV1Campaigns1(config.campaignId);
   const targetHashes: string[] = await DefaultService.getV1TargetPfps(config.campaignId);
   const participants: any[] = await DefaultService.getV1Users();
   
@@ -83,30 +83,46 @@ export async function runVerificationLoop(participants: Participant[], targetHas
   console.log(`[2/5] Running verification loop for ${participants.length} participants...`);
   const verifiedHandles = new Set<string>();
 
-  if (targetHashesSet.size === 0) {
-    if (campaign.type === 'overlay') {
-      // This is a "default" or "overlay" campaign, verify all participants
-      for (const user of participants) {
-        verifiedHandles.add(user.social_handle);
-      }
-      console.log(`  - ✅ Campaign type is 'overlay' with no targets. Verified all ${participants.length} participants by default.`);
-    } else {
-      // This is an 'nft' campaign with no target hashes, which means no one can be verified.
-      console.log(`  - ⚠️  Campaign type is 'nft' but has no target PFPs. No users can be verified.`);
-    }
-  } else {
-    // Standard verification against target hashes
+  // Case 1: Judges Campaign - verify by handle
+  if (campaign.id === 'judges-campaign') {
+    const judgeHandleHashes = targetHashesSet;
     for (const user of participants) {
-      const livePfpHash = await getLivePfpHash(user);
-      if (targetHashesSet.has(livePfpHash)) {
+      const userHandleHash = keccak256(user.social_handle);
+      if (judgeHandleHashes.has(userHandleHash)) {
         verifiedHandles.add(user.social_handle);
-        console.log(`    ✅ [SUCCESS] ${user.social_handle} is verified.`);
-      } else {
-        // This is very verbose, so we can comment it out for cleaner logs.
-        // console.log(`    ❌ [FAILURE] ${user.social_handle} is not verified.`);
+        console.log(`    ✅ [SUCCESS] Judge ${user.social_handle} is verified.`);
       }
     }
   }
+  // Case 2: Default Onboarding Campaign - verify everyone
+  else if (campaign.id === 'default-x-campaign') {
+     for (const user of participants) {
+        verifiedHandles.add(user.social_handle);
+      }
+      console.log(`  - ✅ Campaign is default onboarding. Verified all ${participants.length} participants.`);
+  }
+  // Case 3: Standard NFT PFP Campaign
+  else if (campaign.type === 'nft') {
+    if (targetHashesSet.size === 0) {
+      console.log(`  - ⚠️  Campaign type is 'nft' but has no target PFPs. No users can be verified.`);
+    } else {
+      for (const user of participants) {
+        const livePfpHash = await getLivePfpHash(user);
+        if (targetHashesSet.has(livePfpHash)) {
+          verifiedHandles.add(user.social_handle);
+          console.log(`    ✅ [SUCCESS] ${user.social_handle} is verified.`);
+        }
+      }
+    }
+  }
+  // Case 4: Overlay Campaign (if any others are added)
+  else if (campaign.type === 'overlay') {
+      for (const user of participants) {
+        verifiedHandles.add(user.social_handle);
+      }
+      console.log(`  - ✅ Campaign type is 'overlay'. Verified all ${participants.length} participants by default.`);
+  }
+
   console.log(`  - Found ${verifiedHandles.size} unique verified handles.`);
   return verifiedHandles;
 }

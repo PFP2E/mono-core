@@ -43,8 +43,16 @@ async function main() {
   console.log(`   - RewardToken: ${REWARD_TOKEN_ADDRESS}`);
   console.log(`   - MerkleDistributor: ${MERKLE_DISTRIBUTOR_ADDRESS}`);
 
-  // 2. VERIFY USER STATUS VIA API
-  console.log(`\nStep 2: Verifying status for user "${JUDGE_HANDLE}" via API...`);
+  // 2. VERIFY ON-CHAIN EPOCH
+  console.log(`\nStep 2: Verifying contract's current epoch...`);
+  const onChainEpoch = await distributor.currentEpoch();
+  if (onChainEpoch < 1) {
+    throw new Error(`Contract epoch is not yet started. Expected >= 1, got ${onChainEpoch}`);
+  }
+  console.log(`   ✅ Contract is at epoch ${onChainEpoch}.`);
+
+  // 3. VERIFY USER STATUS VIA API
+  console.log(`\nStep 3: Verifying status for user "${JUDGE_HANDLE}" via API...`);
   const statusRes = await fetch(`${RECORDS_API_URL}/v1/user-status/${JUDGE_HANDLE}`);
   if (!statusRes.ok) {
     throw new Error(`Failed to fetch user status: ${await statusRes.text()}`);
@@ -57,8 +65,8 @@ async function main() {
   }
   console.log(`   ✅ User is verified and rewards are claimable for epoch ${judgeCampaignStatus.latestEpoch}.`);
 
-  // 3. FETCH PROOF VIA API
-  console.log(`\nStep 3: Fetching Merkle proof for "${JUDGE_HANDLE}"...`);
+  // 4. FETCH PROOF VIA API
+  console.log(`\nStep 4: Fetching Merkle proof for "${JUDGE_HANDLE}"...`);
   const proofRes = await fetch(`${RECORDS_API_URL}/v1/proof/${CAMPAIGN_ID}/${JUDGE_HANDLE}`);
    if (!proofRes.ok) {
     throw new Error(`Failed to fetch proof: ${await proofRes.text()}`);
@@ -67,14 +75,14 @@ async function main() {
   const { epoch, amount, proof } = proofData;
   console.log(`   ✅ Proof received for epoch ${epoch}.`);
 
-  // 4. FUNDING (Owner action)
-  console.log("\nStep 4: Funding the distributor contract...");
+  // 5. FUNDING (Owner action)
+  console.log("\nStep 5: Funding the distributor contract...");
   const totalRewards = ethers.parseEther("300"); // 3 judges * 100 tokens
   await rewardToken.connect(owner).mint(MERKLE_DISTRIBUTOR_ADDRESS, totalRewards);
   console.log(`   ✅ Minted and sent ${ethers.formatEther(totalRewards)} RWT to the distributor.`);
 
-  // 5. CLAIM SIMULATION (Judge action)
-  console.log(`\nStep 5: Simulating a claim for judge ${judge1.address}...`);
+  // 6. CLAIM SIMULATION (Judge action)
+  console.log(`\nStep 6: Simulating a claim for judge ${judge1.address}...`);
   const balanceBefore = await rewardToken.balanceOf(judge1.address);
   console.log(`   - Judge 1 balance before claim: ${ethers.formatEther(balanceBefore)} RWT`);
 
