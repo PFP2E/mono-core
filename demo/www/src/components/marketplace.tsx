@@ -5,12 +5,14 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { campaigns } from '@/lib/mock-data'
 import { DepositModal } from './deposit-modal'
+import { useStakingStore } from '@/store/staking.store'
 
 export const Marketplace = () => {
   const [isModalOpen, setIsModalOpen] = React.useState(false)
   const [selectedCampaign, setSelectedCampaign] = React.useState<
     (typeof campaigns)[0] | null
   >(null)
+  const { isStakingEnabled, activeCampaign } = useStakingStore()
 
   const handleFundClick = (campaign: (typeof campaigns)[0]) => {
     setSelectedCampaign(campaign)
@@ -56,7 +58,11 @@ export const Marketplace = () => {
             {campaigns.map(campaign => (
               <div
                 key={campaign.id}
-                className='border-border hover:bg-muted/20 grid grid-cols-12 items-center gap-6 border-b px-6 py-5 transition-colors last:border-b-0'
+                className={`border-border hover:bg-muted/20 grid grid-cols-12 items-center gap-6 border-b px-6 py-5 transition-colors last:border-b-0 ${
+                  isStakingEnabled && activeCampaign && activeCampaign.campaignName === campaign.campaignName
+                    ? 'border-green-500 bg-green-500/5'
+                    : ''
+                }`}
               >
                 <div className='col-span-4 flex items-center gap-4'>
                   <Link
@@ -71,19 +77,27 @@ export const Marketplace = () => {
                       height={48}
                     />
                   </Link>
-                  <div className='flex flex-col gap-1'>
-                    <Link
-                      href={`/campaign/${campaign.campaignName}`}
-                      className='hover:underline'
-                    >
-                      <div className='text-card-foreground cursor-pointer text-base font-medium'>
-                        {campaign.campaignName}
-                      </div>
-                    </Link>
-                    <div className='text-muted-foreground text-sm'>
-                      {campaign.campaignType}
-                    </div>
-                  </div>
+                                     <div className='flex flex-col gap-1'>
+                     <Link
+                       href={`/campaign/${campaign.campaignName}`}
+                       className='hover:underline'
+                     >
+                                               <div className='text-card-foreground cursor-pointer text-base font-medium flex items-center gap-2'>
+                          {campaign.campaignName}
+                          {isStakingEnabled && activeCampaign && activeCampaign.campaignName === campaign.campaignName && (
+                            <div className='bg-gradient-to-r from-green-400 to-green-500 rounded-full px-2 py-0.5 flex items-center gap-1'>
+                              <span className='text-black text-xs font-semibold'>STAKING</span>
+                              <svg className='w-3 h-3 text-black' fill='currentColor' viewBox='0 0 20 20'>
+                                <path fillRule='evenodd' d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z' clipRule='evenodd' />
+                              </svg>
+                            </div>
+                          )}
+                        </div>
+                     </Link>
+                     <div className='text-muted-foreground text-sm'>
+                       {campaign.campaignType}
+                     </div>
+                   </div>
                 </div>
                 <div className='text-card-foreground col-span-2 text-right text-base font-medium'>
                   {campaign.stakers.toLocaleString()}
@@ -134,7 +148,14 @@ export const Marketplace = () => {
       {/* Mobile Layout - New card-based design */}
       <div className='space-y-4 px-4 md:hidden'>
         {campaigns.map(campaign => (
-          <Card key={campaign.id} className='w-full'>
+          <Card 
+            key={campaign.id} 
+            className={`w-full ${
+              isStakingEnabled && activeCampaign && activeCampaign.campaignName === campaign.campaignName
+                ? 'border-green-500 bg-green-500/5'
+                : ''
+            }`}
+          >
             <CardContent className='p-4'>
               {/* Header with logo and title */}
               <div className='flex items-center gap-3 mb-4'>
@@ -150,19 +171,27 @@ export const Marketplace = () => {
                     height={48}
                   />
                 </Link>
-                <div className='flex flex-col'>
-                  <Link
-                    href={`/campaign/${campaign.campaignName}`}
-                    className='hover:underline'
-                  >
-                    <div className='text-card-foreground cursor-pointer text-lg font-medium'>
-                      {campaign.campaignName}
-                    </div>
-                  </Link>
-                  <div className='text-muted-foreground text-sm'>
-                    {campaign.campaignType}
-                  </div>
-                </div>
+                                 <div className='flex flex-col'>
+                   <Link
+                     href={`/campaign/${campaign.campaignName}`}
+                     className='hover:underline'
+                   >
+                                           <div className='text-card-foreground cursor-pointer text-lg font-medium flex items-center gap-2'>
+                        {campaign.campaignName}
+                        {isStakingEnabled && activeCampaign && activeCampaign.campaignName === campaign.campaignName && (
+                          <div className='bg-gradient-to-r from-green-400 to-green-500 rounded-full px-2 py-0.5 flex items-center gap-1'>
+                            <span className='text-black text-xs font-semibold'>STAKING</span>
+                            <svg className='w-3 h-3 text-black' fill='currentColor' viewBox='0 0 20 20'>
+                              <path fillRule='evenodd' d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z' clipRule='evenodd' />
+                            </svg>
+                          </div>
+                        )}
+                      </div>
+                   </Link>
+                   <div className='text-muted-foreground text-sm'>
+                     {campaign.campaignType}
+                   </div>
+                 </div>
               </div>
 
                              {/* Stats as line items - same format as campaign page */}
