@@ -26,9 +26,6 @@ export const apiRouter = Router();
  *           type: string
  *           enum: [nft, overlay]
  *           description: The type of the campaign.
- *         rules:
- *           type: object
- *           description: The rules governing the campaign.
  *         reward_info:
  *           type: object
  *           description: Information about the campaign's rewards.
@@ -40,40 +37,10 @@ export const apiRouter = Router();
  *         name: "Bored Ape Yacht Club Social Staking"
  *         description: "Get rewarded for using your BAYC NFT as your PFP on Twitter/X."
  *         type: "nft"
- *         rules:
- *           type: "nft"
- *           collectionAddress: "0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D"
- *           requireOwnership: true
  *         reward_info:
  *           totalPool: "1,000,000 $APE"
  *           dailyRate: "10,000 $APE"
  *         created_at: 1678886400
- *     VerificationRequest:
- *       type: object
- *       required:
- *         - campaignId
- *         - user
- *       properties:
- *         campaignId:
- *           type: string
- *           description: The ID of the campaign to verify against.
- *         user:
- *           type: object
- *           required:
- *             - twitter
- *           properties:
- *             twitter:
- *               type: string
- *               description: The user's Twitter handle.
- *     VerificationResponse:
- *       type: object
- *       properties:
- *         staked:
- *           type: boolean
- *           description: Whether the user is successfully verified for the campaign.
- *         timestamp:
- *           type: integer
- *           description: The Unix timestamp of the verification.
  */
 
 /**
@@ -258,46 +225,4 @@ apiRouter.get('/users', (req, res) => {
     logger.error('Failed to fetch users:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
-});
-
-/**
- * @swagger
- * /v1/verify:
- *   post:
- *     summary: Verify a user's PFP against a campaign (READ-ONLY)
- *     description: This endpoint is a placeholder to demonstrate the original API design. In the oracle-centric model, the core verification logic is handled by the rewards service.
- *     tags: [Verification]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/VerificationRequest'
- *     responses:
- *       200:
- *         description: Verification status
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/VerificationResponse'
- *       400:
- *         description: Bad Request - Missing parameters
- */
-apiRouter.post('/verify', (req, res) => {
-  const { campaignId, user } = req.body;
-  logger.info('Request received: POST /v1/verify', { campaignId, user });
-
-  if (!campaignId || !user || !user.twitter) {
-    logger.warn('Verification request missing required parameters.');
-    return res.status(400).json({ error: 'Missing campaignId or user.twitter in request body' });
-  }
-
-  // In the new model, this endpoint would look up the *last known* verification status from the DB.
-  // For the hackathon, we return a placeholder.
-  logger.info(`Placeholder verification for ${user.twitter} on campaign ${campaignId}`);
-
-  res.json({
-    staked: true, // Placeholder
-    timestamp: Math.floor(Date.now() / 1000),
-  });
 });

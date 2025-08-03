@@ -1,159 +1,50 @@
 # Taskfile.yml
 # Root task file for the monorepo.
-# Orchestrates all services with a clear, grouped command structure.
+# This file includes tasks from all sub-projects, allowing you to run them from the root.
 version: '3'
+
+includes:
+  sdk:     { taskfile: loop/sdk/Taskfile.yml,     dir: loop/sdk }
+  records: { taskfile: loop/records/Taskfile.yml, dir: loop/records }
+  rewards: { taskfile: loop/rewards/Taskfile.yml, dir: loop/rewards }
+  demo:    { taskfile: demo/Taskfile.yml,       dir: demo }
 
 tasks:
   default:
-    desc: 'Show available tasks for this project'
+    desc: 'Show available tasks. Run `task bootstrap` for first-time setup.'
     cmds:
       - task -l
 
-  # ==============================================================================
-  # LOOP (Backend Services)
-  # ==============================================================================
-
-  loop:install:
-    desc: 'Install dependencies for all loop services'
+  bootstrap:
+    desc: "One-command setup: Install deps, generate client, and run tests."
     cmds:
-      - echo "--- Installing Loop dependencies... ---"
+      - echo "--- Bootstrapping Project ---"
       - bun install
-
-  loop:setup:
-    desc: 'Initialize and seed the database for the records service'
-    dir: loop/records
-    cmds:
-      - task setup
-
-  loop:typecheck:
-    desc: 'Type-check all loop packages (sdk, records, rewards)'
-    cmds:
-      - echo "--- Type-checking Loop packages... ---"
-      - task: sdk:typecheck
-      - task: records:typecheck
-      - task: rewards:typecheck
-
-  loop:dev:
-    desc: 'Initialize DB and start the loop backend in development mode (hot-reloading)'
-    deps: [loop:setup]
-    cmds:
-      - echo "--- Starting Loop dev server (hot-reloading)... ---"
-      - task: records:dev
-
-  loop:prod:
-    desc: 'Initialize DB and start the loop backend in production mode'
-    deps: [loop:setup]
-    cmds:
-      - echo "--- Starting Loop prod server... ---"
-      - task: records:start
-
-  loop:test:
-    desc: 'Run tests for the loop backend services'
-    cmds:
-      - echo "--- Running Loop tests... ---"
+      - task: generate:client
       - task: records:test
+      - task: rewards:test
 
-  loop:stop:
-    desc: 'Stop the loop backend services'
+  clean:
+    desc: "Remove all generated files, caches, and dependencies"
     cmds:
-      - echo "--- Stopping Loop services... ---"
-      - task: records:stop
+      - echo "--- Cleaning Project ---"
+      - rm -rf node_modules
+      - find . -name "node_modules" -type d -prune -exec rm -rf '{}' +
+      - find . -name "dist" -type d -prune -exec rm -rf '{}' +
+      - rm -rf loop/sdk/src/client
+      - rm -rf loop/records/records.db*
 
-  loop:clean:
-    desc: 'Clean all loop packages'
+  generate:client:
+    desc: "Generate the SDK client from the records API (starts server automatically)"
     cmds:
-      - echo "--- Cleaning Loop packages... ---"
-      - task: sdk:clean
-      - task: records:clean
-      - task: rewards:clean
-
-  # ==============================================================================
-  # DEMO (Frontend Service)
-  # ==============================================================================
-
-  demo:install:
-    desc: 'Install dependencies for the demo frontend'
-    cmds:
-      - echo "--- Installing Demo dependencies... ---"
-      - bun install
-
-  demo:build:
-    desc: 'Build the demo frontend for production'
-    cmds:
-      - echo "--- Building Demo... ---"
-      - task: demo:build:internal
-
-  demo:dev:
-    desc: 'Start the demo frontend (container)'
-    cmds:
-      - echo "--- Starting Demo dev container... ---"
-      - task: demo:dev:internal
-
-  demo:dev:local:
-    desc: 'Start the demo frontend (local)'
-    cmds:
-      - echo "--- Starting Demo dev server (local)... ---"
-      - task: demo:dev:local:internal
-
-  demo:prod:
-    desc: 'Build and start the demo frontend (container)'
-    cmds:
-      - echo "--- Starting Demo prod container... ---"
-      - task: demo:prod:internal
-
-  demo:prod:local:
-    desc: 'Build and start the demo frontend (local)'
-    cmds:
-      - echo "--- Starting Demo prod server (local)... ---"
-      - task: demo:prod:local:internal
-
-  demo:test:
-    desc: 'Run the demo test suite (container)'
-    cmds:
-      - echo "--- Running Demo tests (container)... ---"
-      - task: demo:test:internal
-
-  demo:test:local:
-    desc: 'Run the demo test suite (local)'
-    cmds:
-      - echo "--- Running Demo tests (local)... ---"
-      - task: demo:test:local:internal
-
-  demo:stop:
-    desc: 'Stop all running demo services (container only)'
-    cmds:
-      - echo "--- Stopping Demo containers... ---"
-      - task: demo:stop:internal
-
-  demo:clean:
-    desc: 'Remove all demo project assets (build artifacts and containers)'
-    cmds:
-      - echo "--- Cleaning Demo assets... ---"
-      - task: demo:clean:internal
-
-  # ==============================================================================
-  # Internal Helper Tasks (for orchestration)
-  # ==============================================================================
-
-  sdk:typecheck: { internal: true, dir: loop/sdk, cmds: ['task typecheck'] }
-  sdk:clean: { internal: true, dir: loop/sdk, cmds: ['task clean'] }
-
-  records:typecheck: { internal: true, dir: loop/records, cmds: ['task typecheck'] }
-  records:dev: { internal: true, dir: loop/records, cmds: ['bun --hot run src/server.ts'] }
-  records:start: { internal: true, dir: loop/records, cmds: ['task start'] }
-  records:stop: { internal: true, dir: loop/records, cmds: ['task stop'] }
-  records:test: { internal: true, dir: loop/records, cmds: ['task test'] }
-  records:clean: { internal: true, dir: loop/records, cmds: ['rm -rf dist *.db *.db-journal'] }
-
-  rewards:typecheck: { internal: true, dir: loop/rewards, cmds: ['task typecheck'] }
-  rewards:clean: { internal: true, dir: loop/rewards, cmds: ['rm -rf dist'] }
-
-  demo:build:internal: { internal: true, dir: demo, cmds: ['task build'] }
-  demo:dev:internal: { internal: true, dir: demo, cmds: ['task dev'] }
-  demo:dev:local:internal: { internal: true, dir: demo, cmds: ['task dev:local'] }
-  demo:prod:internal: { internal: true, dir: demo, cmds: ['task prod'] }
-  demo:prod:local:internal: { internal: true, dir: demo, cmds: ['task prod:local'] }
-  demo:test:internal: { internal: true, dir: demo, cmds: ['task test'] }
-  demo:test:local:internal: { internal: true, dir: demo, cmds: ['task test:local'] }
-  demo:stop:internal: { internal: true, dir: demo, cmds: ['task stop'] }
-  demo:clean:internal: { internal: true, dir: demo, cmds: ['task clean'] }
+      - task records:prod &
+      - |
+        echo "Waiting for records API to be ready..."
+        until curl -s -f -o /dev/null http://localhost:8787/v1/openapi.json; do
+          printf '.'
+          sleep 1
+        done
+        echo "\nAPI is ready. Generating client..."
+      - task: sdk:generate:client
+    # The records:prod task will continue running in the background.
+    # You can stop it manually with `kill <PID>` or by stopping the terminal session.

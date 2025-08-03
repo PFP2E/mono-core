@@ -1,18 +1,16 @@
 # Service: `@pfp2e/records`
 
-> Owns the database and serves as the "ground truth" for off-chain data via a REST API.
+> The "Ground Truth" database service for the PFP2E protocol.
 
-| | |
-| :--- | :--- |
-| **Input** | N/A. This service is the source of data. |
-| **Process** | Manages an SQLite database and exposes it via a REST API with Swagger documentation. |
-| **Output** | Serves user and campaign data to other services in the loop. |
+This service owns the SQLite database and exposes it via a clean REST API. It is the single source of truth for all off-chain data, including campaign definitions, the canonical set of valid PFP hashes, and the list of reward-eligible participants.
 
 ### API Endpoints
-The full API is described by the OpenAPI spec and can be viewed interactively.
--   `GET /v1/docs`: Interactive Swagger UI.
--   `GET /v1/campaigns`: Lists all available campaigns.
--   `GET /v1/users`: Lists all users.
--   `GET /v1/target-pfps/:campaignId`: Lists the target PFP hashes for a campaign.
+The API is fully documented using OpenAPI. When the service is running, an interactive Swagger UI is available.
+
+-   **`GET /v1/docs`**: Interactive Swagger UI.
+-   **`GET /v1/campaigns`**: Lists all campaigns.
+-   **`GET /v1/users`**: Lists all reward-eligible participants.
+-   **`GET /v1/target-pfps/:campaignId`**: Lists the target PFP hashes for a specific campaign.
+-   **`GET /v1/verifications`**: Lists all historical verification records.
 
 [↰ Back to `/loop`](../readme.md)

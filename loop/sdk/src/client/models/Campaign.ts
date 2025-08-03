@@ -20,10 +20,6 @@ export type Campaign = {
      */
     type?: Campaign.type;
     /**
-     * The rules governing the campaign.
-     */
-    rules?: Record<string, any>;
-    /**
      * Information about the campaign's rewards.
      */
     reward_info?: Record<string, any>;

@@ -6,9 +6,31 @@
 
 ---
 
-PFP2E is a hybrid on-chain/off-chain protocol for verifying visual identity and linking it to a trustless reward system. This repository contains the reference implementation.
+PFP2E is a hybrid on-chain/off-chain protocol for verifying visual identity and linking it to a trustless reward system. This repository contains the reference implementation of the system, structured as a professional monorepo.
 
-![PFP2E Components Diagram](docs/components.jpg)
+## System Architecture
+
+The system is composed of two primary layers: an **Off-Chain Loop** for data processing and an **On-Chain Layer** for settlement.
+
+```mermaid
+graph TD
+    subgraph Off-Chain Loop
+        A[(@pfp2e/records API)] -- Serves user & campaign data --> B[(@pfp2e/rewards Oracle)];
+    end
+
+    subgraph On-Chain Layer
+        C[MerkleDistributor.sol] -- Manages reward epochs --> D[Claimants];
+    end
+
+    B -- 1. Calculates Merkle Root --> C;
+    C -- 2. Stores Root --> C;
+    D -- 3. Submits Proof to Claim --> C;
+
+    style A fill:#f9f,stroke:#333,stroke-width:2px
+    style B fill:#f9f,stroke:#333,stroke-width:2px
+    style C fill:#ccf,stroke:#333,stroke-width:2px
+    style D fill:#ccf,stroke:#333,stroke-width:2px
+```
 
 ---
 
@@ -18,9 +40,9 @@ This repository is a monorepo managed by **[Bun](https://bun.sh/)** and **[Task]
 
 | Module | Description |
 | :--- | :--- |
-| **[`/contracts`](./contracts)** | The on-chain settlement layer (`Solidity`, `Hardhat`). |
-| **[`/loop`](./loop)** | The off-chain verification engine, structured as a set of packages. |
-| **[`/demo`](./demo)** | Frontend proofs-of-concept (`Next.js`). |
+| **[`/contracts`](./contracts)** | The on-chain settlement layer, built with Solidity and Hardhat. |
+| **[`/loop`](./loop)** | The off-chain verification engine, structured as a set of services. |
+| **[`/demo`](./demo)** | Frontend proofs-of-concept, built with Next.js. |
 | **[`/docs`](./docs)** | System architecture diagrams and documentation. |
 
 ---
@@ -32,41 +54,23 @@ This repository is a monorepo managed by **[Bun](https://bun.sh/)** and **[Task]
 -   [**Bun**](https://bun.sh/)
 
 **1. Bootstrap the Project**
-This is the only command you need to run for a first-time setup. It will:
-- Install all dependencies.
-- Generate the type-safe SDK client.
-- Run all tests to ensure everything is working.
+This is the only command you need to run for a first-time setup. It will install all dependencies and ensure the system is ready.
 
 ```bash
 task bootstrap
 ```
 
-**2. Run the Backend Services**
-The backend is composed of independent services that must be run in separate terminal sessions.
-
-**Terminal 1: Start the Records API**
-This service manages the database and exposes the core API.
-
-```bash
-# For development with hot-reloading
-task records:dev
-
-# For production
-task records:prod
-```
-
-**Terminal 2: Start the Rewards Service**
-This service consumes data from the `records` API to calculate rewards.
+**2. Run the End-to-End Demo**
+To see the entire system in action, run the master `e2e:run` task. This will:
+1. Start a local blockchain node.
+2. Start the `@pfp2e/records` API server.
+3. Deploy the smart contracts.
+4. Run the `@pfp2e/rewards` oracle to settle a new epoch on-chain.
+5. Run a test script to claim a reward from the newly settled epoch.
 
 ```bash
-# For development
-task rewards:dev
-
-# For production
-task rewards:prod
+task e2e:run
 ```
-
-The `records` API server will now be running on `http://localhost:8787`.
 
 ---
 
